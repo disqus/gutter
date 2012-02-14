@@ -45,7 +45,7 @@ class TestIntegration(unittest.TestCase):
     def setup_conditions(self):
         self.age_over_65 = Condition(User.age, MoreThan(65))
         self.age_under_18 = Condition(User.age, LessThan(18))
-        self.age_not_under_18 = Condition(User.age, LessThan(18), negative = True)
+        self.age_not_under_18 = Condition(User.age, LessThan(18), negative=True)
         self.age_over_20 = Condition(User.age, MoreThan(20))
         self.age_between_13_and_18 = Condition(User.age, Between(13, 18))
 
@@ -67,7 +67,6 @@ class TestIntegration(unittest.TestCase):
         self.add_switch('teen and in SF', self.age_between_13_and_18,
                         self.has_location, compounded=True)
         self.add_switch('10 percent', self.ten_percent)
-
 
     def add_switch(self, name, condition=None, *conditions, **kwargs):
         switch = Switch(name, compounded=kwargs.get('compounded', False))
