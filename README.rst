@@ -25,7 +25,8 @@ Once the Manager's storage engine has been condfigured, you can import gargoyle-
 
 At this point the ``gargoyle`` object is an instance of the Manager class, which holds all methods to register switches and check if they are active.
 
-**Thread Safety**
+Thread Safety
+~~~~~~~~~~~~~
 
 Please note that a globally shared Manager instance through the singleton is **not** thread safe.  If your usage of gargoyle-client requires multiple threads to use gargoyle-client, please instantiate a separate manager instance per thread.
 
@@ -65,7 +66,8 @@ Swithes and Conditions
 
 The next phase of gargoyle-client usage is defining switches and conditions:
 
-**Switch**
+Switch
+~~~~~~
 
 Switches encapsulate the concept of an item that is either 'on' or 'off' depending on the input.  The swich it's on/off status by checking each of its conditions and seeing if it applies to a certain input.  Normally only one condition needs be true for the Switch to be enabled for a particular input, but of ``switch.componded`` is set to True, then **all** of the switches conditions need to be true in order to be enabled.
 
@@ -75,7 +77,8 @@ Switches are constructed with only one argument, a ``name``::
 
     switch = Switch('my cool feature')
 
-**Condition**
+Condition
+~~~~~~~~~
 
 Each Swtich has 1 to many conditions, which decribe the conditions under which that swtich is active.  Condition objects are constructed with two values: a ``argument`` and ``operator``
 
@@ -103,7 +106,8 @@ Conditions then need to be appending to a swtich instance like so::
 
 You can append as many conditions as you would like to a swtich
 
-** Registering a Switch**
+Registering a Switch
+~~~~~~~~~~~~~~~~~~~~
 
 Once your switch is constsructed with the right conditions, you need to retister the switch with your manager instance to preserve it for future use.  Otherwise it will only exist in memory for the current process.  If you've imported your manager instance it via the singleton, then it's likely the global ``gargoyle`` object::
 
@@ -117,7 +121,7 @@ Checking Switches as Active
 As stated before, switches are checked against **instances** of Input objects.  To do this, you would call the switch's ``enabled_for()`` method with the instance of your input.  You may call ``enabled_for()`` with any input instance, even ones where the switch has no condition for that class of Input.  If the switch is active for your input, ``enabled_for`` will return True.  Otherwise, it will return ``False``.
 
 ``gargoyle.active()`` API
-=========================
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A common use case of gargoyle-client is to use it during the processing of a web request.  During execution of code, different code paths are taken depending on if certain swtiches are active or not.  Iften times there are mutliple switches in existence at any one time and they all need to be checked against multiple arguments.  To handle this use case, Gargoyle provides a high level API.
 
@@ -132,7 +136,7 @@ Then, to check if a switch is active, simply call ``gargoyle.active()`` with the
 
 You may check as many switches as you like, and they all will be checked against the switches you registered with the ``input()`` call.
 
-Once you're doing using these inputs, perhaps at the end of a request, you should call the manager's ``flush()`` method to remove all the inputs.
+Once you're doing using these inputs, perhaps at the end of a request, you should call the manager's ``flush()`` method to remove all the inputs::
 
     gargoyle.flush()
 
