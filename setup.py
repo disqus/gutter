@@ -8,25 +8,20 @@ except ImportError:
     from setuptools import setup, find_packages
 
 tests_require = [
-    'Django>=1.1',
-    'South',
     'nose',
-    'django-nose',
 ]
 
 setup(
-    name='gargoyle',
-    version='0.7.2',
+    name='gargoyle-client',
+    version='0.1.0',
     author='DISQUS',
     author_email='opensource@disqus.com',
-    url='http://github.com/disqus/gargoyle',
-    description = 'Gargoyle is a platform built on top of Django which allows you to switch functionality of your application on and off based on conditions.',
-    packages=find_packages(exclude=["example_project", "tests"]),
+    url='http://github.com/disqus/gargoyle-client',
+    description='Client to gargoyle feature switches backend',
+    packages=find_packages(exclude=["tests"]),
     zip_safe=False,
     install_requires=[
-        'django-modeldict>=1.1.6',
-        'nexus>=0.2.3',
-        'django-jsonfield==0.6',
+        'modeldict>=0.1.0'
     ],
     license='Apache License 2.0',
     tests_require=tests_require,
@@ -34,7 +29,6 @@ setup(
     test_suite='runtests.runtests',
     include_package_data=True,
     classifiers=[
-        'Framework :: Django',
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'Operating System :: OS Independent',
