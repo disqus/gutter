@@ -6,7 +6,7 @@ Gargoyle-Client is feature swtich management library.  It allows users to create
 Configuration
 =============
 
-The only configuration that must be done for Gargoyle is to tell it what storage engine to use for storing its switches.  A storage can be any object that follows the dict protocol, i.e. an instance of `dict` or objects that provide ``__setitem__`` and ``__getitem__`` methods.  By default, gargoyle-client uses an instance of `MemoryDict` from the modeldict library.  This engine **does not persist data once the process ends** so a more persistant data store should be used.
+A storage can be any object that follows the dict protocol, i.e. an instance of `dict` or objects that provide ``__setitem__`` and ``__getitem__`` methods.  By default, gargoyle-client uses an instance of `MemoryDict` from the modeldict library.  This engine **does not persist data once the process ends** so a more persistant data store should be used.
 
 To set the data store, simply import the settings module and set the appropriate variable.  In this case, we are changing the engine to modeldict's Redis dictionary type::
 
@@ -69,13 +69,40 @@ The next phase of gargoyle-client usage is defining switches and conditions:
 Switch
 ~~~~~~
 
-Switches encapsulate the concept of an item that is either 'on' or 'off' depending on the input.  The swich it's on/off status by checking each of its conditions and seeing if it applies to a certain input.  Normally only one Condition needs be true for the Switch to be enabled for a particular input, but of ``switch.componded`` is set to True, then **all** of the switches conditions need to be true in order to be enabled.
+Switches encapsulate the concept of an item that is either 'on' or 'off' depending on the input.  The swich it's on/off status by checking each of its conditions and seeing if it applies to a certain input.
 
-Switches are constructed with only one argument, a ``name``::
+Switches are constructed with only one required argument, a ``name``::
 
     from gargoyle.models import Switch
 
     switch = Switch('my cool feature')
+
+Normally only one Condition needs be true for the Switch to be enabled for a particular input, but of ``switch.componded`` is set to True, then **all** of the switches conditions need to be true in order to be enabled::
+
+    switch = Switch('require alll conditions', compounded=True)
+
+Heriarchical Switches
+~~~~~~~~~~~~~~~~~~~~~
+
+You can create switches using a specific heirarchical naming scheme.  Switch namespaces are divided by the colon character (":"), and heirarchies of swithes can be constructed in this fashion::
+
+    parent = Switch('movies')
+    child1 = Switch('movies:star_wars')
+    child2 = Switch('movies:die_hard')
+    grandchild = Switch('movies:star_wars:a_new_hope')
+
+In the above example, the ``"movies:star_wars"`` switch is a child of the ``"movies"`` switch because it has ``'movies:'`` as a prefix to the switch name.  Both ``"movies:start_wars"`` and ``"movies:die_hard"`` are "children of the parent ``"movies"`` switch.  And ``"'movies:star_wars:a_new_hope'"`` is a child of the ``"movies:star_wars"`` switch, but *not* the ``"'movies:die_hard'"`` switch.
+
+By default, each switch is independent of other switches in the Manager (including its parent) and only consults its own conditions to check if it is enabled for the Input.  However, this is not always the case.  Perhaps you have a cool new feature that is only available to a certain class of user.  And of *those* users, you want 10% to be be exposed to a different user interface to see how they behave vs the other 90%.
+
+gargoyle-client allows you to set a ``concent`` flag on a switch that instructs it to check its parental switch first, before checking itself.  If it checks its parent and it is not enabled for the same Input, the switch immediatly returns ``False``.  If its parent *is* enabled for the Input, then the switch will continue and check its own conditions, returning as it would normally.
+
+For example::
+
+    parent = Switch('cool_new_feature')
+    child = Switch('cool_new_feature:new_ui', concent=True)
+
+For example, because ``child`` was constructed with ``concent=True``, even if ``child`` is enabled for an Input, it will only return ``True`` if ``parent`` is also enbaled for that same input.
 
 Condition
 ~~~~~~~~~
@@ -114,6 +141,15 @@ Once your Switch is constsructed with the right conditions, you need to retister
     gargoyle.register(switch)
 
 The Switch is now stored in the Manager's storage and can be checked if active.
+
+Unregistering a Switch
+~~~~~~~~~~~~~~~~~~~~~~
+
+Existing switches may be removed from the Manager by calling ``unregister()`` with the switch name::
+
+    gargoyle.unregister('deprecated switch')
+
+**Note:** If the switch is part of a heirarchy and has children switches (see the "Heriarchical Switches" section abobve), all decendent switches (children, grandchildren, etc) will also be unregistered and deleted.
 
 Checking Switches as Active
 ===========================

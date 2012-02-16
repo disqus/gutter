@@ -26,11 +26,15 @@ class Switch(object):
         SELECTIVE = 2
         GLOBAL = 3
 
-    def __init__(self, name, state=states.DISABLED, compounded=False):
+    def __init__(self, name, state=states.DISABLED,
+                 compounded=False, parent=None, concent=True):
         self.name = str(name)
         self.state = state
         self.conditions = []
         self.compounded = compounded
+        self.parent = parent
+        self.concent = concent
+        self.children = []
 
     def enabled_for(self, inpt):
         """
@@ -38,6 +42,9 @@ class Switch(object):
         an instance of the ``Input`` class.  The switch is enabled if any of its
         conditions are met by the input.
         """
+        if self.concent and self.parent and not self.parent.enabled_for(inpt):
+            return False
+
         func = self.__enabled_func()
         return func(cond(inpt) for cond in self.conditions)
 
@@ -111,6 +118,8 @@ class Manager(object):
     active, given its conditions and current inputs.
     """
 
+    key_separator = ':'
+
     def __init__(self, storage):
         self.__switches = storage
         self.inputs = []
@@ -120,7 +129,14 @@ class Manager(object):
         return self.__switches.values()
 
     def register(self, switch):
+        self.__add_parent_if_present_to(switch)
         self.__switches[switch.name] = switch
+
+    def unregister(self, name):
+        for child in self.__switches[name].children:
+            self.unregister(child.name)
+
+        del self.__switches[name]
 
     def input(self, *inputs):
         self.inputs = list(inputs)
@@ -134,3 +150,14 @@ class Manager(object):
             return any(switch.enabled_for(inpt) for inpt in self.inputs)
         except KeyError:
             raise ValueError("No switch named '%s' registered" % name)
+
+    def __add_parent_if_present_to(self, switch):
+        parent = self.__switches.get(self.__parent_key_for(switch))
+
+        if parent:
+            switch.parent = parent
+            parent.children.append(switch)
+
+    def __parent_key_for(self, switch):
+        parent_parts = switch.name.split(self.key_separator)[:-1]
+        return self.key_separator.join(parent_parts)

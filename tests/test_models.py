@@ -43,6 +43,21 @@ class TestSwitch(unittest.TestCase):
     def test_conditions_defaults_to_an_empty_list(self):
         eq_(Switch('foo').conditions, [])
 
+    def test_parent_property_defaults_to_none(self):
+        eq_(Switch('foo').parent, None)
+
+    def test_can_be_constructed_with_parent(self):
+        eq_(Switch('foo', parent='dog').parent, 'dog')
+
+    def test_concent_defaults_to_true(self):
+        eq_(Switch('foo').concent, True)
+
+    def test_can_be_constructed_with_concent(self):
+        eq_(Switch('foo', concent=False).concent, False)
+
+    def test_children_defaults_to_an_empty_list(self):
+        eq_(Switch('foo').children, [])
+
 
 class TestCondition(unittest.TestCase):
 
@@ -113,6 +128,35 @@ class SwitchWithConditions(object):
         ok_(condition not in self.switch.conditions)
 
 
+class ConcentTest(SwitchWithConditions, unittest.TestCase):
+
+    def setUp(self):
+        super(ConcentTest, self).setUp()
+        self.parent = mock.Mock()
+        self.parent.enabled_for.return_value = False
+        self.switch.parent = self.parent
+        self.make_all_conditions(True)
+
+    def make_all_conditions(self, val):
+        for cond in self.switch.conditions:
+            cond.return_value = val
+
+    def test_with_concent_only_enabled_if_parent_is_too(self):
+        eq_(self.switch.parent.enabled_for('input'), False)
+        eq_(self.switch.enabled_for('input'), False)
+
+        self.switch.parent.enabled_for.return_value = True
+        eq_(self.switch.enabled_for('input'), True)
+
+    def test_without_concent_ignores_parents_enabled_status(self):
+        self.switch.concent = False
+        eq_(self.switch.parent.enabled_for('input'), False)
+        eq_(self.switch.enabled_for('input'), True)
+
+        self.make_all_conditions(False)
+        eq_(self.switch.enabled_for('input'), False)
+
+
 class DefaultConditionsTest(SwitchWithConditions, unittest.TestCase):
 
     def test_enabled_for_is_true_if_any_conditions_are_true(self):
@@ -140,6 +184,14 @@ class ManagerTest(unittest.TestCase):
     def setUp(self):
         self.manager = Manager(storage=MemoryDict())
 
+    def mock_and_register_switch(self, name, parent=None):
+        switch = mock.Mock(name=name)
+        switch.name = name
+        switch.parent = parent
+        switch.children = []
+        self.manager.register(switch)
+        return switch
+
     def test_input_accepts_variable_input_args(self):
         eq_(self.manager.inputs, [])
         self.manager.input('input1', 'input2')
@@ -152,7 +204,7 @@ class ManagerTest(unittest.TestCase):
         ok_(len(self.manager.inputs) is 0)
 
     def test_register_adds_switch_to_storge_keyed_by_its_name(self):
-        mockstorage = mock.MagicMock(MemoryDict())
+        mockstorage = mock.MagicMock(dict)
         Manager(storage=mockstorage).register(switch)
         mockstorage.__setitem__.assert_called_once_with(switch.name, switch)
 
@@ -167,6 +219,53 @@ class ManagerTest(unittest.TestCase):
     def test_uses_switches_from_storage_on_itialization(self):
         m = Manager(storage=dict(existing='switch', another='valuable switch'))
         self.assertItemsEqual(m.switches, ['switch', 'valuable switch'])
+
+    def test_unregister_removes_a_switch_from_storage_with_name(self):
+        switch = self.mock_and_register_switch('foo')
+        ok_(switch in self.manager.switches)
+
+        self.manager.unregister(switch.name)
+        ok_(switch not in self.manager.switches)
+
+    def test_register_does_not_set_parent_by_default(self):
+        switch = self.mock_and_register_switch('foo')
+        eq_(switch.parent, None)
+
+    def test_register_sets_parent_on_switch_if_there_is_one(self):
+        parent = self.mock_and_register_switch('movies')
+        child = self.mock_and_register_switch('movies:jaws')
+        eq_(child.parent, parent)
+
+    def test_register_adds_self_to_parents_children(self):
+        parent = self.mock_and_register_switch('movies')
+        child = self.mock_and_register_switch('movies:jaws')
+
+        eq_(parent.children, [child])
+
+        sibling = self.mock_and_register_switch('movies:jaws')
+
+        eq_(parent.children, [child, sibling])
+
+    def test_unregister_removes_all_child_switches_too(self):
+        grandparent = self.mock_and_register_switch('movies')
+        parent = self.mock_and_register_switch('movies:star_wars')
+        child1 = self.mock_and_register_switch('movies:star_wars:a_new_hope')
+        child2 = self.mock_and_register_switch('movies:star_wars:return_of_the_jedi')
+        great_uncle = self.mock_and_register_switch('books')
+
+        ok_(grandparent in self.manager.switches)
+        ok_(parent in self.manager.switches)
+        ok_(child1 in self.manager.switches)
+        ok_(child2 in self.manager.switches)
+        ok_(great_uncle in self.manager.switches)
+
+        self.manager.unregister(grandparent.name)
+
+        ok_(grandparent not in self.manager.switches)
+        ok_(parent not in self.manager.switches)
+        ok_(child1 not in self.manager.switches)
+        ok_(child2 not in self.manager.switches)
+        ok_(great_uncle in self.manager.switches)
 
 
 class ManagerActiveTest(unittest.TestCase):
