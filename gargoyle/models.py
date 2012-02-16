@@ -120,9 +120,11 @@ class Manager(object):
 
     key_separator = ':'
 
-    def __init__(self, storage):
+    def __init__(self, storage, autocreate=False, switch_class=Switch):
         self.__switches = storage
+        self.autocreate = False
         self.inputs = []
+        self.switch_class = switch_class
 
     @property
     def switches(self):
@@ -147,9 +149,19 @@ class Manager(object):
     def active(self, name):
         try:
             switch = self.__switches[name]
-            return any(switch.enabled_for(inpt) for inpt in self.inputs)
         except KeyError:
-            raise ValueError("No switch named '%s' registered" % name)
+            if not self.autocreate:
+                raise ValueError("No switch named '%s' registered" % name)
+
+            switch = self.__create_and_register_disabled_switch(name)
+
+        return any(switch.enabled_for(inpt) for inpt in self.inputs)
+
+    def __create_and_register_disabled_switch(self, name):
+        switch = self.switch_class(name)
+        switch.state = self.switch_class.states.DISABLED
+        self.register(switch)
+        return switch
 
     def __add_parent_if_present_to(self, switch):
         parent = self.__switches.get(self.__parent_key_for(switch))

@@ -181,6 +181,24 @@ class CompoundedConditionsTest(SwitchWithConditions, unittest.TestCase):
 
 class ManagerTest(unittest.TestCase):
 
+    def test_autocreate_defaults_to_false(self):
+        eq_(Manager(storage=dict()).autocreate, False)
+
+    def test_autocreate_can_be_passed_to_init(self):
+        eq_(Manager(storage=dict(), autocreate=True).autocreate, False)
+
+    def test_register_adds_switch_to_storge_keyed_by_its_name(self):
+        mockstorage = mock.MagicMock(dict)
+        Manager(storage=mockstorage).register(switch)
+        mockstorage.__setitem__.assert_called_once_with(switch.name, switch)
+
+    def test_uses_switches_from_storage_on_itialization(self):
+        m = Manager(storage=dict(existing='switch', another='valuable switch'))
+        self.assertItemsEqual(m.switches, ['switch', 'valuable switch'])
+
+
+class ActsLikeManager(object):
+
     def setUp(self):
         self.manager = Manager(storage=MemoryDict())
 
@@ -192,22 +210,6 @@ class ManagerTest(unittest.TestCase):
         self.manager.register(switch)
         return switch
 
-    def test_input_accepts_variable_input_args(self):
-        eq_(self.manager.inputs, [])
-        self.manager.input('input1', 'input2')
-        eq_(self.manager.inputs, ['input1', 'input2'])
-
-    def test_flush_clears_all_inputs(self):
-        self.manager.input('input1', 'input2')
-        ok_(len(self.manager.inputs) is 2)
-        self.manager.flush()
-        ok_(len(self.manager.inputs) is 0)
-
-    def test_register_adds_switch_to_storge_keyed_by_its_name(self):
-        mockstorage = mock.MagicMock(dict)
-        Manager(storage=mockstorage).register(switch)
-        mockstorage.__setitem__.assert_called_once_with(switch.name, switch)
-
     def test_switches_list_registed_switches(self):
         eq_(self.manager.switches, [])
         self.manager.register(switch)
@@ -215,10 +217,6 @@ class ManagerTest(unittest.TestCase):
 
     def test_active_raises_exception_if_no_switch_found_with_name(self):
         assert_raises(ValueError, self.manager.active, 'junk')
-
-    def test_uses_switches_from_storage_on_itialization(self):
-        m = Manager(storage=dict(existing='switch', another='valuable switch'))
-        self.assertItemsEqual(m.switches, ['switch', 'valuable switch'])
 
     def test_unregister_removes_a_switch_from_storage_with_name(self):
         switch = self.mock_and_register_switch('foo')
@@ -268,7 +266,21 @@ class ManagerTest(unittest.TestCase):
         ok_(great_uncle in self.manager.switches)
 
 
-class ManagerActiveTest(unittest.TestCase):
+class EmptyManagerInstanceTest(ActsLikeManager, unittest.TestCase):
+
+    def test_input_accepts_variable_input_args(self):
+        eq_(self.manager.inputs, [])
+        self.manager.input('input1', 'input2')
+        eq_(self.manager.inputs, ['input1', 'input2'])
+
+    def test_flush_clears_all_inputs(self):
+        self.manager.input('input1', 'input2')
+        ok_(len(self.manager.inputs) is 2)
+        self.manager.flush()
+        ok_(len(self.manager.inputs) is 0)
+
+
+class ManagerWithInputTest(ActsLikeManager, unittest.TestCase):
 
     def build_and_register_switch(self, name, enabled_for=False):
         switch = Switch(name)
@@ -277,7 +289,7 @@ class ManagerActiveTest(unittest.TestCase):
         return switch
 
     def setUp(self):
-        self.manager = Manager(storage=MemoryDict())
+        super(ManagerWithInputTest, self).setUp()
         self.manager.input('input 1', 'input 2')
 
     def test_returns_boolean_if_named_switch_is_enabled_for_any_input(self):
@@ -286,3 +298,16 @@ class ManagerActiveTest(unittest.TestCase):
 
         self.build_and_register_switch('enabled', enabled_for=True)
         eq_(self.manager.active('disabled'), False)
+
+    def test_raises_exception_if_invalid_switch_name_created(self):
+        assert_raises_regexp(ValueError, 'switch named', self.manager.active, 'junk')
+
+    def test_autocreates_disabled_switch_when_autocreate_is_true(self):
+        eq_(self.manager.switches, [])
+        assert_raises(ValueError, self.manager.active, 'junk')
+
+        self.manager.autocreate = True
+
+        eq_(self.manager.active('junk'), False)
+        ok_(len(self.manager.switches) is 1)
+        ok_(self.manager.switches[0].state, Switch.states.DISABLED)

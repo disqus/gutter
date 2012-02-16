@@ -6,15 +6,31 @@ Gargoyle-Client is feature swtich management library.  It allows users to create
 Configuration
 =============
 
-A storage can be any object that follows the dict protocol, i.e. an instance of `dict` or objects that provide ``__setitem__`` and ``__getitem__`` methods.  By default, gargoyle-client uses an instance of `MemoryDict` from the modeldict library.  This engine **does not persist data once the process ends** so a more persistant data store should be used.
+Gargoyle-client requires a small bit of configuration before usage.
 
-To set the data store, simply import the settings module and set the appropriate variable.  In this case, we are changing the engine to modeldict's Redis dictionary type::
+Choosing Storage
+~~~~~~~~~~~~~~~~
+
+Switches are stored with a ``storage`` object, which is an instance of `dict` or any object which provides ``__setitem__`` and ``__getitem__`` methods.  By default, gargoyle-client uses an instance of `MemoryDict` from the modeldict library.  This engine **does not persist data once the process ends** so a more persistant data store should be used.
+
+Autocreate
+~~~~~~~~~~
+
+Gargoyle-client can also autocreate switches if they are asked about their active state, but have not been officially created yet.  This behavior is off by default, but can be enabled through a setting.  When autocreated, a switch's state is set to "disabled."
+
+Configuring Settings
+~~~~~~~~~~~~~~~~~~~~
+
+To change the ``storage`` and ``autocreate`` settings, simply import the settings module and set the appropriate variables::
 
     from gargoyle.settings import manager
     from modeldict.dict import RedisDict
     from redis import RedisClient
 
     manager.storage_engine = RedisDict('gargoyle', RedisClient()))
+    manager.autocreate = True
+
+In this case, we are changing the engine to modeldict's Redis dictionary type and turning on autocreate.
 
 Setup
 =====
