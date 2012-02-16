@@ -41,6 +41,7 @@ class TestIntegration(unittest.TestCase):
         self.jeff = User('jeff', 21)
         self.frank = User('frank', 10, location="Seattle")
         self.larry = User('bill', 70, location="Yakima", married=True)
+        self.timmy = User('timmy', 12)
 
     def setup_conditions(self):
         self.age_over_65 = Condition(User.age, MoreThan(65))
@@ -59,6 +60,7 @@ class TestIntegration(unittest.TestCase):
 
     def setup_switches(self):
         self.add_switch('can drink', condition=self.age_over_20)
+        self.add_switch('can drink:wine', condition=self.in_sf, concent=True)
         self.add_switch('retired', condition=self.age_over_65)
         self.add_switch('can vote', condition=self.age_not_under_18)
         self.add_switch('teenager', condition=self.age_between_13_and_18)
@@ -95,38 +97,58 @@ class TestIntegration(unittest.TestCase):
 
     def test_basic_switches_work_with_conditions(self):
 
-        with self.inputs(self.manager, self.larry) as manager:
-            ok_(manager.active('can drink') is True)
-            ok_(manager.active('can vote') is True)
-            ok_(manager.active('SF resident') is False)
-            ok_(manager.active('retired') is True)
-            ok_(manager.active('10 percent') is False)
+        with self.inputs(self.manager, self.larry) as context:
+            ok_(context.active('can drink') is True)
+            ok_(context.active('can vote') is True)
+            ok_(context.active('SF resident') is False)
+            ok_(context.active('retired') is True)
+            ok_(context.active('10 percent') is False)
 
-        with self.inputs(self.manager, self.jeff) as manager:
-            ok_(manager.active('can drink') is True)
-            ok_(manager.active('can vote') is True)
-            ok_(manager.active('SF resident') is True)
-            ok_(manager.active('teenager') is False)
-            ok_(manager.active('teen or in SF') is True)
-            ok_(manager.active('teen and in SF') is False)
-            ok_(manager.active('10 percent') is False)
+        with self.inputs(self.manager, self.jeff) as context:
+            ok_(context.active('can drink') is True)
+            ok_(context.active('can vote') is True)
+            ok_(context.active('SF resident') is True)
+            ok_(context.active('teenager') is False)
+            ok_(context.active('teen or in SF') is True)
+            ok_(context.active('teen and in SF') is False)
+            ok_(context.active('10 percent') is False)
 
-        with self.inputs(self.manager, self.frank) as manager:
-            ok_(manager.active('can drink') is False)
-            ok_(manager.active('can vote') is False)
-            ok_(manager.active('teenager') is False)
-            ok_(manager.active('10 percent') is True)
+        with self.inputs(self.manager, self.frank) as context:
+            ok_(context.active('can drink') is False)
+            ok_(context.active('can vote') is False)
+            ok_(context.active('teenager') is False)
+            ok_(context.active('10 percent') is True)
 
     def test_switches_with_multiple_inputs(self):
 
-        with self.inputs(self.manager, self.larry, self.jeff) as manager:
-            ok_(manager.active('can drink') is True)
-            ok_(manager.active('SF resident') is True)
-            ok_(manager.active('teenager') is False)
-            ok_(manager.active('10 percent') is False)
+        with self.inputs(self.manager, self.larry, self.jeff) as context:
+            ok_(context.active('can drink') is True)
+            ok_(context.active('SF resident') is True)
+            ok_(context.active('teenager') is False)
+            ok_(context.active('10 percent') is False)
 
-        with self.inputs(self.manager, self.frank, self.jeff) as manager:
-            ok_(manager.active('can drink') is True)
-            ok_(manager.active('SF resident') is True)
-            ok_(manager.active('teenager') is False)
-            ok_(manager.active('10 percent') is True)
+        with self.inputs(self.manager, self.frank, self.jeff) as context:
+            ok_(context.active('can drink') is True)
+            ok_(context.active('SF resident') is True)
+            ok_(context.active('teenager') is False)
+            ok_(context.active('10 percent') is True)
+
+    def test_switches_can_concent_top_parent_switch(self):
+        with self.inputs(self.manager, self.jeff) as context:
+            ok_(context.active('can drink') is True)
+            ok_(context.active('SF resident') is True)
+            ok_(context.active('can drink:wine') is True)
+        with self.inputs(self.manager, self.timmy) as context:
+            ok_(context.active('can drink') is False)
+            ok_(context.active('SF resident') is True)
+            ok_(context.active('can drink:wine') is False)
+
+    def test_switches_can_be_deregistered_and_then_autocreated(self):
+        with self.inputs(self.manager, self.jeff) as context:
+            ok_(context.active('can drink') is True)
+
+            context.manager.unregister('can drink')
+            assert_raises(ValueError, context.manager.active, 'can drink')
+
+            context.manager.autocreate = True
+            ok_(context.active('can drink') is False)
