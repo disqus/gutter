@@ -1,6 +1,10 @@
 Gargoyle-Client
 --------
 
+**NOTE: This repo is the client for the upcoming Gargoyle 2 release.  It does not work with the exsiting `Gargoyle 1 codebase`_.**
+
+.. _Gargoyle 1 codebase: https://github.com/disqus/gargoyle
+
 Gargoyle-Client is feature swtich management library.  It allows users to create feature swtiches and setup conditions those switches will be enabled for.  Once configured, switches can then be checked against inputs (requestss, user objects, etc) to see if the switches are active.
 
 Configuration
