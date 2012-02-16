@@ -15,7 +15,7 @@ class TestSwitch(unittest.TestCase):
         self.assertTrue(Switch.states.SELECTIVE)
         self.assertTrue(Switch.states.GLOBAL)
 
-    def test_no_switch_is_equal_to_another(self):
+    def test_no_switch_state_is_equal_to_another(self):
         states = (Switch.states.DISABLED, Switch.states.SELECTIVE,
                   Switch.states.GLOBAL)
         eq_(list(states), list(set(states)))
@@ -29,7 +29,15 @@ class TestSwitch(unittest.TestCase):
     def test_switch_state_defaults_to_disabled(self):
         eq_(Switch('foo').state, Switch.states.DISABLED)
 
-    def test_switch_compounded_defaults_to_disabled(self):
+    def test_switch_state_can_be_changed(self):
+        swith = Switch('foo')
+        old_state = switch.state
+
+        switch.state = Switch.states.GLOBAL
+        eq_(switch.state, Switch.states.GLOBAL)
+        ok_(old_state is not switch.state)
+
+    def test_switch_compounded_defaults_to_false(self):
         eq_(Switch('foo').compounded, False)
 
     def test_swtich_can_be_constructed_with_a_state(self):
