@@ -109,6 +109,7 @@ class TestLessThanCondition(BaseCondition, unittest.TestCase):
         ok_(LessThan(56.7).applies_to(57.0) is False)
         ok_(LessThan(56.7).applies_to(56.71) is False)
 
+
 class TestMoreThanCondition(BaseCondition, unittest.TestCase):
 
     @property
