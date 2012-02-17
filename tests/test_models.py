@@ -51,6 +51,18 @@ class TestSwitch(unittest.TestCase):
     def test_conditions_defaults_to_an_empty_list(self):
         eq_(Switch('foo').conditions, [])
 
+    def test_condtions_can_be_added_and_removed(self):
+        switch = Switch('foo')
+        condition = lambda: False
+
+        ok_(condition not in switch.conditions)
+
+        switch.conditions.append(condition)
+        ok_(condition in switch.conditions)
+
+        switch.conditions.remove(condition)
+        ok_(condition not in switch.conditions)
+
     def test_parent_property_defaults_to_none(self):
         eq_(Switch('foo').parent, None)
 
@@ -124,16 +136,6 @@ class SwitchWithConditions(object):
         mck = mock.MagicMock()
         mck.return_value = False
         return mck
-
-    def test_condtions_can_be_added_and_removed(self):
-        condition = self.pessamistic_condition
-        ok_(condition not in self.switch.conditions)
-
-        self.switch.conditions.append(condition)
-        ok_(condition in self.switch.conditions)
-
-        self.switch.conditions.remove(condition)
-        ok_(condition not in self.switch.conditions)
 
 
 class ConcentTest(SwitchWithConditions, unittest.TestCase):
