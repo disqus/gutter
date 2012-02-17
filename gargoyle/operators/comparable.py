@@ -35,6 +35,15 @@ class LessThan(object):
         return argument < self.upper_limit
 
 
+class LessThanOrEqualTo(LessThan):
+
+    label = 'less_than_or_equal_to'
+    descripion = 'Applies if argument is less than or equal to value'
+
+    def applies_to(self, argument):
+        return argument <= self.upper_limit
+
+
 class MoreThan(object):
 
     label = 'more_than'
@@ -45,3 +54,12 @@ class MoreThan(object):
 
     def applies_to(self, argument):
         return argument > self.lower_limit
+
+
+class MoreThanOrEqualTo(MoreThan):
+
+    label = 'more_than_or_equal_to'
+    description = 'Applies if argument is more than or equal to value'
+
+    def applies_to(self, argument):
+        return argument >= self.lower_limit

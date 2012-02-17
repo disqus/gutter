@@ -44,10 +44,10 @@ class TestIntegration(unittest.TestCase):
         self.timmy = User('timmy', 12)
 
     def setup_conditions(self):
-        self.age_over_65 = Condition(User.age, MoreThan(65))
+        self.age_65_and_up = Condition(User.age, MoreThanOrEqualTo(65))
         self.age_under_18 = Condition(User.age, LessThan(18))
         self.age_not_under_18 = Condition(User.age, LessThan(18), negative=True)
-        self.age_over_20 = Condition(User.age, MoreThan(20))
+        self.age_21_plus = Condition(User.age, MoreThanOrEqualTo(21))
         self.age_between_13_and_18 = Condition(User.age, Between(13, 18))
 
         self.in_sf = Condition(User.location, Equals('San Francisco'))
@@ -59,9 +59,9 @@ class TestIntegration(unittest.TestCase):
         self.ten_percent = Condition(User.name, Percent(10))
 
     def setup_switches(self):
-        self.add_switch('can drink', condition=self.age_over_20)
+        self.add_switch('can drink', condition=self.age_21_plus)
         self.add_switch('can drink:wine', condition=self.in_sf, concent=True)
-        self.add_switch('retired', condition=self.age_over_65)
+        self.add_switch('retired', condition=self.age_65_and_up)
         self.add_switch('can vote', condition=self.age_not_under_18)
         self.add_switch('teenager', condition=self.age_between_13_and_18)
         self.add_switch('SF resident', condition=self.in_sf)

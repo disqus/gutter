@@ -5,7 +5,7 @@ from gargoyle.operators.identity import *
 from gargoyle.operators.misc import *
 
 
-class BaseCondition(object):
+class BaseOperator(object):
 
     def test_has_label(self):
         ok_(self.operator.label)
@@ -17,7 +17,7 @@ class BaseCondition(object):
         ok_(self.operator.applies_to)
 
 
-class TestTruthyCondition(BaseCondition, unittest.TestCase):
+class TestTruthyCondition(BaseOperator, unittest.TestCase):
 
     @property
     def operator(self):
@@ -30,7 +30,7 @@ class TestTruthyCondition(BaseCondition, unittest.TestCase):
         ok_(self.operator.applies_to("") is False)
 
 
-class TestEqualsCondition(BaseCondition, unittest.TestCase):
+class TestEqualsCondition(BaseOperator, unittest.TestCase):
 
     @property
     def operator(self):
@@ -47,7 +47,7 @@ class TestEqualsCondition(BaseCondition, unittest.TestCase):
         Equals()
 
 
-class TestEnumCondition(BaseCondition, unittest.TestCase):
+class TestEnumCondition(BaseOperator, unittest.TestCase):
 
     @property
     def operator(self):
@@ -61,7 +61,7 @@ class TestEnumCondition(BaseCondition, unittest.TestCase):
         ok_(self.operator.applies_to(True) is False)
 
 
-class TestBetweenCondition(BaseCondition, unittest.TestCase):
+class TestBetweenCondition(BaseOperator, unittest.TestCase):
 
     @property
     def operator(self, lower=1, higher=100):
@@ -85,7 +85,7 @@ class TestBetweenCondition(BaseCondition, unittest.TestCase):
         ok_(animals.applies_to('zebra') is False)
 
 
-class TestLessThanCondition(BaseCondition, unittest.TestCase):
+class TestLessThanCondition(BaseOperator, unittest.TestCase):
 
     @property
     def operator(self, upper=500):
@@ -110,7 +110,34 @@ class TestLessThanCondition(BaseCondition, unittest.TestCase):
         ok_(LessThan(56.7).applies_to(56.71) is False)
 
 
-class TestMoreThanCondition(BaseCondition, unittest.TestCase):
+class TestLessThanOrEqualToOperator(BaseOperator):
+
+    @property
+    def operator(self, upper=500):
+        return LessThanOrEqualTo(upper)
+
+    def test_applies_if_value_is_less_than_or_equal_to_argument(self):
+        ok_(self.operator.applies_to(float("-inf")))
+        ok_(self.operator.applies_to(-50000))
+        ok_(self.operator.applies_to(-1))
+        ok_(self.operator.applies_to(0))
+        ok_(self.operator.applies_to(499))
+        ok_(self.operator.applies_to(500) is True)
+        ok_(self.operator.applies_to(10000) is False)
+        ok_(self.operator.applies_to(float("inf")) is False)
+
+    def test_works_with_any_comparable(self):
+        ok_(LessThanOrEqualTo('giraffe').applies_to('aardvark'))
+        ok_(LessThanOrEqualTo('giraffe').applies_to('zebra') is False)
+        ok_(LessThanOrEqualTo('giraffe').applies_to('giraffe') is True)
+        ok_(LessThanOrEqualTo(56.7).applies_to(56))
+        ok_(LessThanOrEqualTo(56.7).applies_to(56.0))
+        ok_(LessThanOrEqualTo(56.7).applies_to(56.7))
+        ok_(LessThanOrEqualTo(56.7).applies_to(57.0) is False)
+        ok_(LessThanOrEqualTo(56.7).applies_to(56.71) is False)
+
+
+class TestMoreThanOperator(BaseOperator, unittest.TestCase):
 
     @property
     def operator(self, lower=10):
@@ -134,7 +161,33 @@ class TestMoreThanCondition(BaseCondition, unittest.TestCase):
         ok_(MoreThan(56.7).applies_to(56.71))
 
 
-class TestPercentCondition(BaseCondition, unittest.TestCase):
+class TestMoreThanOrEqualToOperator(BaseOperator, unittest.TestCase):
+
+    @property
+    def operator(self, lower=10):
+        return MoreThanOrEqualTo(lower)
+
+    def test_applies_to_if_value_more_than_argument(self):
+        ok_(self.operator.applies_to(float("inf")))
+        ok_(self.operator.applies_to(10000))
+        ok_(self.operator.applies_to(11))
+        ok_(self.operator.applies_to(10) is True)
+        ok_(self.operator.applies_to(0) is False)
+        ok_(self.operator.applies_to(-100) is False)
+        ok_(self.operator.applies_to(float('-inf')) is False)
+
+    def test_works_with_any_comparable(self):
+        ok_(MoreThanOrEqualTo('giraffe').applies_to('zebra'))
+        ok_(MoreThanOrEqualTo('giraffe').applies_to('aardvark') is False)
+        ok_(MoreThanOrEqualTo('giraffe').applies_to('giraffe'))
+        ok_(MoreThanOrEqualTo(56.7).applies_to(57))
+        ok_(MoreThanOrEqualTo(56.7).applies_to(57.0))
+        ok_(MoreThanOrEqualTo(56.7).applies_to(56.7))
+        ok_(MoreThanOrEqualTo(56.7).applies_to(56.0) is False)
+        ok_(MoreThanOrEqualTo(56.7).applies_to(56.71))
+
+
+class TestPercentCondition(BaseOperator, unittest.TestCase):
 
     class FalseyObject(object):
 
