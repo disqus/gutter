@@ -137,6 +137,8 @@ For an example, let's say you wanted a Condition that check if the user's age is
 
 This Condition will be true if any input instance has an ``age`` that is more than 65.
 
+Please see the ``gargoyle.operators`` for a list of available conditions.
+
 Conditions can also be constructed with a ``negative`` argument, which negates the condition.  For example::
 
     from gargoyle.operators.comparable import MoreThan
