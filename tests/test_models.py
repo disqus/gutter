@@ -30,7 +30,7 @@ class TestSwitch(unittest.TestCase):
         eq_(Switch('foo').state, Switch.states.DISABLED)
 
     def test_switch_state_can_be_changed(self):
-        swith = Switch('foo')
+        switch = Switch('foo')
         old_state = switch.state
 
         switch.state = Switch.states.GLOBAL
