@@ -15,7 +15,7 @@ class Signal(object):
 
 
 switch_registered = Signal()
-switch_deregistered = Signal()
+switch_unregistered = Signal()
 switch_updated = Signal()
 switch_condition_added = Signal()
 switch_condition_deleted = Signal()

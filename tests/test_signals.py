@@ -38,11 +38,11 @@ class TestSwitchRegisteredCallback(ActsLikeSignal, unittest.TestCase):
         return signals.switch_registered
 
 
-class TestSwitchDeregisteredCallback(ActsLikeSignal, unittest.TestCase):
+class TestSwitchUnregisteredCallback(ActsLikeSignal, unittest.TestCase):
 
     @fixture
     def signal(self):
-        return signals.switch_deregistered
+        return signals.switch_unregistered
 
 
 class TestSwitchUpdatedCallback(ActsLikeSignal, unittest.TestCase):
