@@ -8,39 +8,39 @@ from gargoyle.operators.misc import *
 class BaseCondition(object):
 
     def test_has_label(self):
-        ok_(self.condition.label)
+        ok_(self.operator.label)
 
     def test_has_description(self):
-        ok_(self.condition.description)
+        ok_(self.operator.description)
 
     def test_has_applies_to_method(self):
-        ok_(self.condition.applies_to)
+        ok_(self.operator.applies_to)
 
 
 class TestTruthyCondition(BaseCondition, unittest.TestCase):
 
     @property
-    def condition(self):
+    def operator(self):
         return Truthy()
 
     def test_applies_to_if_argument_is_truthy(self):
-        ok_(self.condition.applies_to(True))
-        ok_(self.condition.applies_to("hello"))
-        ok_(self.condition.applies_to(False) is False)
-        ok_(self.condition.applies_to("") is False)
+        ok_(self.operator.applies_to(True))
+        ok_(self.operator.applies_to("hello"))
+        ok_(self.operator.applies_to(False) is False)
+        ok_(self.operator.applies_to("") is False)
 
 
 class TestEqualsCondition(BaseCondition, unittest.TestCase):
 
     @property
-    def condition(self):
+    def operator(self):
         return Equals(value='Fred')
 
     def test_applies_to_if_argument_is_equal_to_value(self):
-        ok_(self.condition.applies_to('Fred'))
-        ok_(self.condition.applies_to('Steve') is False)
-        ok_(self.condition.applies_to('') is False)
-        ok_(self.condition.applies_to(True) is False)
+        ok_(self.operator.applies_to('Fred'))
+        ok_(self.operator.applies_to('Steve') is False)
+        ok_(self.operator.applies_to('') is False)
+        ok_(self.operator.applies_to(True) is False)
 
     @raises(TypeError)
     def test_raises_error_if_not_provided_value(self):
@@ -50,30 +50,30 @@ class TestEqualsCondition(BaseCondition, unittest.TestCase):
 class TestEnumCondition(BaseCondition, unittest.TestCase):
 
     @property
-    def condition(self):
+    def operator(self):
         return Enum(False, 2.0, '3')
 
     def test_applies_to_if_argument_in_enum(self):
-        ok_(self.condition.applies_to(False))
-        ok_(self.condition.applies_to(2.0))
-        ok_(self.condition.applies_to(9) is False)
-        ok_(self.condition.applies_to("1") is False)
-        ok_(self.condition.applies_to(True) is False)
+        ok_(self.operator.applies_to(False))
+        ok_(self.operator.applies_to(2.0))
+        ok_(self.operator.applies_to(9) is False)
+        ok_(self.operator.applies_to("1") is False)
+        ok_(self.operator.applies_to(True) is False)
 
 
 class TestBetweenCondition(BaseCondition, unittest.TestCase):
 
     @property
-    def condition(self, lower=1, higher=100):
+    def operator(self, lower=1, higher=100):
         return Between(lower, higher)
 
     def test_applies_to_if_between_lower_and_upper_bound(self):
-        ok_(self.condition.applies_to(0) is False)
-        ok_(self.condition.applies_to(1) is False)
-        ok_(self.condition.applies_to(2))
-        ok_(self.condition.applies_to(99))
-        ok_(self.condition.applies_to(100) is False)
-        ok_(self.condition.applies_to('steve') is False)
+        ok_(self.operator.applies_to(0) is False)
+        ok_(self.operator.applies_to(1) is False)
+        ok_(self.operator.applies_to(2))
+        ok_(self.operator.applies_to(99))
+        ok_(self.operator.applies_to(100) is False)
+        ok_(self.operator.applies_to('steve') is False)
 
     def test_applies_to_works_with_any_comparable(self):
         animals = Between('cobra', 'orangatang')
@@ -88,18 +88,18 @@ class TestBetweenCondition(BaseCondition, unittest.TestCase):
 class TestLessThanCondition(BaseCondition, unittest.TestCase):
 
     @property
-    def condition(self, upper=500):
+    def operator(self, upper=500):
         return LessThan(upper)
 
     def test_applies_to_if_value_less_than_argument(self):
-        ok_(self.condition.applies_to(float("-inf")))
-        ok_(self.condition.applies_to(-50000))
-        ok_(self.condition.applies_to(-1))
-        ok_(self.condition.applies_to(0))
-        ok_(self.condition.applies_to(499))
-        ok_(self.condition.applies_to(500) is False)
-        ok_(self.condition.applies_to(10000) is False)
-        ok_(self.condition.applies_to(float("inf")) is False)
+        ok_(self.operator.applies_to(float("-inf")))
+        ok_(self.operator.applies_to(-50000))
+        ok_(self.operator.applies_to(-1))
+        ok_(self.operator.applies_to(0))
+        ok_(self.operator.applies_to(499))
+        ok_(self.operator.applies_to(500) is False)
+        ok_(self.operator.applies_to(10000) is False)
+        ok_(self.operator.applies_to(float("inf")) is False)
 
     def test_works_with_any_comparable(self):
         ok_(LessThan('giraffe').applies_to('aardvark'))
@@ -113,17 +113,17 @@ class TestLessThanCondition(BaseCondition, unittest.TestCase):
 class TestMoreThanCondition(BaseCondition, unittest.TestCase):
 
     @property
-    def condition(self, lower=10):
+    def operator(self, lower=10):
         return MoreThan(lower)
 
     def test_applies_to_if_value_more_than_argument(self):
-        ok_(self.condition.applies_to(float("inf")))
-        ok_(self.condition.applies_to(10000))
-        ok_(self.condition.applies_to(11))
-        ok_(self.condition.applies_to(10) is False)
-        ok_(self.condition.applies_to(0) is False)
-        ok_(self.condition.applies_to(-100) is False)
-        ok_(self.condition.applies_to(float('-inf')) is False)
+        ok_(self.operator.applies_to(float("inf")))
+        ok_(self.operator.applies_to(10000))
+        ok_(self.operator.applies_to(11))
+        ok_(self.operator.applies_to(10) is False)
+        ok_(self.operator.applies_to(0) is False)
+        ok_(self.operator.applies_to(-100) is False)
+        ok_(self.operator.applies_to(float('-inf')) is False)
 
     def test_works_with_any_comparable(self):
         ok_(MoreThan('giraffe').applies_to('zebra'))
@@ -142,14 +142,14 @@ class TestPercentCondition(BaseCondition, unittest.TestCase):
             return False
 
     @property
-    def condition(self):
+    def operator(self):
         return Percent(50)
 
     def test_applies_to_percentage_passed_in(self):
-        runs = map(self.condition.applies_to, range(1000))
+        runs = map(self.operator.applies_to, range(1000))
         successful_runs = filter(bool, runs)
         self.assertAlmostEqual(len(successful_runs), 500, delta=50)
 
     def test_returns_false_if_argument_is_falsey(self):
-        eq_(self.condition.applies_to(False), False)
-        eq_(self.condition.applies_to(self.FalseyObject()), False)
+        eq_(self.operator.applies_to(False), False)
+        eq_(self.operator.applies_to(self.FalseyObject()), False)
