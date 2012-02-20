@@ -65,19 +65,6 @@ class TestSwitch(unittest.TestCase):
         switch.conditions.remove(condition)
         ok_(condition not in switch.conditions)
 
-    @mock.patch('gargoyle.signals.switch_condition_added')
-    def test_adding_a_condition_calls_condition_added_signal(self, signal):
-        switch = Switch('foo')
-        switch.conditions.append('cond')
-        signal.call.assert_called_once_with(switch, 'cond')
-
-    @mock.patch('gargoyle.signals.switch_condition_removed')
-    def test_removing_a_condition_calls_condition_removed_signal(self, signal):
-        switch = Switch('foo')
-        switch.conditions.append('cond')
-        switch.conditions.remove('cond')
-        signal.call.assert_called_with(switch, 'cond')
-
     def test_parent_property_defaults_to_none(self):
         eq_(Switch('foo').parent, None)
 

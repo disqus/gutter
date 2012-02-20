@@ -50,17 +50,3 @@ class TestSwitchUpdatedCallback(ActsLikeSignal, unittest.TestCase):
     @fixture
     def signal(self):
         return signals.switch_updated
-
-
-class TestSwitchConditionAddedCallback(ActsLikeSignal, unittest.TestCase):
-
-    @fixture
-    def signal(self):
-        return signals.switch_condition_added
-
-
-class TestSwitchConditionRemovedCallback(ActsLikeSignal, unittest.TestCase):
-
-    @fixture
-    def signal(self):
-        return signals.switch_condition_removed

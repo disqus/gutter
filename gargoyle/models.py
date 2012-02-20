@@ -23,23 +23,6 @@ class Switch(object):
     it checks to see if it's satisfied by an input.
     """
 
-    class ConditionList(list):
-
-        def __init__(self, switch, *args, **kwargs):
-            self.switch = switch
-            super(Switch.ConditionList, self).__init__(*args, **kwargs)
-
-        # TODO: support other ways to append items from a list?
-        def append(self, item):
-            super(Switch.ConditionList, self).append(item)
-            signals.switch_condition_added.call(self.switch, item)
-
-        # TODO: support other ways to remove items from a list?
-        def remove(self, item):
-            super(Switch.ConditionList, self).remove(item)
-            signals.switch_condition_removed.call(self.switch, item)
-
-
     class states:
         DISABLED = 1
         SELECTIVE = 2
@@ -49,7 +32,7 @@ class Switch(object):
                  parent=None, concent=True, manager=None):
         self.name = str(name)
         self.state = state
-        self.conditions = self.ConditionList(switch=self)
+        self.conditions = list()
         self.compounded = compounded
         self.parent = parent
         self.concent = concent
