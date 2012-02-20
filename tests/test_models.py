@@ -78,6 +78,25 @@ class TestSwitch(unittest.TestCase):
         switch.conditions.remove('cond')
         signal.call.assert_called_with(switch, 'cond')
 
+    @mock.patch('gargoyle.models.Switch.save')
+    def test_adding_a_condition_saves_the_switch(self, save_func):
+        switch = Switch('foo')
+        switch.save = mock.Mock()
+        switch.conditions.append('cond')
+        switch.save.assert_called_once_with()
+
+    @mock.patch('gargoyle.models.Switch.save')
+    def test_removing_a_condition_saves_the_switch_as_well(self, save_func):
+        switch = Switch('foo')
+        switch.save = mock.Mock()
+
+        switch.conditions.append('cond')
+        switch.save.assert_called_once_with()
+
+        switch.save.reset_mock()
+        switch.conditions.remove('cond')
+        switch.save.assert_called_once_with()
+
     def test_parent_property_defaults_to_none(self):
         eq_(Switch('foo').parent, None)
 
@@ -210,44 +229,6 @@ class CompoundedConditionsTest(SwitchWithConditions, unittest.TestCase):
         ok_(self.switch.enabled_for('input') is True)
 
 
-class TestSwitchDirtyTracking(unittest.TestCase):
-
-    @fixture
-    def switch(self):
-        return Switch('foo')
-
-    def test_it_starts_out_as_not_dirty(self):
-        ok_(Switch('foo').dirty is False)
-
-    def test_dity_can_be_reset_to_false(self):
-        self.switch.name = 'new'
-        ok_(self.switch.dirty is True)
-        self.switch.dirty = False
-        ok_(self.switch.dirty is False)
-
-    def test_it_becomes_dirty_if_the_name_changes(self):
-        ok_(self.switch.dirty is False)
-        self.switch.name = 'new'
-        ok_(self.switch.dirty is True)
-
-    def test_it_becomes_dirty_if_conditions_are_added(self):
-        ok_(self.switch.dirty is False)
-        self.switch.conditions.append('condition')
-        ok_(self.switch.dirty is True)
-
-    def test_it_becomes_dirty_if_conditions_are_removed(self):
-        self.switch.conditions.append('condition')
-        self.switch.dirty = False
-        ok_(self.switch.dirty is False)
-        self.switch.conditions.remove('condition')
-        ok_(self.switch.dirty is True)
-
-    def test_save_tells_the_manager_to_update_the_wtich(self):
-        self.switch.manager = mock.Mock()
-        self.switch.save()
-        self.switch.manager.update.assert_called_once_with(self.switch)
-
-
 class ManagerTest(unittest.TestCase):
 
     @fixture
@@ -284,11 +265,6 @@ class ManagerTest(unittest.TestCase):
     def test_uses_switches_from_storage_on_itialization(self):
         m = Manager(storage=dict(existing='switch', another='valuable switch'))
         self.assertItemsEqual(m.switches, ['switch', 'valuable switch'])
-
-    def test_update_marks_the_switch_as_not_dirty(self):
-        self.switch.dirty = True
-        self.manager.update(self.switch)
-        ok_(self.switch.dirty is False)
 
     def test_update_tells_manager_to_register_with_switch_updated_signal(self):
         self.manager.register = mock.Mock()
@@ -343,8 +319,6 @@ class ActsLikeManager(object):
         child = self.mock_and_register_switch('movies:jaws')
 
         eq_(parent.children, [child])
-
-        print self.manager.switches[0].children
 
         sibling = self.mock_and_register_switch('movies:jaws')
 

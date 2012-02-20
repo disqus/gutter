@@ -32,13 +32,13 @@ class Switch(object):
         # TODO: support other ways to append items from a list?
         def append(self, item):
             super(Switch.ConditionList, self).append(item)
-            self.switch.dirty = True
+            self.switch.save()
             signals.switch_condition_added.call(self.switch, item)
 
         # TODO: support other ways to remove items from a list?
         def remove(self, item):
             super(Switch.ConditionList, self).remove(item)
-            self.switch.dirty = True
+            self.switch.save()
             signals.switch_condition_removed.call(self.switch, item)
 
 
@@ -49,7 +49,7 @@ class Switch(object):
 
     def __init__(self, name, state=states.DISABLED, compounded=False,
                  parent=None, concent=True, manager=None):
-        self._name = str(name)
+        self.name = str(name)
         self.state = state
         self.conditions = self.ConditionList(switch=self)
         self.compounded = compounded
@@ -57,16 +57,6 @@ class Switch(object):
         self.concent = concent
         self.children = []
         self.manager = manager
-        self.dirty = False
-
-    def get_name(self):
-        return self._name
-
-    def set_name(self, name):
-        self.dirty = True
-        self._name = name
-
-    name = property(get_name, set_name)
 
     def enabled_for(self, inpt):
         """
@@ -81,7 +71,8 @@ class Switch(object):
         return func(cond(inpt) for cond in self.conditions)
 
     def save(self):
-        self.manager.update(self)
+        if self.manager:
+            self.manager.update(self)
 
     def __enabled_func(self):
         if self.compounded:
@@ -193,8 +184,8 @@ class Manager(object):
         return any(switch.enabled_for(inpt) for inpt in self.inputs)
 
     def update(self, switch):
-        switch.dirty = False
         self.register(switch, signal=signals.switch_updated)
+        # TODO: handle the delta here....somehow
 
     def __create_and_register_disabled_switch(self, name):
         switch = self.switch_class(name)
