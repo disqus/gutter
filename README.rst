@@ -215,3 +215,39 @@ Once you're doing using these inputs, perhaps at the end of a request, you shoul
     gargoyle.flush()
 
 The Manager is now setup and ready for its next set of inputs.
+
+Signals
+=======
+
+Gargoyle-client provides 3 signals related to Switch changes.  They are all avilable from the ``gargoyle.signals`` module:
+
+1. ``switch_registered`` - Called when a new switch is registered with the Manager.
+2. ``switch_unregistered`` - Called when a switch is unregistered with the Manager.
+3. ``switch_updated`` - Called with a switch was updated.
+
+To use a signal, simply call the signal's ``connect()`` method and pass in a callable object.  When the signal is fired, it will call your callable with the switch that is being register/unregistered/updated.  I.e.::
+
+    from gargoyle.signals import switch_updated
+
+    def log_switch_update(switch):
+        log "Switch %s updated" % switch.name
+
+    switch_updated.connect(log_switch_updated)
+
+Understanding Switch Changes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``switch_updated`` signal can be connected to in order to be notified when a switch has been changed.  To know *what* changed in the switch, you can consult its ``changes`` property::
+
+    >>> from gargoyle.models import Switch
+    >>> switch = Switch('test')
+    >>> switch.concent
+    True
+    >>> switch.concent = False
+    >>> switch.name = 'new name'
+    >>> switch.changes
+    {'concent': {'current': False, 'previous': True}, 'name': {'current': 'new name', 'previous': 'test'}}
+
+As you can see, when we changed the Switch's ``concent`` setting and ``name``, ``switch.changes`` reflects that in a dictionary of changed properties.  You can also simply ask the switch if anything has changed with the ``changed`` property.
+
+You can use these values inside your signal callback to make decisions based on what changed.  I.e., email out a diff of the changed values.
