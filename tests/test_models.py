@@ -78,25 +78,6 @@ class TestSwitch(unittest.TestCase):
         switch.conditions.remove('cond')
         signal.call.assert_called_with(switch, 'cond')
 
-    @mock.patch('gargoyle.models.Switch.save')
-    def test_adding_a_condition_saves_the_switch(self, save_func):
-        switch = Switch('foo')
-        switch.save = mock.Mock()
-        switch.conditions.append('cond')
-        switch.save.assert_called_once_with()
-
-    @mock.patch('gargoyle.models.Switch.save')
-    def test_removing_a_condition_saves_the_switch_as_well(self, save_func):
-        switch = Switch('foo')
-        switch.save = mock.Mock()
-
-        switch.conditions.append('cond')
-        switch.save.assert_called_once_with()
-
-        switch.save.reset_mock()
-        switch.conditions.remove('cond')
-        switch.save.assert_called_once_with()
-
     def test_parent_property_defaults_to_none(self):
         eq_(Switch('foo').parent, None)
 
@@ -118,6 +99,41 @@ class TestSwitch(unittest.TestCase):
     def test_switch_can_be_constructed_witn_a_manager(self):
         eq_(Switch('foo', manager='manager').manager, 'manager')
 
+
+class TestSwitchChanges(unittest.TestCase):
+
+    @fixture
+    def switch(self):
+        return Switch('foo')
+
+    def changes_dict(self, previous, current):
+        return dict(previous=previous, current=current)
+
+    def test_switch_is_not_changed_by_default(self):
+        ok_(Switch('foo').changed is False)
+
+    def test_switch_is_changed_if_property_changes(self):
+        ok_(self.switch.changed is False)
+        self.switch.name = 'another name'
+        ok_(self.switch.changed is True)
+
+    def test_switch_reset_causes_switch_to_reset_change_tracking(self):
+        self.switch.name = 'another name'
+        ok_(self.switch.changed is True)
+        self.switch.reset()
+        ok_(self.switch.changed is False)
+
+    def test_switch_changes_returns_changes(self):
+        eq_(self.switch.changes, {})
+
+        self.switch.name = 'new name'
+        eq_(self.switch.changes, dict(name=self.changes_dict('foo', 'new name')))
+
+        self.switch.concent = False
+        eq_(self.switch.changes, dict(
+            name=self.changes_dict('foo', 'new name'),
+            concent=self.changes_dict(True, False)
+        ))
 
 class TestCondition(unittest.TestCase):
 
@@ -242,6 +258,7 @@ class ManagerTest(unittest.TestCase):
     @fixture
     def switch(self):
         switch = mock.Mock(spec=Switch)
+        switch.changes = {}
         switch.parent = None
         switch.name = 'foo'
         switch.manager = None
@@ -275,6 +292,10 @@ class ManagerTest(unittest.TestCase):
     def test_update_calls_the_switch_updateed_signal(self, signal):
         self.manager.update(self.switch)
         signal.call.assert_call_once()
+
+    def test_manager_resets_switch_dirty_tracking(self):
+        self.manager.update(self.switch)
+        self.switch.reset.assert_called_once_with()
 
 
 class ActsLikeManager(object):
@@ -319,6 +340,8 @@ class ActsLikeManager(object):
         child = self.mock_and_register_switch('movies:jaws')
 
         eq_(parent.children, [child])
+
+        print self.manager.switches[0].children
 
         sibling = self.mock_and_register_switch('movies:jaws')
 
@@ -378,6 +401,17 @@ class ActsLikeManager(object):
         switch = self.mock_and_register_switch('foo')
         self.manager.unregister(switch.name)
         signal.call.assert_called_once_with(switch)
+
+    def test_update_does_not_linger_old_switch(self):
+        switch = self.mock_and_register_switch('foo')
+        switch.name = 'new name'
+        switch.changes = dict(name=dict(previous='foo'))
+
+        ok_(self.manager.switch('foo'))
+        assert_raises(ValueError, self.manager.switch, ' new name')
+        self.manager.update(switch)
+        assert_raises(ValueError, self.manager.switch, 'foo')
+        ok_(self.manager.switch('new name'))
 
 
 class EmptyManagerInstanceTest(ActsLikeManager, unittest.TestCase):

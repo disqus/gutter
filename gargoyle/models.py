@@ -32,13 +32,11 @@ class Switch(object):
         # TODO: support other ways to append items from a list?
         def append(self, item):
             super(Switch.ConditionList, self).append(item)
-            self.switch.save()
             signals.switch_condition_added.call(self.switch, item)
 
         # TODO: support other ways to remove items from a list?
         def remove(self, item):
             super(Switch.ConditionList, self).remove(item)
-            self.switch.save()
             signals.switch_condition_removed.call(self.switch, item)
 
 
@@ -57,6 +55,7 @@ class Switch(object):
         self.concent = concent
         self.children = []
         self.manager = manager
+        self.reset()
 
     def enabled_for(self, inpt):
         """
@@ -74,11 +73,36 @@ class Switch(object):
         if self.manager:
             self.manager.update(self)
 
+    @property
+    def changes(self):
+        return dict(list(self.__changes()))
+
+    @property
+    def changed(self):
+        return bool(list(self.__changes()))
+
+    def reset(self):
+        self.__init_vars = vars(self).copy()
+
+    def init_vars_items(self):
+        for key, value in self.__init_vars.items():
+            if key is '_Switch__init_vars':
+                continue
+            else:
+                yield ()
+
     def __enabled_func(self):
         if self.compounded:
             return all
         else:
             return any
+
+    def __changes(self):
+        for key, value in self.__init_vars.items():
+            if key is '_Switch__init_vars':
+                continue
+            elif key not in vars(self) or getattr(self, key) != value:
+                yield (key, dict(previous=value, current=getattr(self, key)))
 
 
 class Condition(object):
@@ -185,7 +209,12 @@ class Manager(object):
 
     def update(self, switch):
         self.register(switch, signal=signals.switch_updated)
-        # TODO: handle the delta here....somehow
+
+        if switch.changes.get('name'):
+            old_name = switch.changes['name'].get('previous')
+            del self.__switches[old_name]
+
+        switch.reset()
 
     def __create_and_register_disabled_switch(self, name):
         switch = self.switch_class(name)
