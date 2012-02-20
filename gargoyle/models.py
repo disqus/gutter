@@ -6,6 +6,8 @@ gargoyle.models
 :license: Apache License 2.0, see LICENSE for more details.
 """
 
+from gargoyle import signals
+
 
 class Switch(object):
     """
@@ -21,20 +23,50 @@ class Switch(object):
     it checks to see if it's satisfied by an input.
     """
 
+    class ConditionList(list):
+
+        def __init__(self, switch, *args, **kwargs):
+            self.switch = switch
+            super(Switch.ConditionList, self).__init__(*args, **kwargs)
+
+        # TODO: support other ways to append items from a list?
+        def append(self, item):
+            super(Switch.ConditionList, self).append(item)
+            self.switch.dirty = True
+            signals.switch_condition_added.call(self.switch, item)
+
+        # TODO: support other ways to remove items from a list?
+        def remove(self, item):
+            super(Switch.ConditionList, self).remove(item)
+            self.switch.dirty = True
+            signals.switch_condition_removed.call(self.switch, item)
+
+
     class states:
         DISABLED = 1
         SELECTIVE = 2
         GLOBAL = 3
 
-    def __init__(self, name, state=states.DISABLED,
-                 compounded=False, parent=None, concent=True):
-        self.name = str(name)
+    def __init__(self, name, state=states.DISABLED, compounded=False,
+                 parent=None, concent=True, manager=None):
+        self._name = str(name)
         self.state = state
-        self.conditions = []
+        self.conditions = self.ConditionList(switch=self)
         self.compounded = compounded
         self.parent = parent
         self.concent = concent
         self.children = []
+        self.manager = manager
+        self.dirty = False
+
+    def get_name(self):
+        return self._name
+
+    def set_name(self, name):
+        self.dirty = True
+        self._name = name
+
+    name = property(get_name, set_name)
 
     def enabled_for(self, inpt):
         """
@@ -47,6 +79,9 @@ class Switch(object):
 
         func = self.__enabled_func()
         return func(cond(inpt) for cond in self.conditions)
+
+    def save(self):
+        self.manager.update(self)
 
     def __enabled_func(self):
         if self.compounded:
@@ -130,15 +165,22 @@ class Manager(object):
     def switches(self):
         return self.__switches.values()
 
-    def register(self, switch):
-        self.__add_parent_if_present_to(switch)
+    def switch(self, name):
+            return self.__get_switch_by_name(name)
+
+    def register(self, switch, signal=signals.switch_registered):
+        self.__sync_parental_relationships(switch)
+        switch.manager = self
         self.__switches[switch.name] = switch
+        signal.call(switch)
 
     def unregister(self, name):
         for child in self.__switches[name].children:
             self.unregister(child.name)
 
+        to_delete = self.__switches[name]
         del self.__switches[name]
+        signals.switch_unregistered.call(to_delete)
 
     def input(self, *inputs):
         self.inputs = list(inputs)
@@ -147,15 +189,12 @@ class Manager(object):
         self.inputs = []
 
     def active(self, name):
-        try:
-            switch = self.__switches[name]
-        except KeyError:
-            if not self.autocreate:
-                raise ValueError("No switch named '%s' registered" % name)
-
-            switch = self.__create_and_register_disabled_switch(name)
-
+        switch = self.__get_switch_by_name(name)
         return any(switch.enabled_for(inpt) for inpt in self.inputs)
+
+    def update(self, switch):
+        switch.dirty = False
+        self.register(switch, signal=signals.switch_updated)
 
     def __create_and_register_disabled_switch(self, name):
         switch = self.switch_class(name)
@@ -163,13 +202,28 @@ class Manager(object):
         self.register(switch)
         return switch
 
-    def __add_parent_if_present_to(self, switch):
-        parent = self.__switches.get(self.__parent_key_for(switch))
+    def __sync_parental_relationships(self, switch):
+        new_parent = self.__switches.get(self.__parent_key_for(switch))
+        old_parent = switch.parent
 
-        if parent:
-            switch.parent = parent
-            parent.children.append(switch)
+        switch.parent = new_parent
+
+        if old_parent and old_parent is not new_parent:
+            old_parent.children.remove(switch)
+
+        if new_parent:
+            new_parent.children.append(switch)
 
     def __parent_key_for(self, switch):
+        # TODO: Make this a method on the switch object
         parent_parts = switch.name.split(self.key_separator)[:-1]
         return self.key_separator.join(parent_parts)
+
+    def __get_switch_by_name(self, name):
+        try:
+            return self.__switches[name]
+        except KeyError:
+            if not self.autocreate:
+                raise ValueError("No switch named '%s' registered" % name)
+
+            return self.__create_and_register_disabled_switch(name)

@@ -2,6 +2,8 @@ import unittest
 from nose.tools import *
 from gargoyle.models import Switch, Manager, Condition
 from modeldict.dict import MemoryDict
+from gargoyle import signals
+from tests import fixture
 import mock
 
 
@@ -63,6 +65,19 @@ class TestSwitch(unittest.TestCase):
         switch.conditions.remove(condition)
         ok_(condition not in switch.conditions)
 
+    @mock.patch('gargoyle.signals.switch_condition_added')
+    def test_adding_a_condition_calls_condition_added_signal(self, signal):
+        switch = Switch('foo')
+        switch.conditions.append('cond')
+        signal.call.assert_called_once_with(switch, 'cond')
+
+    @mock.patch('gargoyle.signals.switch_condition_removed')
+    def test_removing_a_condition_calls_condition_removed_signal(self, signal):
+        switch = Switch('foo')
+        switch.conditions.append('cond')
+        switch.conditions.remove('cond')
+        signal.call.assert_called_with(switch, 'cond')
+
     def test_parent_property_defaults_to_none(self):
         eq_(Switch('foo').parent, None)
 
@@ -77,6 +92,12 @@ class TestSwitch(unittest.TestCase):
 
     def test_children_defaults_to_an_empty_list(self):
         eq_(Switch('foo').children, [])
+
+    def test_switch_manager_defaults_to_none(self):
+        eq_(Switch('foo').manager, None)
+
+    def test_switch_can_be_constructed_witn_a_manager(self):
+        eq_(Switch('foo', manager='manager').manager, 'manager')
 
 
 class TestCondition(unittest.TestCase):
@@ -189,7 +210,61 @@ class CompoundedConditionsTest(SwitchWithConditions, unittest.TestCase):
         ok_(self.switch.enabled_for('input') is True)
 
 
+class TestSwitchDirtyTracking(unittest.TestCase):
+
+    @fixture
+    def switch(self):
+        return Switch('foo')
+
+    def test_it_starts_out_as_not_dirty(self):
+        ok_(Switch('foo').dirty is False)
+
+    def test_dity_can_be_reset_to_false(self):
+        self.switch.name = 'new'
+        ok_(self.switch.dirty is True)
+        self.switch.dirty = False
+        ok_(self.switch.dirty is False)
+
+    def test_it_becomes_dirty_if_the_name_changes(self):
+        ok_(self.switch.dirty is False)
+        self.switch.name = 'new'
+        ok_(self.switch.dirty is True)
+
+    def test_it_becomes_dirty_if_conditions_are_added(self):
+        ok_(self.switch.dirty is False)
+        self.switch.conditions.append('condition')
+        ok_(self.switch.dirty is True)
+
+    def test_it_becomes_dirty_if_conditions_are_removed(self):
+        self.switch.conditions.append('condition')
+        self.switch.dirty = False
+        ok_(self.switch.dirty is False)
+        self.switch.conditions.remove('condition')
+        ok_(self.switch.dirty is True)
+
+    def test_save_tells_the_manager_to_update_the_wtich(self):
+        self.switch.manager = mock.Mock()
+        self.switch.save()
+        self.switch.manager.update.assert_called_once_with(self.switch)
+
+
 class ManagerTest(unittest.TestCase):
+
+    @fixture
+    def mockstorage(self):
+        return mock.MagicMock(dict)
+
+    @fixture
+    def manager(self):
+        return Manager(storage=self.mockstorage)
+
+    @fixture
+    def switch(self):
+        switch = mock.Mock(spec=Switch)
+        switch.parent = None
+        switch.name = 'foo'
+        switch.manager = None
+        return switch
 
     def test_autocreate_defaults_to_false(self):
         eq_(Manager(storage=dict()).autocreate, False)
@@ -198,13 +273,32 @@ class ManagerTest(unittest.TestCase):
         eq_(Manager(storage=dict(), autocreate=True).autocreate, False)
 
     def test_register_adds_switch_to_storge_keyed_by_its_name(self):
-        mockstorage = mock.MagicMock(dict)
-        Manager(storage=mockstorage).register(switch)
-        mockstorage.__setitem__.assert_called_once_with(switch.name, switch)
+        self.manager.register(switch)
+        self.mockstorage.__setitem__.assert_called_once_with(switch.name, switch)
+
+    def test_register_adds_self_as_manager_to_switch(self):
+        ok_(self.switch.manager is not self.manager)
+        self.manager.register(self.switch)
+        ok_(self.switch.manager is self.manager)
 
     def test_uses_switches_from_storage_on_itialization(self):
         m = Manager(storage=dict(existing='switch', another='valuable switch'))
         self.assertItemsEqual(m.switches, ['switch', 'valuable switch'])
+
+    def test_update_marks_the_switch_as_not_dirty(self):
+        self.switch.dirty = True
+        self.manager.update(self.switch)
+        ok_(self.switch.dirty is False)
+
+    def test_update_tells_manager_to_register_with_switch_updated_signal(self):
+        self.manager.register = mock.Mock()
+        self.manager.update(self.switch)
+        self.manager.register.assert_called_once_with(self.switch, signal=signals.switch_updated)
+
+    @mock.patch('gargoyle.signals.switch_updated')
+    def test_update_calls_the_switch_updateed_signal(self, signal):
+        self.manager.update(self.switch)
+        signal.call.assert_call_once()
 
 
 class ActsLikeManager(object):
@@ -250,9 +344,34 @@ class ActsLikeManager(object):
 
         eq_(parent.children, [child])
 
+        print self.manager.switches[0].children
+
         sibling = self.mock_and_register_switch('movies:jaws')
 
         eq_(parent.children, [child, sibling])
+
+    def test_register_removes_switch_from_children_of_old_parent(self):
+        parent = self.mock_and_register_switch('movies')
+        child = self.mock_and_register_switch('movies:jaws')
+        foster_parent = self.mock_and_register_switch('books')
+
+        ok_(child in parent.children)
+        ok_(child not in foster_parent.children)
+        ok_(child.parent is parent)
+
+        child.name = 'books:jaws'
+        self.manager.register(child)
+
+        ok_(child not in parent.children)
+        ok_(child in foster_parent.children)
+        ok_(child.parent is foster_parent)
+
+    def test_switch_returns_switch_from_manager_with_name(self):
+        switch = self.mock_and_register_switch('foo')
+        eq_(switch, self.manager.switch('foo'))
+
+    def test_swich_raises_valueerror_if_no_switch_by_name(self):
+        assert_raises(ValueError, self.manager.switch, 'junk')
 
     def test_unregister_removes_all_child_switches_too(self):
         grandparent = self.mock_and_register_switch('movies')
@@ -274,6 +393,17 @@ class ActsLikeManager(object):
         ok_(child1 not in self.manager.switches)
         ok_(child2 not in self.manager.switches)
         ok_(great_uncle in self.manager.switches)
+
+    @mock.patch('gargoyle.signals.switch_registered')
+    def test_register_signals_switch_registered_with_switch(self, signal):
+        switch = self.mock_and_register_switch('foo')
+        signal.call.assert_called_once_with(switch)
+
+    @mock.patch('gargoyle.signals.switch_unregistered')
+    def test_register_signals_switch_registered_with_switch(self, signal):
+        switch = self.mock_and_register_switch('foo')
+        self.manager.unregister(switch.name)
+        signal.call.assert_called_once_with(switch)
 
 
 class EmptyManagerInstanceTest(ActsLikeManager, unittest.TestCase):

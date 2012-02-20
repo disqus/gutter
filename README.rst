@@ -162,6 +162,24 @@ Once your Switch is constsructed with the right conditions, you need to retister
 
 The Switch is now stored in the Manager's storage and can be checked if active.
 
+Updating a Switch
+~~~~~~~~~~~~~~~~~
+
+If you need to update your Switch, simple make the changes to the Switch object, then call the Manager's ``updatee()`` method to tell it to update the switch with the new object::
+
+    switch = Switch('cool switch')
+    manager.register(switch)
+
+    switch.name = 'even cooler switch'  # Switch has not been updated in manager yet
+
+    manager.update(switch)  # Switch is now updated in the manager
+
+Since this is a common pattern (retreive switch from the manager, then update it), gargoyle-client provides a shorthand API in which you ask the Manager for a switch by name, and then call ``save()`` on the switch to update it in the Manager::
+
+    switch = manager.switch('existing switch')
+    switch.name = 'a new name'  # Switch is not updated in manager yet
+    switch.save()  # Same as calling manager.update(switch)
+
 Unregistering a Switch
 ~~~~~~~~~~~~~~~~~~~~~~
 
