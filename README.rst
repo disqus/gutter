@@ -113,7 +113,7 @@ Swiches can either be constructed in a certain state or the property can be chan
     another_switch = Switch('new feature')
     another_switch.state = Switch.states.DISABLED
 
-When in the ``SELECTIVE`` state, normally only one Condition needs be true for the Switch to be enabled for a particular input, but of ``switch.componded`` is set to True, then **all** of the switches conditions need to be true in order to be enabled::
+When in the ``SELECTIVE`` state, normally only one Condition needs be true for the Switch to be enabled for a particular input, but of ``switch.componded`` is set to ``True``, then **all** of the switches conditions need to be true in order to be enabled::
 
     switch = Switch('require alll conditions', compounded=True)
 
@@ -165,7 +165,7 @@ Conditions can also be constructed with a ``negative`` argument, which negates t
 
     condition = Condition(argument=UserInput.age, operator=MoreThan(65), negative=True)
 
-This Condition is now True if it evaluates to false.  In this case if the user's ``age`` is **not** more than 65.
+This Condition is now ``True`` if it evaluates to ``False``.  In this case if the user's ``age`` is **not** more than 65.
 
 Conditions then need to be appending to a swtich instance like so::
 
@@ -213,7 +213,7 @@ Existing switches may be removed from the Manager by calling ``unregister()`` wi
 Checking Switches as Active
 ===========================
 
-As stated before, switches are checked against **instances** of Input objects.  To do this, you would call the switch's ``enabled_for()`` method with the instance of your input.  You may call ``enabled_for()`` with any input instance, even ones where the Switch has no Condition for that class of Input.  If the Switch is active for your input, ``enabled_for`` will return True.  Otherwise, it will return ``False``.
+As stated before, switches are checked against **instances** of Input objects.  To do this, you would call the switch's ``enabled_for()`` method with the instance of your input.  You may call ``enabled_for()`` with any input instance, even ones where the Switch has no Condition for that class of Input.  If the Switch is active for your input, ``enabled_for`` will return ``True``.  Otherwise, it will return ``False``.
 
 ``gargoyle.active()`` API
 ~~~~~~~~~~~~~~~~~~~~~~~~~
