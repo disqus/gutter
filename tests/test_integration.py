@@ -66,6 +66,7 @@ class TestIntegration(unittest.TestCase):
 
     def setup_switches(self):
         self.add_switch('can drink', condition=self.age_21_plus)
+        self.add_switch('can drink in europe', condition=self.age_21_plus, state=Switch.states.GLOBAL)
         self.add_switch('can drink:wine', condition=self.in_sf, concent=True)
         self.add_switch('retired', condition=self.age_65_and_up)
         self.add_switch('can vote', condition=self.age_not_under_18)
@@ -78,6 +79,7 @@ class TestIntegration(unittest.TestCase):
 
     def add_switch(self, name, condition=None, *conditions, **kwargs):
         switch = Switch(name, compounded=kwargs.get('compounded', False))
+        switch.state = kwargs.get('state', Switch.states.SELECTIVE)
         conditions = list(conditions)
 
         if condition:
@@ -105,6 +107,7 @@ class TestIntegration(unittest.TestCase):
 
         with self.inputs(self.manager, self.larry) as context:
             ok_(context.active('can drink') is True)
+            ok_(context.active('can drink in europe') is True)
             ok_(context.active('can vote') is True)
             ok_(context.active('SF resident') is False)
             ok_(context.active('retired') is True)
@@ -112,6 +115,7 @@ class TestIntegration(unittest.TestCase):
 
         with self.inputs(self.manager, self.jeff) as context:
             ok_(context.active('can drink') is True)
+            ok_(context.active('can drink in europe') is True)
             ok_(context.active('can vote') is True)
             ok_(context.active('SF resident') is True)
             ok_(context.active('teenager') is False)
@@ -121,6 +125,7 @@ class TestIntegration(unittest.TestCase):
 
         with self.inputs(self.manager, self.frank) as context:
             ok_(context.active('can drink') is False)
+            ok_(context.active('can drink in europe') is True)
             ok_(context.active('can vote') is False)
             ok_(context.active('teenager') is False)
             ok_(context.active('10 percent') is True)
@@ -129,12 +134,14 @@ class TestIntegration(unittest.TestCase):
 
         with self.inputs(self.manager, self.larry, self.jeff) as context:
             ok_(context.active('can drink') is True)
+            ok_(context.active('can drink in europe') is True)
             ok_(context.active('SF resident') is True)
             ok_(context.active('teenager') is False)
             ok_(context.active('10 percent') is False)
 
         with self.inputs(self.manager, self.frank, self.jeff) as context:
             ok_(context.active('can drink') is True)
+            ok_(context.active('can drink in europe') is True)
             ok_(context.active('SF resident') is True)
             ok_(context.active('teenager') is False)
             ok_(context.active('10 percent') is True)
@@ -142,10 +149,12 @@ class TestIntegration(unittest.TestCase):
     def test_switches_can_concent_top_parent_switch(self):
         with self.inputs(self.manager, self.jeff) as context:
             ok_(context.active('can drink') is True)
+            ok_(context.active('can drink in europe') is True)
             ok_(context.active('SF resident') is True)
             ok_(context.active('can drink:wine') is True)
         with self.inputs(self.manager, self.timmy) as context:
             ok_(context.active('can drink') is False)
+            ok_(context.active('can drink in europe') is True)
             ok_(context.active('SF resident') is True)
             ok_(context.active('can drink:wine') is False)
 

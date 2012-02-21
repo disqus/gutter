@@ -184,7 +184,7 @@ class TestCondition(unittest.TestCase):
 class SwitchWithConditions(object):
 
     def setUp(self):
-        self.switch = Switch('with conditions')
+        self.switch = Switch('with conditions', state=Switch.states.SELECTIVE)
         self.switch.conditions.append(self.pessamistic_condition)
         self.switch.conditions.append(self.pessamistic_condition)
 
@@ -230,6 +230,17 @@ class DefaultConditionsTest(SwitchWithConditions, unittest.TestCase):
         ok_(self.switch.enabled_for('input') is False)
         self.switch.conditions[0].return_value = True
         ok_(self.switch.enabled_for('input') is True)
+
+    def test_is_true_when_state_is_enabled_and_(self):
+        eq_(self.switch.enabled_for('input'), False)
+        self.switch.state = Switch.states.GLOBAL
+        eq_(self.switch.enabled_for('input'), True)
+
+    def test_is_false_when_state_is_disabled(self):
+        self.switch.conditions[0].return_value = True
+        eq_(self.switch.enabled_for('input'), True)
+        self.switch.state = Switch.states.DISABLED
+        eq_(self.switch.enabled_for('input'), False)
 
 
 class CompoundedConditionsTest(SwitchWithConditions, unittest.TestCase):

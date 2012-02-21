@@ -105,7 +105,15 @@ Switches are constructed with only one required argument, a ``name``::
 
     switch = Switch('my cool feature')
 
-Normally only one Condition needs be true for the Switch to be enabled for a particular input, but of ``switch.componded`` is set to True, then **all** of the switches conditions need to be true in order to be enabled::
+Switches can be in 3 core states: ``GLOBAL``, ``DISABLED`` and ``SELECTIVE``.  In the ``GLOBAL`` state, the Switch is enabled for every input no matter what.  ``DISABLED`` Switches are not enabled for any input, no matter what.  ``SELECTIVE`` Switches enabled based on their conditions.
+
+Swiches can either be constructed in a certain state or the property can be changed later::
+
+    switch = Switch('new feature', state=Switch.states.DISABLED)
+    another_switch = Switch('new feature')
+    another_switch.state = Switch.states.DISABLED
+
+When in the ``SELECTIVE`` state, normally only one Condition needs be true for the Switch to be enabled for a particular input, but of ``switch.componded`` is set to True, then **all** of the switches conditions need to be true in order to be enabled::
 
     switch = Switch('require alll conditions', compounded=True)
 
@@ -131,6 +139,8 @@ For example::
     child = Switch('cool_new_feature:new_ui', concent=True)
 
 For example, because ``child`` was constructed with ``concent=True``, even if ``child`` is enabled for an Input, it will only return ``True`` if ``parent`` is also enbaled for that same input.
+
+**Note:** Even switches in a ``GLOBAL`` or ``DISABLED`` state (see "Switch" section above) still concent their parent before checking themselves.  That means that even if a particular switch is ``GLOBAL``, if it is concenting and its parent is not enabled for the input, the switch itself will return that it is not enabled for the input.
 
 Condition
 ~~~~~~~~~

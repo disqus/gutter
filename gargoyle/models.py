@@ -48,6 +48,10 @@ class Switch(object):
         """
         if self.concent and self.parent and not self.parent.enabled_for(inpt):
             return False
+        elif self.state is self.states.GLOBAL:
+            return True
+        elif self.state is self.states.DISABLED:
+            return False
 
         func = self.__enabled_func()
         return func(cond(inpt) for cond in self.conditions)
