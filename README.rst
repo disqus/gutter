@@ -83,11 +83,11 @@ The first step in your usage of gargoyle-client should be to define your Inputs 
 
 There are a few things going on here, so let's break down what they all mean.
 
-1. An Input object has some number methods defined which return Arguments.  These methods define the values you want to check Switch conditions against.  In the above example, we'll want to make some switches active based on the user's name, admin status and age.
-2. Methods must return an instance of an argument, a subclass of ``gargoyle.input.arguments.Base``.  At present there are 3 subclasses: ``Field`` for general values, ``Boolean`` for boolean values and ``String`` for string values.
-3. Arguments understand Switch conditions and their operators, and implement the correct magic methods to allow themselves to be appropriatly compared.
+1. An Input object has some number methods defined, which return the values you want to check Switch conditions against.  In the above example, we'll want to make some switches active based on the user's name, admin status and age.
+2. Methods must return an instance of an Argument object.  All arguments must subclass ``gargoyle.input.arguments.Base``.  At present there are 3 subclasses: ``Value`` for general values, ``Boolean`` for boolean values and ``String`` for string values.
+3. Argument objects understand Switch conditions and operators, and implement the correct magic methods which allow themselves to be appropriatly compared.
 
-By default, any callable public attribute of an Input considered an argument. Subclasses that which to change that behavior can implement their own implementation of the``arguments`` property.
+By default, any callable public attribute of an Input considered an argument. Subclasses that which to change that behavior must implement their own implementation of the``arguments`` property.
 
 Switches and Conditions
 ============================================
