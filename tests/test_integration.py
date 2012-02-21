@@ -6,6 +6,7 @@ from gargoyle.operators.identity import *
 from gargoyle.operators.misc import *
 from gargoyle.models import Switch, Condition, Manager
 from gargoyle.inputs.arguments import Value, Boolean, String
+from gargoyle import signals
 
 
 class User(object):
@@ -36,6 +37,11 @@ class TestIntegration(unittest.TestCase):
         self.setup_inputs()
         self.setup_conditions()
         self.setup_switches()
+
+    def tearDown(self):
+        signals.switch_registered.reset()
+        signals.switch_unregistered.reset()
+        signals.switch_updated.reset()
 
     def setup_inputs(self):
         self.jeff = User('jeff', 21)
@@ -152,3 +158,59 @@ class TestIntegration(unittest.TestCase):
 
             context.manager.autocreate = True
             ok_(context.active('can drink') is False)
+
+    class Callback(object):
+
+        register_calls = []
+        unregister_calls = []
+        update_calls = []
+
+        @classmethod
+        def switch_added(klass, switch):
+            klass.register_calls.append(switch)
+
+        @classmethod
+        def switch_removed(klass, switch):
+            klass.unregister_calls.append(switch)
+
+        @classmethod
+        def switch_updated(klass, switch):
+            klass.update_calls.append((switch, switch.changes))
+
+    def test_can_register_signals_and_get_notified(self):
+        signals.switch_registered.connect(self.Callback.switch_added)
+        signals.switch_unregistered.connect(self.Callback.switch_removed)
+        signals.switch_updated.connect(self.Callback.switch_updated)
+
+        eq_(self.Callback.register_calls, [])
+        eq_(self.Callback.unregister_calls, [])
+        eq_(self.Callback.update_calls, [])
+
+        switch = Switch('foo')
+
+        self.manager.register(switch)
+        eq_(self.Callback.register_calls, [switch])
+
+        self.manager.unregister(switch.name)
+        eq_(self.Callback.unregister_calls, [switch])
+
+        self.manager.register(switch)
+        eq_(self.Callback.register_calls, [switch, switch])
+
+        switch.name = 'a new name'
+        switch.state = Switch.states.GLOBAL
+        self.manager.update(switch)
+
+        change = self.Callback.update_calls[0]
+        eq_(change[0], switch)
+        changes = change[1]
+        eq_(changes['name'], dict(current='a new name', previous='foo'))
+        eq_(changes['state'], dict(current=Switch.states.GLOBAL, previous=Switch.states.DISABLED))
+
+        switch.name = 'from save() call'
+        switch.save()
+
+        change = self.Callback.update_calls[1]
+        eq_(change[0], switch)
+        changes = change[1]
+        eq_(changes['name'], dict(current='from save() call', previous='a new name'))

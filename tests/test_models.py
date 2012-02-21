@@ -342,8 +342,6 @@ class ActsLikeManager(object):
 
         eq_(parent.children, [child])
 
-        print self.manager.switches[0].children
-
         sibling = self.mock_and_register_switch('movies:jaws')
 
         eq_(parent.children, [child, sibling])

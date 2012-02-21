@@ -13,6 +13,9 @@ class Signal(object):
         for callback in self.__callbacks:
             callback(*args, **kwargs)
 
+    def reset(self):
+        self.__callbacks = []
+
 
 switch_registered = Signal()
 switch_unregistered = Signal()
