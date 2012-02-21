@@ -5,6 +5,16 @@ Gargoyle-Client
 
 Gargoyle-Client is feature swtich management library.  It allows users to create feature swtiches and setup conditions those switches will be enabled for.  Once configured, switches can then be checked against inputs (requestss, user objects, etc) to see if the switches are active.
 
+Table of Contents
+=================
+
+* Configuration_
+* Setup_
+* Inputs_
+* `Switches and Conditions`_
+* `Checking Switches as Active`_
+* Signals_
+
 Configuration
 =============
 
