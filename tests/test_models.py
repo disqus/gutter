@@ -143,7 +143,7 @@ class TestCondition(unittest.TestCase):
         an Input as the argument, the vaue that the condition's operator is
         asked if it applies to is calculated by calling the condition's own
         argument function as bound to the instance of the Input originally
-        passed in to the condition.
+        passed to the condition.
 
         By using the ReflectiveInput class, we can verify that it was called
         with expected arguments, which are returned in a tuple with an extra
@@ -165,6 +165,20 @@ class TestCondition(unittest.TestCase):
         eq_(condition(self.ReflectiveInput()), True)
         condition = Condition(self.ReflectiveInput.foo, self.operator, negative=True)
         eq_(condition(self.ReflectiveInput()), False)
+
+    def test_if_apply_explodes_it_returns_false(self):
+        self.operator.applies_to.side_effect = Exception
+        eq_(self.condition(self.ReflectiveInput()), False)
+
+    @mock.patch('gargoyle.signals.condition_apply_error')
+    def test_if_apply_explodes_it_signals_condition_apply_error(self, signal):
+        error = Exception('boom!')
+        inpt = self.ReflectiveInput()
+
+        self.operator.applies_to.side_effect = error
+        self.condition(inpt)
+
+        signal.call.assert_called_once_with(self.condition, inpt, error)
 
 
 class SwitchWithConditions(object):

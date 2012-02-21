@@ -219,7 +219,11 @@ The Manager is now setup and ready for its next set of inputs.
 Signals
 =======
 
-Gargoyle-client provides 3 signals related to Switch changes.  They are all avilable from the ``gargoyle.signals`` module:
+Gargoyle-client provides 4 total signals to connect to: 3 about changes to Switches, and 1 about errors applying Conditions.  They are all avilable from the ``gargoyle.signals`` module
+
+Switch Signals
+~~~~~~~~~~~~~~
+There are 3 signals related to Switch changes:
 
 1. ``switch_registered`` - Called when a new switch is registered with the Manager.
 2. ``switch_unregistered`` - Called when a switch is unregistered with the Manager.
@@ -251,3 +255,16 @@ The ``switch_updated`` signal can be connected to in order to be notified when a
 As you can see, when we changed the Switch's ``concent`` setting and ``name``, ``switch.changes`` reflects that in a dictionary of changed properties.  You can also simply ask the switch if anything has changed with the ``changed`` property.
 
 You can use these values inside your signal callback to make decisions based on what changed.  I.e., email out a diff of the changed values.
+
+Condition Application Error Signal
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When a Switch applies an Input object to its conditions, there is a good possibility that the Argument value may be some sort of unexpected value, and can cause an exception.  Whenever there is an exception raised during Condition checking itself against an Input, the Condition will catch that exception and return ``False``.
+
+While catching all exceptions is generally bad form and hides error, most of the time you do not want to fail an application request just because there was an error checking a Switch Condition, *especially* if there was an error during checking a Condition for which a user would not have applied in the first place.
+
+That said, you would still probably want to know if there was an error checking a Condition.  To acomplish this, gargoyle-client provides a ``condition_apply_error`` signal which is called when there was an error applying a Condition.  The signal is called with an instance of the condition, the Input which caused the error and the instance of the Exception class itself::
+
+    signals.condition_apply_error.call(condition, inpt, error)
+
+In your connected callback, you can do whatever you would like: log the error, report the exeception, etc.

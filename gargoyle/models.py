@@ -137,7 +137,12 @@ class Condition(object):
 
     def __apply(self, inpt):
         value = self.argument(inpt)
-        return self.operator.applies_to(value)
+
+        try:
+            return self.operator.applies_to(value)
+        except Exception as error:
+            signals.condition_apply_error.call(self, inpt, error)
+            return False
 
     def __is_same_class_as_argument(self, inpt):
         return inpt.__class__ is self.argument.im_class

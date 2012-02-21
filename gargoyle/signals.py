@@ -17,3 +17,4 @@ class Signal(object):
 switch_registered = Signal()
 switch_unregistered = Signal()
 switch_updated = Signal()
+condition_apply_error = Signal()
