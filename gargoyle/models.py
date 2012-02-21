@@ -184,7 +184,9 @@ class Manager(object):
         self.__switches[switch.name] = switch
         signal.call(switch)
 
-    def unregister(self, name):
+    def unregister(self, switch_or_name):
+        name = getattr(switch_or_name, 'name', switch_or_name)
+
         for child in self.__switches[name].children:
             self.unregister(child.name)
 

@@ -351,6 +351,13 @@ class ActsLikeManager(object):
         self.manager.unregister(switch.name)
         ok_(switch not in self.manager.switches)
 
+    def test_unregister_can_remove_if_given_switch_instance(self):
+        switch = self.mock_and_register_switch('foo')
+        ok_(switch in self.manager.switches)
+
+        self.manager.unregister(switch)
+        ok_(switch not in self.manager.switches)
+
     def test_register_does_not_set_parent_by_default(self):
         switch = self.mock_and_register_switch('foo')
         eq_(switch.parent, None)
