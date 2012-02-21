@@ -89,7 +89,7 @@ There are a few things going on here, so let's break down what they all mean.
 
 By default, any callable public attribute of an Input considered an argument. Subclasses that which to change that behavior can implement their own implementation of the``arguments`` property.
 
-Swithes and Conditions
+Switches and Conditions
 ============================================
 
 The next phase of gargoyle-client usage is defining switches and conditions:
@@ -203,9 +203,10 @@ Since this is a common pattern (retrieve switch from the manager, then update it
 Unregistering a Switch
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Existing switches may be removed from the Manager by calling ``unregister()`` with the switch name::
+Existing switches may be removed from the Manager by calling ``unregister()`` with the switch name or switch instance::
 
     gargoyle.unregister('deprecated switch')
+    gargoyle.unregister(a_switch_instance)
 
 **Note:** If the switch is part of a heirarchy and has children switches (see the "Heriarchical Switches" section abobve), all decendent switches (children, grandchildren, etc) will also be unregistered and deleted.
 
@@ -254,7 +255,7 @@ To use a signal, simply call the signal's ``connect()`` method and pass in a cal
     from gargoyle.signals import switch_updated
 
     def log_switch_update(switch):
-        log "Switch %s updated" % switch.name
+        Syslog.log("Switch %s updated" % switch.name)
 
     switch_updated.connect(log_switch_updated)
 
