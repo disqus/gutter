@@ -134,6 +134,7 @@ class TestSwitchChanges(unittest.TestCase):
             concent=self.changes_dict(True, False)
         ))
 
+
 class TestCondition(unittest.TestCase):
 
     class ReflectiveInput(object):
