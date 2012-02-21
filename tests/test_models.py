@@ -25,6 +25,18 @@ class TestSwitch(unittest.TestCase):
     def test_switch_constructs_with_a_name_attribute(self):
         eq_(Switch('foo').name, 'foo')
 
+    def test_switch_has_label(self):
+        ok_(Switch('foo').label is None)
+
+    def test_switch_can_be_constructed_with_a_label(self):
+        eq_(Switch('foo', label='A label').label, 'A label')
+
+    def test_switch_has_description(self):
+        ok_(Switch('foo').description is None)
+
+    def test_switch_can_be_constructed_with_a_description(self):
+        eq_(Switch('foo', description='A description').description, 'A description')
+
     def test_switch_strs_the_name_argument(self):
         eq_(Switch(name=12345).name, '12345')
 

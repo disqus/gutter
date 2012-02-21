@@ -29,8 +29,11 @@ class Switch(object):
         GLOBAL = 3
 
     def __init__(self, name, state=states.DISABLED, compounded=False,
-                 parent=None, concent=True, manager=None):
+                 parent=None, concent=True, manager=None, label=None,
+                 description=None):
         self.name = str(name)
+        self.label = label
+        self.description = description
         self.state = state
         self.conditions = list()
         self.compounded = compounded
