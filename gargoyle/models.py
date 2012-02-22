@@ -202,13 +202,13 @@ class Manager(threading.local):
     def flush(self):
         self.inputs = []
 
-    def active(self, name, *extra_inputs, **kwargs):
+    def active(self, name, *inputs, **kwargs):
         switch = self.__get_switch_by_name(name)
 
         if not kwargs.get('exclusive', False):
-            extra_inputs = chain(self.inputs, extra_inputs)
+            inputs = chain(self.inputs, inputs)
 
-        return any(switch.enabled_for(inpt) for inpt in extra_inputs)
+        return any(switch.enabled_for(inpt) for inpt in inputs)
 
     def update(self, switch):
         self.register(switch, signal=signals.switch_updated)
