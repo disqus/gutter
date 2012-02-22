@@ -7,6 +7,7 @@ gargoyle.models
 """
 
 from gargoyle import signals
+from itertools import chain
 
 
 class Switch(object):
@@ -200,9 +201,13 @@ class Manager(object):
     def flush(self):
         self.inputs = []
 
-    def active(self, name):
+    def active(self, name, *extra_inputs, **kwargs):
         switch = self.__get_switch_by_name(name)
-        return any(switch.enabled_for(inpt) for inpt in self.inputs)
+
+        if not kwargs.get('exclusive', False):
+            extra_inputs = chain(self.inputs, extra_inputs)
+
+        return any(switch.enabled_for(inpt) for inpt in extra_inputs)
 
     def update(self, switch):
         self.register(switch, signal=signals.switch_updated)

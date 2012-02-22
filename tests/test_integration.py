@@ -99,8 +99,8 @@ class TestIntegration(unittest.TestCase):
         def __enter__(self):
             return self
 
-        def active(self, name):
-            return self.manager.active(name)
+        def active(self, *args, **kwargs):
+            return self.manager.active(*args, **kwargs)
 
         def __exit__(self, type, value, traceback):
             self.manager.flush()
@@ -134,6 +134,15 @@ class TestIntegration(unittest.TestCase):
             ok_(context.active('teenager') is False)
             ok_(context.active('10 percent') is True)
             ok_(context.active('Upper 50 percent') is False)
+
+    def test_can_use_extra_inputs_to_active(self):
+        with self.inputs(self.manager, self.frank) as context:
+            ok_(context.active('can drink') is False)
+            ok_(context.active('can drink', self.larry) is True)
+
+        with self.inputs(self.manager, self.larry) as context:
+            ok_(context.active('can drink') is True)
+            ok_(context.active('can drink', self.frank, exclusive=True) is False)
 
     def test_switches_with_multiple_inputs(self):
 

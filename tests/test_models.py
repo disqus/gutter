@@ -457,6 +457,13 @@ class EmptyManagerInstanceTest(ActsLikeManager, unittest.TestCase):
         self.manager.flush()
         ok_(len(self.manager.inputs) is 0)
 
+    def test_can_pass_extra_inputs_to_check_enabled_for_on(self):
+        switch = self.mock_and_register_switch('foo')
+        additional_input = mock.Mock()
+        self.manager.active('foo', additional_input)
+        switch.enabled_for.assert_called_once_with(additional_input)
+
+
 
 class ManagerWithInputTest(ActsLikeManager, unittest.TestCase):
 
@@ -489,3 +496,14 @@ class ManagerWithInputTest(ActsLikeManager, unittest.TestCase):
         eq_(self.manager.active('junk'), False)
         ok_(len(self.manager.switches) is 1)
         ok_(self.manager.switches[0].state, Switch.states.DISABLED)
+
+    def test_active_extra_inputs_considered_in_check_with_global_inputs(self):
+        switch = self.build_and_register_switch('foo')
+        self.manager.active('foo', 'input 3')
+        calls = [mock.call(c) for c in ('input 1', 'input 2', 'input 3')]
+        switch.enabled_for.assert_has_calls(calls)
+
+    def test_active_with_extra_inputs_only_considers_extra_when_only_kw_arg_is_used(self):
+        switch = self.build_and_register_switch('foo')
+        self.manager.active('foo', 'input 3', exclusive=True)
+        switch.enabled_for.assert_called_once_with('input 3')

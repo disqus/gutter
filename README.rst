@@ -220,22 +220,39 @@ As stated before, switches are checked against **instances** of Input objects.  
 
 A common use case of gargoyle-client is to use it during the processing of a web request.  During execution of code, different code paths are taken depending on if certain swtiches are active or not.  Iften times there are mutliple switches in existence at any one time and they all need to be checked against multiple arguments.  To handle this use case, Gargoyle provides a high level API.
 
-To use the high level API, first add input instances to the Manager instance like so::
-
-    gargoyle.input(input1, input2, inputn)
-
-Then, to check if a Switch is active, simply call ``gargoyle.active()`` with the Switch name::
+To check if a Switch is active, simply call ``gargoyle.active()`` with the Switch name::
 
     gargoyle.active('my cool feature')
     >>> True
 
-You may check as many switches as you like, and they all will be checked against the switches you registered with the ``input()`` call.
+The switch is checked against some number of Input objects.  Inputs can be added to the ``active()`` check one of two ways: locally, passed in to the ``active()`` call or globally, configured ahead of time.
 
-Once you're doing using these inputs, perhaps at the end of a request, you should call the Manager's ``flush()`` method to remove all the inputs::
+To check agianst local inputs, ``active()`` takes any number of Input objects after the switch name to check the switch against.  In this example, the switch named ``'my cool feature'`` is checked against input objects ``input1`` and ``input2``.
+
+    gargoyle.active('my cool feature', input1, input2)
+    >>> True
+
+If you have global Input objects you would like to use for every check, you can set them up by calling the Manager's ``input()`` method:
+
+    gargoyle.input(input1, input2)
+
+Now, ``input1`` and ``input2`` are checked against for every ``active`` call.  For exampele, assuming ``input1`` and ``input2`` are configured as above, this ``active()`` call would check if the Switch was enabled for inputs ``input1``, ``input2`` and ``input3`` in that order.
+
+    gargoyle.active('my cool feature', input3)
+
+Once you're doing using global inputs, perhaps at the end of a request, you should call the Manager's ``flush()`` method to remove all the inputs::
 
     gargoyle.flush()
 
-The Manager is now setup and ready for its next set of inputs.
+The Manager is now setup and ready for its next set of inputs global.
+
+When calling ``active()`` with a local Input, you can skip checking the Switch against the global inputs and **only** check against your locally passed in Inputs by passing ``exclusive=True`` as a keyword argument::
+
+    gargoyle.input(input1, input2)
+    gargoyle.active('my cool feature', input3, exclusive=True)
+
+In the above example, since ``exclusive=True`` is passed, the switch named ``'my cool feature'`` is only checked against ``input3``, and not ``input1`` or ``input2``.  The ``exclusive=True`` argument is not persistant, so the next call to ``active()`` without ``exclusive=True`` will use the globally defined inputs.
+
 
 Signals
 =======
