@@ -294,7 +294,7 @@ class ManagerTest(unittest.TestCase):
         eq_(Manager(storage=dict()).autocreate, False)
 
     def test_autocreate_can_be_passed_to_init(self):
-        eq_(Manager(storage=dict(), autocreate=True).autocreate, False)
+        eq_(Manager(storage=dict(), autocreate=True).autocreate, True)
 
     def test_register_adds_switch_to_storge_keyed_by_its_name(self):
         self.manager.register(switch)

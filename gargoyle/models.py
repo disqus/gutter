@@ -169,7 +169,7 @@ class Manager(threading.local):
 
     def __init__(self, storage, autocreate=False, switch_class=Switch):
         self.__switches = storage
-        self.autocreate = False
+        self.autocreate = autocreate
         self.inputs = []
         self.switch_class = switch_class
 
