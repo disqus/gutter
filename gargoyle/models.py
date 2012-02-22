@@ -8,6 +8,7 @@ gargoyle.models
 
 from gargoyle import signals
 from itertools import chain
+import threading
 
 
 class Switch(object):
@@ -156,7 +157,7 @@ class Condition(object):
         return inpt.__class__ is self.argument.im_class
 
 
-class Manager(object):
+class Manager(threading.local):
     """
     The Manager holds all state for Gargoyle.  It knows what Switches have been
     registered, and also what Input objects are currently being applied.  It

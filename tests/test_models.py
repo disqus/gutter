@@ -1,4 +1,5 @@
 import unittest
+import threading
 from nose.tools import *
 from gargoyle.models import Switch, Manager, Condition
 from modeldict.dict import MemoryDict
@@ -321,6 +322,15 @@ class ManagerTest(unittest.TestCase):
     def test_manager_resets_switch_dirty_tracking(self):
         self.manager.update(self.switch)
         self.switch.reset.assert_called_once_with()
+
+    def test_manager_properties_not_shared_between_threads(self):
+        manager = Manager(storage=self.mockstorage, autocreate=True)
+
+        def change_autocreate_to_false():
+            manager.autocreate = False
+
+        threading.Thread(target=change_autocreate_to_false).start()
+        eq_(manager.autocreate, True)
 
 
 class ActsLikeManager(object):

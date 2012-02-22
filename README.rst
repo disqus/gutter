@@ -53,11 +53,6 @@ Once the Manager's storage engine has been condfigured, you can import gargoyle-
 
 At this point the ``gargoyle`` object is an instance of the Manager class, which holds all methods to register switches and check if they are active.
 
-Thread Safety
-~~~~~~~~~~~~~
-
-Please note that a globally shared Manager instance through the singleton is **not** thread safe.  If your usage of gargoyle-client requires multiple threads to use gargoyle-client, please instantiate a separate Manager instance per thread.
-
 Inputs
 ======
 
