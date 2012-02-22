@@ -187,22 +187,49 @@ class TestMoreThanOrEqualToOperator(BaseOperator, unittest.TestCase):
         ok_(MoreThanOrEqualTo(56.7).applies_to(56.71))
 
 
-class TestPercentCondition(BaseOperator, unittest.TestCase):
+class PercentTest(BaseOperator):
 
     class FalseyObject(object):
 
         def __nonzero__(self):
             return False
 
+    def successful_runs(self, number):
+        runs = map(self.operator.applies_to, range(1000))
+        return len(filter(bool, runs))
+
+    def test_returns_false_if_argument_is_falsey(self):
+        eq_(self.operator.applies_to(False), False)
+        eq_(self.operator.applies_to(self.FalseyObject()), False)
+
+
+class PercentageTest(PercentTest, unittest.TestCase):
+
     @property
     def operator(self):
         return Percent(50)
 
     def test_applies_to_percentage_passed_in(self):
-        runs = map(self.operator.applies_to, range(1000))
-        successful_runs = filter(bool, runs)
-        self.assertAlmostEqual(len(successful_runs), 500, delta=50)
+        self.assertAlmostEqual(self.successful_runs(1000), 500, delta=50)
 
-    def test_returns_false_if_argument_is_falsey(self):
-        eq_(self.operator.applies_to(False), False)
-        eq_(self.operator.applies_to(self.FalseyObject()), False)
+
+class PercentRangeTest(PercentTest, unittest.TestCase):
+
+    @property
+    def operator(self):
+        return self.range_of(10, 20)
+
+    def range_of(self, lower, upper):
+        return PercentRange(lower, upper)
+
+    def test_can_apply_to_a_certain_percent_range(self):
+        self.assertAlmostEqual(self.successful_runs(1000), 100, delta=20)
+
+    def test_percentage_range_does_not_overlap(self):
+        bottom_10 = self.range_of(0, 10)
+        next_10 = self.range_of(10, 20)
+
+        for i in range(1, 500):
+            bottom = bottom_10.applies_to(i)
+            next = next_10.applies_to(i)
+            assert_false(bottom is next is True)

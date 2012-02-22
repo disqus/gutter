@@ -63,6 +63,7 @@ class TestIntegration(unittest.TestCase):
 
         self.three_quarters_married = Condition(User.married, Percent(75))
         self.ten_percent = Condition(User.name, Percent(10))
+        self.upper_50_percent = Condition(User.name, PercentRange(50, 100))
 
     def setup_switches(self):
         self.add_switch('can drink', condition=self.age_21_plus)
@@ -76,6 +77,7 @@ class TestIntegration(unittest.TestCase):
         self.add_switch('teen and in SF', self.age_between_13_and_18,
                         self.has_location, compounded=True)
         self.add_switch('10 percent', self.ten_percent)
+        self.add_switch('Upper 50 percent', self.upper_50_percent)
 
     def add_switch(self, name, condition=None, *conditions, **kwargs):
         switch = Switch(name, compounded=kwargs.get('compounded', False))
@@ -112,6 +114,7 @@ class TestIntegration(unittest.TestCase):
             ok_(context.active('SF resident') is False)
             ok_(context.active('retired') is True)
             ok_(context.active('10 percent') is False)
+            ok_(context.active('Upper 50 percent') is True)
 
         with self.inputs(self.manager, self.jeff) as context:
             ok_(context.active('can drink') is True)
@@ -122,6 +125,7 @@ class TestIntegration(unittest.TestCase):
             ok_(context.active('teen or in SF') is True)
             ok_(context.active('teen and in SF') is False)
             ok_(context.active('10 percent') is False)
+            ok_(context.active('Upper 50 percent') is True)
 
         with self.inputs(self.manager, self.frank) as context:
             ok_(context.active('can drink') is False)
@@ -129,6 +133,7 @@ class TestIntegration(unittest.TestCase):
             ok_(context.active('can vote') is False)
             ok_(context.active('teenager') is False)
             ok_(context.active('10 percent') is True)
+            ok_(context.active('Upper 50 percent') is False)
 
     def test_switches_with_multiple_inputs(self):
 
@@ -138,6 +143,7 @@ class TestIntegration(unittest.TestCase):
             ok_(context.active('SF resident') is True)
             ok_(context.active('teenager') is False)
             ok_(context.active('10 percent') is False)
+            ok_(context.active('Upper 50 percent') is True)
 
         with self.inputs(self.manager, self.frank, self.jeff) as context:
             ok_(context.active('can drink') is True)
@@ -145,6 +151,7 @@ class TestIntegration(unittest.TestCase):
             ok_(context.active('SF resident') is True)
             ok_(context.active('teenager') is False)
             ok_(context.active('10 percent') is True)
+            ok_(context.active('Upper 50 percent') is True)
 
     def test_switches_can_concent_top_parent_switch(self):
         with self.inputs(self.manager, self.jeff) as context:
