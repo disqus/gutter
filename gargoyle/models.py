@@ -47,9 +47,21 @@ class Switch(object):
 
     def enabled_for(self, inpt):
         """
-        Checks to see if this switch is enabled for the provided input, which is
-        an instance of the ``Input`` class.  The switch is enabled if any of its
-        conditions are met by the input.
+        Checks to see if this switch is enabled for the provided input.
+
+        If necessary, the switch first concents with its parent and return false
+        if the swich is conceting and the parent is not enabled for hte
+        ``inpt``.  If the parent is enabled (or the switch is not concenting)
+        then the switch state is checked to see if it is ``GLOBAL`` or
+        ``DISABLED``.  If it is not, then the switch is ``SELECTIVE`` and each
+        condition is checked.
+
+        If ``compounded``, all switch conditions must be ``True`` for the swtich
+        to be enabled.  Otherwise, *any* condition needs to be ``True`` for the
+        switch to be enabled.
+
+        Keyword Arguments:
+        inpt -- An instance of the ``Input`` class.
         """
         if self.concent and self.parent and not self.parent.enabled_for(inpt):
             return False
@@ -62,26 +74,50 @@ class Switch(object):
         return func(cond(inpt) for cond in self.conditions)
 
     def save(self):
+        """
+        Saves this switch in its manager (if present).
+
+        Equivilant to ``self.manager.update(self)``.  If no ``manager`` is set
+        for the switch, this method is a no-op.
+        """
         if self.manager:
             self.manager.update(self)
 
     @property
     def changes(self):
+        """
+        A dicitonary of changes to the switch since last saved.
+
+        Switch changes are a dict in the following format::
+
+            {
+                'property_name': {'previous': value, 'current': value}
+            }
+
+        For example, if the switch name change from ``foo`` to ``bar``, the
+        changes dict will be in the following structure::
+
+            {
+                'name': {'previous': 'foo', 'current': 'bar'}
+            }
+        """
         return dict(list(self.__changes()))
 
     @property
     def changed(self):
+        """
+        Boolean of if the switch has changed since last saved.
+        """
         return bool(list(self.__changes()))
 
     def reset(self):
-        self.__init_vars = vars(self).copy()
+        """
+        Resets switch change tracking.
 
-    def init_vars_items(self):
-        for key, value in self.__init_vars.items():
-            if key is '_Switch__init_vars':
-                continue
-            else:
-                yield ()
+        No switch properties are alterted, only the tracking of what has changed
+        is reset.
+        """
+        self.__init_vars = vars(self).copy()
 
     def __enabled_func(self):
         if self.compounded:
@@ -134,6 +170,18 @@ class Condition(object):
         self.negative = negative
 
     def __call__(self, inpt):
+        """
+        Returns if the condition applies to the ``inpt``.
+
+        If the class ``inpt`` is an instance of is not the same class as the
+        condition's own ``argument``, then ``False`` is returned.  Otherwise,
+        ``argument`` is called, with ``inpt`` as the instance and the value is
+        compared to the ``operator`` and the Value is returned.  If the
+        condition is ``negative``, then then ``not`` the value is returned.
+
+        Keyword Arguments:
+        inpt -- An instance of the ``Input`` class.
+        """
         if not self.__is_same_class_as_argument(inpt):
             return False
 
@@ -175,10 +223,22 @@ class Manager(threading.local):
 
     @property
     def switches(self):
+        """
+        List of all switches currently registered.
+        """
         return self.__switches.values()
 
     def switch(self, name):
-            return self.__get_switch_by_name(name)
+        """
+        Returns the switch with the provided ``name``.
+
+        If ``autocreate`` is set to ``True`` and no switch with that name
+        exists, a ``DISABLED`` switch will be with that name.
+
+        Keyword Arguments:
+        name -- A name of a switch.
+        """
+        return self.__get_switch_by_name(name)
 
     def register(self, switch, signal=signals.switch_registered):
         self.__sync_parental_relationships(switch)
