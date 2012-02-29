@@ -99,6 +99,24 @@ class TestSwitch(unittest.TestCase):
     def test_switch_can_be_constructed_witn_a_manager(self):
         eq_(Switch('foo', manager='manager').manager, 'manager')
 
+    @mock.patch('gargoyle.signals.switch_checked')
+    def test_switch_enabed_for_calls_switch_checked_signal(self, signal):
+        switch = Switch('foo', manager='manager')
+        switch.enabled_for(True)
+        signal.call.assert_called_once_with(switch)
+
+    @mock.patch('gargoyle.signals.switch_active')
+    def test_switch_enabed_for_calls_switch_active_signal_when_enabled(self, signal):
+        switch = Switch('foo', manager='manager', state=Switch.states.GLOBAL)
+        ok_(switch.enabled_for('causing input'))
+        signal.call.assert_called_once_with(switch, 'causing input')
+
+    @mock.patch('gargoyle.signals.switch_active')
+    def test_switch_enabed_for_skips_switch_active_signal_when_not_enabled(self, signal):
+        switch = Switch('foo', manager='manager', state=Switch.states.DISABLED)
+        eq_(switch.enabled_for('causing input'), False)
+        eq_(signal.call.called, False)
+
 
 class TestSwitchChanges(unittest.TestCase):
 
@@ -245,7 +263,7 @@ class DefaultConditionsTest(SwitchWithConditions, unittest.TestCase):
         self.switch.conditions[0].return_value = True
         ok_(self.switch.enabled_for('input') is True)
 
-    def test_is_true_when_state_is_enabled_and_(self):
+    def test_is_true_when_state_is_global(self):
         eq_(self.switch.enabled_for('input'), False)
         self.switch.state = Switch.states.GLOBAL
         eq_(self.switch.enabled_for('input'), True)

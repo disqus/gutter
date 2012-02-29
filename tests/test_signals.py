@@ -57,3 +57,17 @@ class TestConditionApplyErrorCallback(ActsLikeSignal, unittest.TestCase):
     @fixture
     def signal(self):
         return signals.switch_updated
+
+
+class TestSwitchChecked(ActsLikeSignal, unittest.TestCase):
+
+    @fixture
+    def signal(self):
+        return signals.switch_checked
+
+
+class TestSwitchActive(ActsLikeSignal, unittest.TestCase):
+
+    @fixture
+    def signal(self):
+        return signals.switch_active

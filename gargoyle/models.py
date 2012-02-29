@@ -8,6 +8,7 @@ gargoyle.models
 
 from gargoyle import signals
 from itertools import chain
+from functools import partial
 import threading
 
 
@@ -63,15 +64,18 @@ class Switch(object):
         Keyword Arguments:
         inpt -- An instance of the ``Input`` class.
         """
-        if self.concent and self.parent and not self.parent.enabled_for(inpt):
-            return False
-        elif self.state is self.states.GLOBAL:
-            return True
-        elif self.state is self.states.DISABLED:
-            return False
+        signals.switch_checked.call(self)
+        signal_decorated = partial(self.__signal_and_return, inpt)
 
-        func = self.__enabled_func()
-        return func(cond(inpt) for cond in self.conditions)
+        if self.concent and self.parent and not self.parent.enabled_for(inpt):
+            return signal_decorated(False)
+        elif self.state is self.states.GLOBAL:
+            return signal_decorated(True)
+        elif self.state is self.states.DISABLED:
+            return signal_decorated(False)
+
+        result = self.__enabled_func(cond(inpt) for cond in self.conditions)
+        return signal_decorated(result)
 
     def save(self):
         """
@@ -119,6 +123,7 @@ class Switch(object):
         """
         self.__init_vars = vars(self).copy()
 
+    @property
     def __enabled_func(self):
         if self.compounded:
             return all
@@ -131,6 +136,12 @@ class Switch(object):
                 continue
             elif key not in vars(self) or getattr(self, key) != value:
                 yield (key, dict(previous=value, current=getattr(self, key)))
+
+    def __signal_and_return(self, input, is_enabled):
+        if is_enabled:
+            signals.switch_active.call(self, input)
+
+        return is_enabled
 
 
 class Condition(object):
