@@ -431,11 +431,6 @@ class ActsLikeManager(object):
         ok_(child2 not in self.manager.switches)
         ok_(great_uncle in self.manager.switches)
 
-    @mock.patch('gargoyle.signals.switch_registered')
-    def test_register_signals_switch_registered_with_switch(self, signal):
-        switch = self.mock_and_register_switch('foo')
-        signal.call.assert_called_once_with(switch)
-
     @mock.patch('gargoyle.signals.switch_unregistered')
     def test_register_signals_switch_registered_with_switch(self, signal):
         switch = self.mock_and_register_switch('foo')
@@ -472,7 +467,6 @@ class EmptyManagerInstanceTest(ActsLikeManager, unittest.TestCase):
         additional_input = mock.Mock()
         self.manager.active('foo', additional_input)
         switch.enabled_for.assert_called_once_with(additional_input)
-
 
 
 class ManagerWithInputTest(ActsLikeManager, unittest.TestCase):
