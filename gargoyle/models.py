@@ -137,9 +137,9 @@ class Switch(object):
             elif key not in vars(self) or getattr(self, key) != value:
                 yield (key, dict(previous=value, current=getattr(self, key)))
 
-    def __signal_and_return(self, input, is_enabled):
+    def __signal_and_return(self, inpt, is_enabled):
         if is_enabled:
-            signals.switch_active.call(self, input)
+            signals.switch_active.call(self, inpt)
 
         return is_enabled
 
