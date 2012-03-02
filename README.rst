@@ -35,7 +35,7 @@ Configuring Settings
 
 To change the ``storage`` and ``autocreate`` settings, simply import the settings module and set the appropriate variables::
 
-    from gargoyle.settings import manager
+    from gargoyle.client.settings import manager
     from modeldict.dict import RedisDict
     from redis import RedisClient
 
@@ -49,7 +49,7 @@ Setup
 
 Once the Manager's storage engine has been condfigured, you can import gargoyle-client's singleton Manager object, which is your main interface with gargoyle-client::
 
-    from gargoyle.singleton import gargoyle
+    from gargoyle.client.singleton import gargoyle
 
 At this point the ``gargoyle`` object is an instance of the Manager class, which holds all methods to register switches and check if they are active.
 
@@ -58,8 +58,8 @@ Inputs
 
 The first step in your usage of gargoyle-client should be to define your Inputs that you will be checking switches against.  An Input is an object which understands the business objects in your system (users, requests, etc) and knows how to validate and transform them into arguments for Switch conditions.  For instance, you may have a User object that has properties like ``is_admin``, ``date_joined``, etc.  You would create an UserInput object, which wraps a User instance, and provides API methods, which return Argument objects::
 
-    from gargoyle.input import Base
-    from gargoyle.input.arguments import String, Boolean, Value
+    from gargoyle.client.input import Base
+    from gargoyle.client.input.arguments import String, Boolean, Value
 
     class UserInput(Base):
 
@@ -96,7 +96,7 @@ Switches encapsulate the concept of an item that is either 'on' or 'off' dependi
 
 Switches are constructed with only one required argument, a ``name``::
 
-    from gargoyle.models import Switch
+    from gargoyle.client.models import Switch
 
     switch = Switch('my cool feature')
 
@@ -146,7 +146,7 @@ An ``argument`` is an Argument object returned from an Input class, like the one
 
 For an example, let's say you wanted a Condition that check if the user's age is > 65 years old?  You would construct a Condition that way::
 
-    from gargoyle.operators.comparable import MoreThan
+    from gargoyle.client.operators.comparable import MoreThan
 
     condition = Condition(argument=UserInput.age, operator=MoreThan(65))
 
@@ -156,7 +156,7 @@ Please see the ``gargoyle.operators`` for a list of available conditions.
 
 Conditions can also be constructed with a ``negative`` argument, which negates the condition.  For example::
 
-    from gargoyle.operators.comparable import MoreThan
+    from gargoyle.client.operators.comparable import MoreThan
 
     condition = Condition(argument=UserInput.age, operator=MoreThan(65), negative=True)
 
@@ -264,7 +264,7 @@ There are 3 signals related to Switch changes:
 
 To use a signal, simply call the signal's ``connect()`` method and pass in a callable object.  When the signal is fired, it will call your callable with the switch that is being register/unregistered/updated.  I.e.::
 
-    from gargoyle.signals import switch_updated
+    from gargoyle.client.signals import switch_updated
 
     def log_switch_update(switch):
         Syslog.log("Switch %s updated" % switch.name)
@@ -276,7 +276,7 @@ Understanding Switch Changes
 
 The ``switch_updated`` signal can be connected to in order to be notified when a switch has been changed.  To know *what* changed in the switch, you can consult its ``changes`` property::
 
-    >>> from gargoyle.models import Switch
+    >>> from gargoyle.client.models import Switch
     >>> switch = Switch('test')
     >>> switch.concent
     True

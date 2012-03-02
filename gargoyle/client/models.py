@@ -6,7 +6,7 @@ gargoyle.models
 :license: Apache License 2.0, see LICENSE for more details.
 """
 
-from gargoyle import signals
+from gargoyle.client import signals
 from itertools import chain
 from functools import partial
 import threading

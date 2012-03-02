@@ -1,9 +1,9 @@
 import unittest
 import threading
 from nose.tools import *
-from gargoyle.models import Switch, Manager, Condition
+from gargoyle.client.models import Switch, Manager, Condition
 from modeldict.dict import MemoryDict
-from gargoyle import signals
+from gargoyle.client import signals
 from tests import fixture
 import mock
 
@@ -99,19 +99,19 @@ class TestSwitch(unittest.TestCase):
     def test_switch_can_be_constructed_witn_a_manager(self):
         eq_(Switch('foo', manager='manager').manager, 'manager')
 
-    @mock.patch('gargoyle.signals.switch_checked')
+    @mock.patch('gargoyle.client.signals.switch_checked')
     def test_switch_enabed_for_calls_switch_checked_signal(self, signal):
         switch = Switch('foo', manager='manager')
         switch.enabled_for(True)
         signal.call.assert_called_once_with(switch)
 
-    @mock.patch('gargoyle.signals.switch_active')
+    @mock.patch('gargoyle.client.signals.switch_active')
     def test_switch_enabed_for_calls_switch_active_signal_when_enabled(self, signal):
         switch = Switch('foo', manager='manager', state=Switch.states.GLOBAL)
         ok_(switch.enabled_for('causing input'))
         signal.call.assert_called_once_with(switch, 'causing input')
 
-    @mock.patch('gargoyle.signals.switch_active')
+    @mock.patch('gargoyle.client.signals.switch_active')
     def test_switch_enabed_for_skips_switch_active_signal_when_not_enabled(self, signal):
         switch = Switch('foo', manager='manager', state=Switch.states.DISABLED)
         eq_(switch.enabled_for('causing input'), False)
@@ -202,7 +202,7 @@ class TestCondition(unittest.TestCase):
         self.operator.applies_to.side_effect = Exception
         eq_(self.condition(self.ReflectiveInput()), False)
 
-    @mock.patch('gargoyle.signals.condition_apply_error')
+    @mock.patch('gargoyle.client.signals.condition_apply_error')
     def test_if_apply_explodes_it_signals_condition_apply_error(self, signal):
         error = Exception('boom!')
         inpt = self.ReflectiveInput()
@@ -332,7 +332,7 @@ class ManagerTest(unittest.TestCase):
         self.manager.update(self.switch)
         self.manager.register.assert_called_once_with(self.switch, signal=signals.switch_updated)
 
-    @mock.patch('gargoyle.signals.switch_updated')
+    @mock.patch('gargoyle.client.signals.switch_updated')
     def test_update_calls_the_switch_updateed_signal(self, signal):
         self.manager.update(self.switch)
         signal.call.assert_call_once()
@@ -449,7 +449,7 @@ class ActsLikeManager(object):
         ok_(child2 not in self.manager.switches)
         ok_(great_uncle in self.manager.switches)
 
-    @mock.patch('gargoyle.signals.switch_unregistered')
+    @mock.patch('gargoyle.client.signals.switch_unregistered')
     def test_register_signals_switch_registered_with_switch(self, signal):
         switch = self.mock_and_register_switch('foo')
         self.manager.unregister(switch.name)

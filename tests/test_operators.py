@@ -1,8 +1,8 @@
 import unittest
 from nose.tools import *
-from gargoyle.operators.comparable import *
-from gargoyle.operators.identity import *
-from gargoyle.operators.misc import *
+from gargoyle.client.operators.comparable import *
+from gargoyle.client.operators.identity import *
+from gargoyle.client.operators.misc import *
 
 
 class BaseOperator(object):

@@ -1,12 +1,12 @@
 import unittest
 from nose.tools import *
 
-from gargoyle.operators.comparable import *
-from gargoyle.operators.identity import *
-from gargoyle.operators.misc import *
-from gargoyle.models import Switch, Condition, Manager
-from gargoyle.inputs.arguments import Value, Boolean, String
-from gargoyle import signals
+from gargoyle.client.operators.comparable import *
+from gargoyle.client.operators.identity import *
+from gargoyle.client.operators.misc import *
+from gargoyle.client.models import Switch, Condition, Manager
+from gargoyle.client.inputs.arguments import Value, Boolean, String
+from gargoyle.client import signals
 
 
 class User(object):

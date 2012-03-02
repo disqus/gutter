@@ -1,8 +1,8 @@
 import unittest
 from nose.tools import *
 from tests import fixture
-from gargoyle.wsgi import EnabledSwitchesMiddleware, signals
-from gargoyle.singleton import gargoyle as singleton_gargoyle
+from gargoyle.client.wsgi import EnabledSwitchesMiddleware, signals
+from gargoyle.client.singleton import gargoyle as singleton_gargoyle
 import mock
 import threading
 import time

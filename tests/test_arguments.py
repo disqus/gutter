@@ -1,7 +1,7 @@
 import unittest
 from mock import MagicMock, Mock
 from nose.tools import *
-from gargoyle.inputs.arguments import *
+from gargoyle.client.inputs.arguments import *
 
 
 class BaseArgument(object):

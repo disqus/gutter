@@ -1,4 +1,4 @@
-from gargoyle import signals
+from gargoyle.client import signals
 from werkzeug.local import Local
 
 
@@ -17,7 +17,7 @@ class EnabledSwitchesMiddleware(object):
         self.application = application
 
         if not gargoyle:
-            from gargoyle.singleton import gargoyle
+            from gargoyle.client.singleton import gargoyle
 
         self.gargoyle = gargoyle
         self.locals = Local()

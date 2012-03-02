@@ -1,6 +1,6 @@
 import unittest
 from nose.tools import *
-from gargoyle import signals
+from gargoyle.client import signals
 from tests import fixture
 import mock
 

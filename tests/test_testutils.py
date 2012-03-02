@@ -1,9 +1,9 @@
 import unittest
 from nose.tools import *
 
-from gargoyle.singleton import gargoyle
-from gargoyle.testutils import switches
-from gargoyle.models import Switch
+from gargoyle.client.singleton import gargoyle
+from gargoyle.client.testutils import switches
+from gargoyle.client.models import Switch
 
 
 class TestDecorator(unittest.TestCase):

@@ -7,7 +7,7 @@ gargoyle.testutils
 """
 
 from functools import wraps
-from gargoyle.singleton import gargoyle
+from gargoyle.client.singleton import gargoyle
 
 
 class SwitchContextManager(object):
