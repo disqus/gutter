@@ -26,11 +26,10 @@ class EnabledSwitchesMiddleware(object):
         signals.switch_active.connect(self.locals.on_switch_active)
 
     def __signal_handler(self, switch, inpt):
-        self.locals.switches_active.append(switch)
+        self.locals.switches_active.append(switch.name)
 
     def __call__(self, environ, start_response):
         self.locals.switches_active = []
-
         body, status, headers = self.__call_app(environ, start_response)
         self.__add_gargoyle_header_to(headers)
 
@@ -38,7 +37,6 @@ class EnabledSwitchesMiddleware(object):
         return body
 
     def __add_gargoyle_header_to(self, headers):
-        # TODO: switch slugs instead of the human name
         active_switches = ','.join(self.locals.switches_active)
         headers.append(('X-Gargoyle-Switch', 'active=%s' % active_switches))
 

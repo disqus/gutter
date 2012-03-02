@@ -5,11 +5,14 @@ from gargoyle.wsgi import EnabledSwitchesMiddleware, signals
 from gargoyle.singleton import gargoyle as singleton_gargoyle
 import mock
 import threading
+import time
 
 from werkzeug.test import Client
 
 
 class BaseTest(unittest.TestCase):
+
+    SWITCH_HEADER_NAME = 'X-Gargoyle-Switch'
 
     @fixture
     def switch_active_signal_args(self):
@@ -35,6 +38,11 @@ class BaseTest(unittest.TestCase):
 
     def start_response(self, status, headers):
         return mock.Mock()
+
+    def build_switch(self, name='switch'):
+        switch = mock.Mock(name='switch-%s' % name)
+        switch.name = name
+        return switch
 
 
 class TestInterface(BaseTest):
@@ -69,8 +77,8 @@ class TestSwitchTracking(BaseTest):
     @fixture
     def switch_active_signal_args(self):
         return [
-            ('switch', 'inpt'),
-            ('switch2', 'inpt2')
+            (self.build_switch('switch'), 'inpt'),
+            (self.build_switch('switch2'), 'inpt2')
         ]
 
     def call_and_get_headers(self):
@@ -80,10 +88,10 @@ class TestSwitchTracking(BaseTest):
 
     @fixture
     def gargoyle_header(self):
-        return self.call_and_get_headers()['X-Gargoyle-Switch']
+        return self.call_and_get_headers()[self.SWITCH_HEADER_NAME]
 
     def test_calls_start_response_with_x_gargoyle_switches_header(self):
-        ok_('X-Gargoyle-Switch' in self.call_and_get_headers())
+        ok_(self.SWITCH_HEADER_NAME in self.call_and_get_headers())
 
     def test_adds_comma_separated_list_of_switches_to_x_gargoyle_header(self):
         eq_(self.gargoyle_header, 'active=switch,switch2')
@@ -105,17 +113,29 @@ class TestSwitchTracking(BaseTest):
 
         ok_(len(global_called) is 4)
 
+class ConcurrencyTest(BaseTest):
+
+    def signaling_wsgi_app(self, environ, start_response):
+        time.sleep(0.01)
+        return super(ConcurrencyTest, self).signaling_wsgi_app(environ, start_response)
+
+    @fixture
+    def switch_active_signal_args(self):
+        return [
+            (self.build_switch('switch_a'), 'inpt'),
+            (self.build_switch('switch_b'), 'inpt2')
+        ]
+
     def test_signals_do_not_leak_between_threads(self):
         switch_headers = []
-        app = EnabledSwitchesMiddleware(self.signaling_wsgi_app)
 
         def run_app():
-            body, status, headers = Client(app).get('/')
-            switch_headers.append(dict(headers)['X-Gargoyle-Switch'])
+            body, status, headers = self.client.get('/')
+            switch_headers.append(dict(headers)[self.SWITCH_HEADER_NAME])
 
         threads = [threading.Thread(target=run_app) for i in range(2)]
 
         [thread.start() for thread in threads]
         [thread.join() for thread in threads]
 
-        eq_(switch_headers, ['active=switch,switch2', 'active=switch,switch2'])
+        eq_(switch_headers, ['active=switch_a,switch_b', 'active=switch_a,switch_b'])
