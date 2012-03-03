@@ -323,6 +323,13 @@ class ManagerTest(unittest.TestCase):
         self.manager.register(self.switch)
         ok_(self.switch.manager is self.manager)
 
+    def test_register_adds_switch_to_storage_before_setting_manager(self):
+        def assert_no_manger(key, switch):
+            ok_(switch.manager is None)
+
+        self.mockstorage.__setitem__.side_effect = assert_no_manger
+        self.manager.register(self.switch)
+
     def test_uses_switches_from_storage_on_itialization(self):
         m = Manager(storage=dict(existing='switch', another='valuable switch'))
         self.assertItemsEqual(m.switches, ['switch', 'valuable switch'])
@@ -356,11 +363,15 @@ class ActsLikeManager(object):
     def setUp(self):
         self.manager = Manager(storage=MemoryDict())
 
-    def mock_and_register_switch(self, name, parent=None):
+    def new_switch(self, name, parent=None):
         switch = mock.Mock(name=name)
         switch.name = name
         switch.parent = parent
         switch.children = []
+        return switch
+
+    def mock_and_register_switch(self, name, parent=None):
+        switch = self.new_switch(name, parent)
         self.manager.register(switch)
         return switch
 
@@ -424,6 +435,12 @@ class ActsLikeManager(object):
     def test_switch_returns_switch_from_manager_with_name(self):
         switch = self.mock_and_register_switch('foo')
         eq_(switch, self.manager.switch('foo'))
+
+    def test_switch_returns_switch_with_manager_assigned(self):
+        switch = self.new_switch('foo')
+        self.manager.register(switch)
+        switch.manager = None
+        eq_(self.manager, self.manager.switch('foo').manager)
 
     def test_swich_raises_valueerror_if_no_switch_by_name(self):
         assert_raises(ValueError, self.manager.switch, 'junk')

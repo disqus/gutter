@@ -253,8 +253,8 @@ class Manager(threading.local):
 
     def register(self, switch, signal=signals.switch_registered):
         self.__sync_parental_relationships(switch)
-        switch.manager = self
         self.__switches[switch.name] = switch
+        switch.manager = self
         signal.call(switch)
 
     def unregister(self, switch_or_name):
@@ -315,9 +315,12 @@ class Manager(threading.local):
 
     def __get_switch_by_name(self, name):
         try:
-            return self.__switches[name]
+            switch = self.__switches[name]
         except KeyError:
             if not self.autocreate:
                 raise ValueError("No switch named '%s' registered" % name)
 
-            return self.__create_and_register_disabled_switch(name)
+            switch = self.__create_and_register_disabled_switch(name)
+
+        switch.manager = self
+        return switch
