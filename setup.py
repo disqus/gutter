@@ -23,6 +23,7 @@ setup(
     install_requires=[
         'modeldict>=0.1.0'
     ],
+    namespace_packages=['gargoyle'],
     license='Apache License 2.0',
     tests_require=tests_require,
     extras_require={'test': tests_require},
