@@ -327,6 +327,7 @@ class ManagerTest(unittest.TestCase):
         def assert_no_manger(key, switch):
             ok_(switch.manager is None)
 
+        self.switch.manager = True
         self.mockstorage.__setitem__.side_effect = assert_no_manger
         self.manager.register(self.switch)
 

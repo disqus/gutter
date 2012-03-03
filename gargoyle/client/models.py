@@ -252,6 +252,7 @@ class Manager(threading.local):
         return self.__get_switch_by_name(name)
 
     def register(self, switch, signal=signals.switch_registered):
+        switch.manager = None
         self.__sync_parental_relationships(switch)
         self.__switches[switch.name] = switch
         switch.manager = self
