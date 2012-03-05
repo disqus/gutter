@@ -74,7 +74,7 @@ class Switch(object):
         elif self.state is self.states.DISABLED:
             return signal_decorated(False)
 
-        result = self.__enabled_func(cond(inpt) for cond in self.conditions)
+        result = self.__enabled_func(cond.call(inpt) for cond in self.conditions)
         return signal_decorated(result)
 
     def save(self):
@@ -180,7 +180,7 @@ class Condition(object):
         self.operator = operator
         self.negative = negative
 
-    def __call__(self, inpt):
+    def call(self, inpt):
         """
         Returns if the condition applies to the ``inpt``.
 

@@ -167,7 +167,7 @@ class TestCondition(unittest.TestCase):
         self.condition = Condition(self.ReflectiveInput.foo, self.operator)
 
     def test_returns_false_if_input_is_not_same_class_as_argument_class(self):
-        eq_(self.condition(object()), False)
+        eq_(self.condition.call(object()), False)
 
     def test_returns_results_from_calling_operator_with_argument_value(self):
         """
@@ -184,23 +184,23 @@ class TestCondition(unittest.TestCase):
         """
 
         input_instance = self.ReflectiveInput()
-        self.condition(input_instance)
+        self.condition.call(input_instance)
         self.operator.applies_to.assert_called_once_with((42, input_instance))
 
     def test_condition_can_be_negated(self):
-        eq_(self.condition(self.ReflectiveInput()), True)
+        eq_(self.condition.call(self.ReflectiveInput()), True)
         self.condition.negative = True
-        eq_(self.condition(self.ReflectiveInput()), False)
+        eq_(self.condition.call(self.ReflectiveInput()), False)
 
     def test_can_be_negated_via_init_argument(self):
         condition = Condition(self.ReflectiveInput.foo, self.operator)
-        eq_(condition(self.ReflectiveInput()), True)
+        eq_(condition.call(self.ReflectiveInput()), True)
         condition = Condition(self.ReflectiveInput.foo, self.operator, negative=True)
-        eq_(condition(self.ReflectiveInput()), False)
+        eq_(condition.call(self.ReflectiveInput()), False)
 
     def test_if_apply_explodes_it_returns_false(self):
         self.operator.applies_to.side_effect = Exception
-        eq_(self.condition(self.ReflectiveInput()), False)
+        eq_(self.condition.call(self.ReflectiveInput()), False)
 
     @mock.patch('gargoyle.client.signals.condition_apply_error')
     def test_if_apply_explodes_it_signals_condition_apply_error(self, signal):
@@ -208,7 +208,7 @@ class TestCondition(unittest.TestCase):
         inpt = self.ReflectiveInput()
 
         self.operator.applies_to.side_effect = error
-        self.condition(inpt)
+        self.condition.call(inpt)
 
         signal.call.assert_called_once_with(self.condition, inpt, error)
 
@@ -223,7 +223,7 @@ class SwitchWithConditions(object):
     @property
     def pessamistic_condition(self):
         mck = mock.MagicMock()
-        mck.return_value = False
+        mck.call.return_value = False
         return mck
 
 
@@ -238,7 +238,7 @@ class ConcentTest(SwitchWithConditions, unittest.TestCase):
 
     def make_all_conditions(self, val):
         for cond in self.switch.conditions:
-            cond.return_value = val
+            cond.call.return_value = val
 
     def test_with_concent_only_enabled_if_parent_is_too(self):
         eq_(self.switch.parent.enabled_for('input'), False)
@@ -260,7 +260,7 @@ class DefaultConditionsTest(SwitchWithConditions, unittest.TestCase):
 
     def test_enabled_for_is_true_if_any_conditions_are_true(self):
         ok_(self.switch.enabled_for('input') is False)
-        self.switch.conditions[0].return_value = True
+        self.switch.conditions[0].call.return_value = True
         ok_(self.switch.enabled_for('input') is True)
 
     def test_is_true_when_state_is_global(self):
@@ -269,7 +269,7 @@ class DefaultConditionsTest(SwitchWithConditions, unittest.TestCase):
         eq_(self.switch.enabled_for('input'), True)
 
     def test_is_false_when_state_is_disabled(self):
-        self.switch.conditions[0].return_value = True
+        self.switch.conditions[0].call.return_value = True
         eq_(self.switch.enabled_for('input'), True)
         self.switch.state = Switch.states.DISABLED
         eq_(self.switch.enabled_for('input'), False)
@@ -283,9 +283,9 @@ class CompoundedConditionsTest(SwitchWithConditions, unittest.TestCase):
 
     def test_enabled_if_all_conditions_are_true(self):
         ok_(self.switch.enabled_for('input') is False)
-        self.switch.conditions[0].return_value = True
+        self.switch.conditions[0].call.return_value = True
         ok_(self.switch.enabled_for('input') is False)
-        self.switch.conditions[1].return_value = True
+        self.switch.conditions[1].call.return_value = True
         ok_(self.switch.enabled_for('input') is True)
 
 
