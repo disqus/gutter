@@ -6,6 +6,9 @@ class Truthy(object):
     def applies_to(self, argument):
         return bool(argument)
 
+    def __str__(self):
+        return 'is truthy'
+
 
 class Enum(object):
 
@@ -17,3 +20,7 @@ class Enum(object):
 
     def applies_to(self, argument):
         return argument in self.possibilities
+
+    def __str__(self):
+        quoted = ['"%s"' % str(p) for p in self.possibilities]
+        return "is in %s" % ", ".join(quoted)

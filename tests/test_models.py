@@ -11,6 +11,10 @@ import mock
 switch = Switch('test')
 
 
+def unbound_method():
+    pass
+
+
 class TestSwitch(unittest.TestCase):
 
     def test_switch_has_state_constants(self):
@@ -166,6 +170,14 @@ class TestCondition(unittest.TestCase):
         self.operator.applies_to.return_value = True
         self.condition = Condition(self.ReflectiveInput.foo, self.operator)
 
+    def test_raises_valueerror_if_argument_not_callable(self):
+        assert_raises_regexp(ValueError, 'must be callable', Condition,
+                             True, self.operator)
+
+    def test_raises_value_error_if_argument_has_arity_of_0(self):
+        assert_raises_regexp(ValueError, 'must have an arity > 0', Condition,
+                             unbound_method, self.operator)
+
     def test_returns_false_if_input_is_not_same_class_as_argument_class(self):
         eq_(self.condition.call(object()), False)
 
@@ -211,6 +223,13 @@ class TestCondition(unittest.TestCase):
         self.condition.call(inpt)
 
         signal.call.assert_called_once_with(self.condition, inpt, error)
+
+    def test_str_returns_argument_and_str_of_operator(self):
+        def local_str(self):
+            return 'str of operator'
+
+        self.operator.__str__ = local_str
+        eq_(str(self.condition), "ReflectiveInput.foo str of operator")
 
 
 class SwitchWithConditions(object):

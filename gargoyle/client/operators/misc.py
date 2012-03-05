@@ -13,6 +13,9 @@ class PercentRange(object):
         else:
             return self.lower <= (hash(argument) % 100) < self.upper
 
+    def __str__(self):
+        return 'is in %s - %s%% of values' % (self.lower, self.upper)
+
 
 class Percent(PercentRange):
 
@@ -22,3 +25,6 @@ class Percent(PercentRange):
     def __init__(self, percentage):
         self.upper = float(percentage)
         self.lower = 0.0
+
+    def __str__(self):
+        return 'is in %s%% of values' % self.upper

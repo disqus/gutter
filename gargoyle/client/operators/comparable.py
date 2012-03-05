@@ -9,6 +9,9 @@ class Equals(object):
     def applies_to(self, argument):
         return argument == self.value
 
+    def __str__(self):
+        return 'is equal to "%s"' % self.value
+
 
 class Between(object):
 
@@ -22,6 +25,9 @@ class Between(object):
     def applies_to(self, argument):
         return argument > self.lower and argument < self.higher
 
+    def __str__(self):
+        return 'is between "%s" and "%s"' % (self.lower, self.higher)
+
 
 class LessThan(object):
 
@@ -34,6 +40,9 @@ class LessThan(object):
     def applies_to(self, argument):
         return argument < self.upper_limit
 
+    def __str__(self):
+        return 'is less than "%s"' % self.upper_limit
+
 
 class LessThanOrEqualTo(LessThan):
 
@@ -42,6 +51,9 @@ class LessThanOrEqualTo(LessThan):
 
     def applies_to(self, argument):
         return argument <= self.upper_limit
+
+    def __str__(self):
+        return 'is less than or equal to "%s"' % self.upper_limit
 
 
 class MoreThan(object):
@@ -55,6 +67,9 @@ class MoreThan(object):
     def applies_to(self, argument):
         return argument > self.lower_limit
 
+    def __str__(self):
+        return 'is more than "%s"' % self.lower_limit
+
 
 class MoreThanOrEqualTo(MoreThan):
 
@@ -63,3 +78,6 @@ class MoreThanOrEqualTo(MoreThan):
 
     def applies_to(self, argument):
         return argument >= self.lower_limit
+
+    def __str__(self):
+        return 'is more than or equal to "%s"' % self.lower_limit

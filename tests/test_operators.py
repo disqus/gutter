@@ -16,6 +16,10 @@ class BaseOperator(object):
     def test_has_applies_to_method(self):
         ok_(self.operator.applies_to)
 
+    @property
+    def str(self):
+        return str(self.operator)
+
 
 class TestTruthyCondition(BaseOperator, unittest.TestCase):
 
@@ -28,6 +32,9 @@ class TestTruthyCondition(BaseOperator, unittest.TestCase):
         ok_(self.operator.applies_to("hello"))
         ok_(self.operator.applies_to(False) is False)
         ok_(self.operator.applies_to("") is False)
+
+    def test_str_says_is_truthy(self):
+        eq_(self.str, 'is truthy')
 
 
 class TestEqualsCondition(BaseOperator, unittest.TestCase):
@@ -46,6 +53,9 @@ class TestEqualsCondition(BaseOperator, unittest.TestCase):
     def test_raises_error_if_not_provided_value(self):
         Equals()
 
+    def test_str_says_is_equal_to_condition(self):
+        eq_(self.str, 'is equal to "Fred"')
+
 
 class TestEnumCondition(BaseOperator, unittest.TestCase):
 
@@ -59,6 +69,9 @@ class TestEnumCondition(BaseOperator, unittest.TestCase):
         ok_(self.operator.applies_to(9) is False)
         ok_(self.operator.applies_to("1") is False)
         ok_(self.operator.applies_to(True) is False)
+
+    def test_str_says_it_is_in_possibilities(self):
+        eq_(self.str, 'is in "False", "2.0", "3"')
 
 
 class TestBetweenCondition(BaseOperator, unittest.TestCase):
@@ -84,6 +97,9 @@ class TestBetweenCondition(BaseOperator, unittest.TestCase):
         ok_(animals.applies_to('whale') is False)
         ok_(animals.applies_to('zebra') is False)
 
+    def test_str_says_between_values(self):
+        eq_(self.str, 'is between "1" and "100"')
+
 
 class TestLessThanCondition(BaseOperator, unittest.TestCase):
 
@@ -108,6 +124,9 @@ class TestLessThanCondition(BaseOperator, unittest.TestCase):
         ok_(LessThan(56.7).applies_to(56.0))
         ok_(LessThan(56.7).applies_to(57.0) is False)
         ok_(LessThan(56.7).applies_to(56.71) is False)
+
+    def test_str_says_less_than_value(self):
+        eq_(self.str, 'is less than "500"')
 
 
 class TestLessThanOrEqualToOperator(BaseOperator):
@@ -136,6 +155,9 @@ class TestLessThanOrEqualToOperator(BaseOperator):
         ok_(LessThanOrEqualTo(56.7).applies_to(57.0) is False)
         ok_(LessThanOrEqualTo(56.7).applies_to(56.71) is False)
 
+    def test_str_says_less_than_or_equal_to_value(self):
+        eq_(self.str, 'is less than or equal to "500"')
+
 
 class TestMoreThanOperator(BaseOperator, unittest.TestCase):
 
@@ -159,6 +181,9 @@ class TestMoreThanOperator(BaseOperator, unittest.TestCase):
         ok_(MoreThan(56.7).applies_to(57.0))
         ok_(MoreThan(56.7).applies_to(56.0) is False)
         ok_(MoreThan(56.7).applies_to(56.71))
+
+    def test_str_says_more_than_value(self):
+        eq_(self.str, 'is more than "10"')
 
 
 class TestMoreThanOrEqualToOperator(BaseOperator, unittest.TestCase):
@@ -186,6 +211,9 @@ class TestMoreThanOrEqualToOperator(BaseOperator, unittest.TestCase):
         ok_(MoreThanOrEqualTo(56.7).applies_to(56.0) is False)
         ok_(MoreThanOrEqualTo(56.7).applies_to(56.71))
 
+    def test_str_says_more_than_or_equal_to_value(self):
+        eq_(self.str, 'is more than or equal to "10"')
+
 
 class PercentTest(BaseOperator):
 
@@ -212,6 +240,9 @@ class PercentageTest(PercentTest, unittest.TestCase):
     def test_applies_to_percentage_passed_in(self):
         self.assertAlmostEqual(self.successful_runs(1000), 500, delta=50)
 
+    def test_str_says_applies_to_percentage_of_values(self):
+        eq_(self.str, 'is in 50.0% of values')
+
 
 class PercentRangeTest(PercentTest, unittest.TestCase):
 
@@ -233,3 +264,6 @@ class PercentRangeTest(PercentTest, unittest.TestCase):
             bottom = bottom_10.applies_to(i)
             next = next_10.applies_to(i)
             assert_false(bottom is next is True)
+
+    def test_str_says_applies_to_percentage_range_of_values(self):
+        eq_(self.str, 'is in 10.0 - 20.0% of values')

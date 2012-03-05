@@ -10,6 +10,7 @@ from gargoyle.client import signals
 from itertools import chain
 from functools import partial
 import threading
+import inspect
 
 
 class Switch(object):
@@ -176,6 +177,14 @@ class Condition(object):
     """
 
     def __init__(self, argument, operator, negative=False):
+        if not callable(argument):
+            raise ValueError('argument must be callable')
+
+        (args, varargs, keywords, defaults) = inspect.getargspec(argument)
+
+        if not len(args) > 0:
+            raise ValueError('argument must have an arity > 0')
+
         self.argument = argument
         self.operator = operator
         self.negative = negative
@@ -202,6 +211,18 @@ class Condition(object):
             application = not application
 
         return application
+
+    @property
+    def argument_string(self):
+        parts = [self.argument.__name__]
+
+        if hasattr(self.argument, 'im_class'):
+            parts.insert(0, self.argument.im_class.__name__)
+
+        return '.'.join(map(str, parts))
+
+    def __str__(self):
+        return "%s %s" % (self.argument_string, self.operator)
 
     def __apply(self, inpt):
         value = self.argument(inpt)
