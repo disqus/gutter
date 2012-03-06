@@ -270,12 +270,13 @@ class Manager(threading.local):
 
     key_separator = ':'
 
-    def __init__(self, storage, autocreate=False, switch_class=Switch):
+    def __init__(self, storage, autocreate=False, switch_class=Switch,
+                 operators=[], inputs=[]):
         self.__switches = storage
         self.autocreate = autocreate
-        self.inputs = []
+        self.inputs = inputs
         self.input_classes = []
-        self.operators = []
+        self.operators = operators
         self.switch_class = switch_class
 
     @property

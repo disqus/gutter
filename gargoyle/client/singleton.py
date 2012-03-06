@@ -1,5 +1,7 @@
-from gargoyle.client.settings import manager
+from gargoyle.client import settings
 from gargoyle.client.models import Manager
 
-gargoyle = Manager(storage=manager.storage_engine,
-                   autocreate=manager.autocreate)
+gargoyle = Manager(storage=settings.manager.storage_engine,
+                   autocreate=settings.manager.autocreate,
+                   operators=settings.manager.operators,
+                   inputs=settings.manager.inputs)

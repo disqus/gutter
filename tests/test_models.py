@@ -396,10 +396,22 @@ class ManagerTest(unittest.TestCase):
         self.manager.operators.append(1)
         eq_(self.manager.operators, [1])
 
+    def test_can_be_constructed_with_operators(self):
+        eq_(
+            Manager(storage=self.mockstorage, operators=[2]).operators,
+            [2]
+        )
+
     def test_has_input_classes_that_can_be_appended(self):
         eq_(self.manager.input_classes, [])
         self.manager.input_classes.append(self.__class__)
         eq_(self.manager.input_classes, [self.__class__])
+
+    def test_can_be_constructed_with_inputs(self):
+        eq_(
+            Manager(storage=self.mockstorage, inputs=[3]).inputs,
+            [3]
+        )
 
 
 class ActsLikeManager(object):
