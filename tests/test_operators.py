@@ -10,8 +10,8 @@ class BaseOperator(object):
     def test_has_label(self):
         ok_(self.operator.label)
 
-    def test_has_description(self):
-        ok_(self.operator.description)
+    def test_has_preposition(self):
+        ok_(self.operator.preposition)
 
     def test_has_applies_to_method(self):
         ok_(self.operator.applies_to)

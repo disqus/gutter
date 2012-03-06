@@ -1,7 +1,8 @@
 class Equals(object):
 
     label = 'equals'
-    description = 'Applies of the candidate equals the specified values.'
+    group = 'comparable'
+    preposition = 'equals'
 
     def __init__(self, value):
         self.value = value
@@ -16,7 +17,8 @@ class Equals(object):
 class Between(object):
 
     label = 'between'
-    description = 'Applies if argument is between the upper and lower bounds'
+    group = 'comparable'
+    preposition = 'is between'
 
     def __init__(self, lower, higher):
         self.lower = lower
@@ -32,7 +34,8 @@ class Between(object):
 class LessThan(object):
 
     label = 'before'
-    description = 'Applies if argument is before value'
+    group = 'comparable'
+    preposition = 'is less than'
 
     def __init__(self, upper_limit):
         self.upper_limit = upper_limit
@@ -47,7 +50,8 @@ class LessThan(object):
 class LessThanOrEqualTo(LessThan):
 
     label = 'less_than_or_equal_to'
-    descripion = 'Applies if argument is less than or equal to value'
+    group = 'comparable'
+    preposition = 'is less than or equal to'
 
     def applies_to(self, argument):
         return argument <= self.upper_limit
@@ -59,7 +63,8 @@ class LessThanOrEqualTo(LessThan):
 class MoreThan(object):
 
     label = 'more_than'
-    description = 'Applies if argument is more than value'
+    group = 'comparable'
+    preposition = 'is more than'
 
     def __init__(self, lower_limit):
         self.lower_limit = lower_limit
@@ -74,7 +79,8 @@ class MoreThan(object):
 class MoreThanOrEqualTo(MoreThan):
 
     label = 'more_than_or_equal_to'
-    description = 'Applies if argument is more than or equal to value'
+    group = 'comparable'
+    preposition = 'is more than or equal to'
 
     def applies_to(self, argument):
         return argument >= self.lower_limit

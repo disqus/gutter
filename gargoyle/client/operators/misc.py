@@ -1,7 +1,8 @@
 class PercentRange(object):
 
     label = 'percent_range'
-    description = 'Applies if argument hashes to within percent range'
+    group = 'misc'
+    preposition = 'is in the percentage range'
 
     def __init__(self, lower, upper):
         self.upper = float(upper)
@@ -20,7 +21,8 @@ class PercentRange(object):
 class Percent(PercentRange):
 
     label = 'percent'
-    description = 'Applies if argument hashes to <= percent value'
+    group = 'misc'
+    preposition = 'is within the percentage'
 
     def __init__(self, percentage):
         self.upper = float(percentage)

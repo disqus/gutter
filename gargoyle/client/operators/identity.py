@@ -1,7 +1,8 @@
 class Truthy(object):
 
     label = 'truthy'
-    description = 'Applies if the argument is truthy.'
+    group = 'identity'
+    preposition = 'is'
 
     def applies_to(self, argument):
         return bool(argument)
@@ -13,7 +14,8 @@ class Truthy(object):
 class Enum(object):
 
     label = 'enum'
-    description = 'Appies if argument is included in the specified values'
+    group = 'identity'
+    preposition = 'is in'
 
     def __init__(self, *possibilities):
         self.possibilities = possibilities

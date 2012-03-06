@@ -391,6 +391,9 @@ class ManagerTest(unittest.TestCase):
         threading.Thread(target=change_autocreate_to_false).start()
         eq_(manager.autocreate, True)
 
+    def test_has_operators_that_can_be_appended(self):
+        eq_(self.manager.operators, [])
+
 
 class ActsLikeManager(object):
 
