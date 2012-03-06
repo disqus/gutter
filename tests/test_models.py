@@ -15,6 +15,16 @@ def unbound_method():
     pass
 
 
+class Argument(object):
+    def bar(self):
+        pass
+
+
+class ReflectiveInput(object):
+    def foo(self):
+        return (42, self)
+
+
 class TestSwitch(unittest.TestCase):
 
     def test_switch_has_state_constants(self):
@@ -160,15 +170,10 @@ class TestSwitchChanges(unittest.TestCase):
 
 class TestCondition(unittest.TestCase):
 
-    class ReflectiveInput(object):
-
-        def foo(self):
-            return (42, self)
-
     def setUp(self):
         self.operator = mock.Mock(name='operator')
         self.operator.applies_to.return_value = True
-        self.condition = Condition(self.ReflectiveInput.foo, self.operator)
+        self.condition = Condition(ReflectiveInput.foo, self.operator)
 
     def test_raises_valueerror_if_argument_not_callable(self):
         assert_raises_regexp(ValueError, 'must be callable', Condition,
@@ -195,29 +200,29 @@ class TestCondition(unittest.TestCase):
         method.
         """
 
-        input_instance = self.ReflectiveInput()
+        input_instance = ReflectiveInput()
         self.condition.call(input_instance)
         self.operator.applies_to.assert_called_once_with((42, input_instance))
 
     def test_condition_can_be_negated(self):
-        eq_(self.condition.call(self.ReflectiveInput()), True)
+        eq_(self.condition.call(ReflectiveInput()), True)
         self.condition.negative = True
-        eq_(self.condition.call(self.ReflectiveInput()), False)
+        eq_(self.condition.call(ReflectiveInput()), False)
 
     def test_can_be_negated_via_init_argument(self):
-        condition = Condition(self.ReflectiveInput.foo, self.operator)
-        eq_(condition.call(self.ReflectiveInput()), True)
-        condition = Condition(self.ReflectiveInput.foo, self.operator, negative=True)
-        eq_(condition.call(self.ReflectiveInput()), False)
+        condition = Condition(ReflectiveInput.foo, self.operator)
+        eq_(condition.call(ReflectiveInput()), True)
+        condition = Condition(ReflectiveInput.foo, self.operator, negative=True)
+        eq_(condition.call(ReflectiveInput()), False)
 
     def test_if_apply_explodes_it_returns_false(self):
         self.operator.applies_to.side_effect = Exception
-        eq_(self.condition.call(self.ReflectiveInput()), False)
+        eq_(self.condition.call(ReflectiveInput()), False)
 
     @mock.patch('gargoyle.client.signals.condition_apply_error')
     def test_if_apply_explodes_it_signals_condition_apply_error(self, signal):
         error = Exception('boom!')
-        inpt = self.ReflectiveInput()
+        inpt = ReflectiveInput()
 
         self.operator.applies_to.side_effect = error
         self.condition.call(inpt)
@@ -230,6 +235,15 @@ class TestCondition(unittest.TestCase):
 
         self.operator.__str__ = local_str
         eq_(str(self.condition), "ReflectiveInput.foo str of operator")
+
+    def test_can_pickle_instancemethods(self):
+        import pickle
+        condition = Condition(Argument.bar, bool)
+
+        string = pickle.dumps(condition)
+        rebuilt = pickle.loads(string)
+        eq_(rebuilt.operator, condition.operator)
+        eq_(rebuilt.argument, condition.argument)
 
 
 class SwitchWithConditions(object):

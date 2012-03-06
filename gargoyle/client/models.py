@@ -125,6 +125,12 @@ class Switch(object):
         self.__init_vars = vars(self).copy()
 
     @property
+    def state_string(self):
+        state_vars = vars(self.states)
+        rev = dict(zip(state_vars.values(), state_vars))
+        return rev[self.state]
+
+    @property
     def __enabled_func(self):
         if self.compounded:
             return all
@@ -185,9 +191,27 @@ class Condition(object):
         if not len(args) > 0:
             raise ValueError('argument must have an arity > 0')
 
-        self.argument = argument
+        self.argument_dict = dict(
+            module=argument.__module__,
+            klass=argument.im_class.__name__,
+            func=argument.__func__.__name__
+        )
         self.operator = operator
         self.negative = negative
+
+    @property
+    def argument(self):
+        # These gymnasticas are neccessary because instancemethod types in
+        # Python are not pickleable, so we deconstruct the argumente on the way
+        # in, into its module, class and function, and then rebuild it here when
+        # first requested.  The result is cached for future requests.
+        if not getattr(self, '__argument', False):
+            d = self.argument_dict
+            mod = __import__(d['module'], fromlist=(d['klass'],))
+            klass = getattr(mod, d['klass'])
+            self.__argument = getattr(klass, d['func'])
+
+        return self.__argument
 
     def call(self, inpt):
         """
@@ -214,11 +238,7 @@ class Condition(object):
 
     @property
     def argument_string(self):
-        parts = [self.argument.__name__]
-
-        if hasattr(self.argument, 'im_class'):
-            parts.insert(0, self.argument.im_class.__name__)
-
+        parts = [self.argument_dict['klass'], self.argument_dict['func']]
         return '.'.join(map(str, parts))
 
     def __str__(self):
@@ -235,6 +255,9 @@ class Condition(object):
 
     def __is_same_class_as_argument(self, inpt):
         return inpt.__class__ is self.argument.im_class
+
+    def function(self):
+        pass
 
 
 class Manager(threading.local):
