@@ -393,6 +393,13 @@ class ManagerTest(unittest.TestCase):
 
     def test_has_operators_that_can_be_appended(self):
         eq_(self.manager.operators, [])
+        self.manager.operators.append(1)
+        eq_(self.manager.operators, [1])
+
+    def test_has_input_classes_that_can_be_appended(self):
+        eq_(self.manager.input_classes, [])
+        self.manager.input_classes.append(self.__class__)
+        eq_(self.manager.input_classes, [self.__class__])
 
 
 class ActsLikeManager(object):

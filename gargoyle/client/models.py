@@ -274,6 +274,8 @@ class Manager(threading.local):
         self.__switches = storage
         self.autocreate = autocreate
         self.inputs = []
+        self.input_classes = []
+        self.operators = []
         self.switch_class = switch_class
 
     @property
