@@ -9,4 +9,4 @@ class manager(object):
     autocreate = False
     inputs = []
     operators = (Equals, Between, LessThan, LessThanOrEqualTo, MoreThan,
-                 MoreThanOrEqualTo, Truthy, Enum, Percent, PercentRange)
+                 MoreThanOrEqualTo, Truthy, Percent, PercentRange)

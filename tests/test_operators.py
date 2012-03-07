@@ -70,23 +70,6 @@ class TestEqualsCondition(BaseOperator, unittest.TestCase):
         eq_(self.property_class.arguments, ('value',))
 
 
-class TestEnumCondition(BaseOperator, unittest.TestCase):
-
-    @property
-    def operator(self):
-        return Enum(False, 2.0, '3')
-
-    def test_applies_to_if_argument_in_enum(self):
-        ok_(self.operator.applies_to(False))
-        ok_(self.operator.applies_to(2.0))
-        ok_(self.operator.applies_to(9) is False)
-        ok_(self.operator.applies_to("1") is False)
-        ok_(self.operator.applies_to(True) is False)
-
-    def test_str_says_it_is_in_possibilities(self):
-        eq_(self.str, 'is in "False", "2.0", "3"')
-
-
 class TestBetweenCondition(BaseOperator, unittest.TestCase):
 
     @property

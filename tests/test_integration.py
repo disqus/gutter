@@ -59,8 +59,6 @@ class TestIntegration(unittest.TestCase):
         self.in_sf = Condition(User.location, Equals('San Francisco'))
         self.has_location = Condition(User.location, Truthy())
 
-        self.j_named = Condition(User.name, Enum('jeff', 'john', 'josh'))
-
         self.three_quarters_married = Condition(User.married, Percent(75))
         self.ten_percent = Condition(User.name, Percent(10))
         self.upper_50_percent = Condition(User.name, PercentRange(50, 100))
