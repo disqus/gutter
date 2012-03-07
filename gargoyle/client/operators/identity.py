@@ -1,4 +1,7 @@
-class Truthy(object):
+from gargoyle.client.operators import Base
+
+
+class Truthy(Base):
 
     label = 'truthy'
     group = 'identity'
@@ -11,7 +14,7 @@ class Truthy(object):
         return 'is truthy'
 
 
-class Enum(object):
+class Enum(Base):
 
     label = 'enum'
     group = 'identity'

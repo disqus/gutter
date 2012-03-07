@@ -1,4 +1,7 @@
-class PercentRange(object):
+from gargoyle.client.operators import Base
+
+
+class PercentRange(Base):
 
     label = 'percent_range'
     group = 'misc'

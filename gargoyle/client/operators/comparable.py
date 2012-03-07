@@ -1,4 +1,7 @@
-class Equals(object):
+from gargoyle.client.operators import Base
+
+
+class Equals(Base):
 
     label = 'equals'
     group = 'comparable'
@@ -14,7 +17,7 @@ class Equals(object):
         return 'is equal to "%s"' % self.value
 
 
-class Between(object):
+class Between(Base):
 
     label = 'between'
     group = 'comparable'
@@ -31,7 +34,7 @@ class Between(object):
         return 'is between "%s" and "%s"' % (self.lower, self.higher)
 
 
-class LessThan(object):
+class LessThan(Base):
 
     label = 'before'
     group = 'comparable'
@@ -60,7 +63,7 @@ class LessThanOrEqualTo(LessThan):
         return 'is less than or equal to "%s"' % self.upper_limit
 
 
-class MoreThan(object):
+class MoreThan(Base):
 
     label = 'more_than'
     group = 'comparable'
