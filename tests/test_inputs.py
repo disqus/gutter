@@ -28,7 +28,7 @@ class TestBaseInput(unittest.TestCase):
 
     def test_arguments_returns_all_public_callable_attributes(self):
         expected = [DumbInput.arg1, DumbInput.arg2]
-        self.assertItemsEqual(DumbInput().arguments, expected)
+        self.assertItemsEqual(DumbInput.arguments(), expected)
 
     def test_provides_supports_method(self):
         ok_(DumbInput.supports)

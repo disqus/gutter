@@ -13,14 +13,14 @@ class Base(object):
     implementation of ``arguments``.
     """
 
-    @property
-    def arguments(self):
-        return [getattr(self.__class__, attr) for attr
-                in self.callable_attributes()]
+    @classmethod
+    def arguments(cls):
+        return [getattr(cls, attr) for attr in cls.callable_attributes()]
 
-    def callable_attributes(self):
+    @classmethod
+    def callable_attributes(cls):
         return (
-            key for key, value in self.__class__.__dict__.items()
+            key for key, value in cls.__dict__.items()
             if callable(value) and not key.startswith('_')
         )
 
