@@ -222,16 +222,16 @@ To check if a Switch is active, simply call ``gargoyle.active()`` with the Switc
 
 The switch is checked against some number of Input objects.  Inputs can be added to the ``active()`` check one of two ways: locally, passed in to the ``active()`` call or globally, configured ahead of time.
 
-To check agianst local inputs, ``active()`` takes any number of Input objects after the switch name to check the switch against.  In this example, the switch named ``'my cool feature'`` is checked against input objects ``input1`` and ``input2``.
+To check agianst local inputs, ``active()`` takes any number of Input objects after the switch name to check the switch against.  In this example, the switch named ``'my cool feature'`` is checked against input objects ``input1`` and ``input2``::
 
     gargoyle.active('my cool feature', input1, input2)
     >>> True
 
-If you have global Input objects you would like to use for every check, you can set them up by calling the Manager's ``input()`` method:
+If you have global Input objects you would like to use for every check, you can set them up by calling the Manager's ``input()`` method::
 
     gargoyle.input(input1, input2)
 
-Now, ``input1`` and ``input2`` are checked against for every ``active`` call.  For exampele, assuming ``input1`` and ``input2`` are configured as above, this ``active()`` call would check if the Switch was enabled for inputs ``input1``, ``input2`` and ``input3`` in that order.
+Now, ``input1`` and ``input2`` are checked against for every ``active`` call.  For exampele, assuming ``input1`` and ``input2`` are configured as above, this ``active()`` call would check if the Switch was enabled for inputs ``input1``, ``input2`` and ``input3`` in that order::
 
     gargoyle.active('my cool feature', input3)
 
