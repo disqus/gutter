@@ -318,8 +318,7 @@ class Manager(threading.local):
         name = getattr(switch_or_name, 'name', switch_or_name)
         switch = self.switch(name)
 
-        for child in switch.children:
-            self.unregister(child.name)
+        map(self.unregister, switch.children)
 
         del self.__switches[name]
         signals.switch_unregistered.call(switch)
@@ -336,7 +335,7 @@ class Manager(threading.local):
         if not kwargs.get('exclusive', False):
             inputs = chain(self.inputs, inputs)
 
-        return any(switch.enabled_for(inpt) for inpt in inputs)
+        return any(map(switch.enabled_for, inputs))
 
     def update(self, switch):
         self.register(switch, signal=signals.switch_updated)
