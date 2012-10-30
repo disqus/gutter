@@ -3,17 +3,18 @@ from mock import MagicMock, Mock
 from nose.tools import *
 from gargoyle.client.inputs.arguments import *
 
+from exam import fixture
+
 
 class BaseArgument(object):
 
-    def setUp(self):
-        self.argument = self.klass(self.valid_comparison_value)
+    interface_functions = ['__cmp__', '__hash__', '__nonzero__']
 
-    @property
-    def interface_functions(self):
-        return ['__cmp__', '__hash__', '__nonzero__']
+    @fixture
+    def argument(self):
+        return self.klass(self.valid_comparison_value)
 
-    @property
+    @fixture
     def interface_methods(self):
         return [getattr(self.argument, f) for f in self.interface_functions]
 
@@ -39,23 +40,14 @@ class DelegateToValue(object):
 class ValueTest(BaseArgument, DelegateToValue, unittest.TestCase):
 
     klass = Value
-
-    @property
-    def valid_comparison_value(self):
-        return 'marv'
+    valid_comparison_value = 'marv'
 
 
 class BooleanTest(BaseArgument, DelegateToValue, unittest.TestCase):
 
     klass = Boolean
-
-    @property
-    def valid_comparison_value(self):
-        return True
-
-    @property
-    def interface_functions(self):
-        return ['__cmp__', '__nonzero__']
+    valid_comparison_value = True
+    interface_functions = ['__cmp__', '__nonzero__']
 
     def test_hashes_its_hash_value_instead_of_value(self):
         boolean = Boolean(True, hash_value='another value')
@@ -73,14 +65,8 @@ class BooleanTest(BaseArgument, DelegateToValue, unittest.TestCase):
 class StringTest(BaseArgument, DelegateToValue, unittest.TestCase):
 
     klass = String
-
-    @property
-    def valid_comparison_value(self):
-        return 'foobazzle'
-
-    @property
-    def interface_functions(self):
-        return ['__hash__']
+    valid_comparison_value = 'foobazzle'
+    interface_functions = ['__hash__']
 
     def test_cmp_compares_with_other_value(self):
         eq_(self.argument.__cmp__('zebra'), -1)

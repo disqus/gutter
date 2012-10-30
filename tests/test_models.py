@@ -4,11 +4,9 @@ from nose.tools import *
 from gargoyle.client.models import Switch, Manager, Condition
 from modeldict import MemoryDict
 from gargoyle.client import signals
-from tests import fixture
 import mock
 
-
-switch = Switch('test')
+from exam import fixture
 
 
 def unbound_method():
@@ -170,10 +168,15 @@ class TestSwitchChanges(unittest.TestCase):
 
 class TestCondition(unittest.TestCase):
 
-    def setUp(self):
-        self.operator = mock.Mock(name='operator')
-        self.operator.applies_to.return_value = True
-        self.condition = Condition(ReflectiveInput.foo, self.operator)
+    @fixture
+    def operator(self):
+        m = mock.Mock(name='operator')
+        m.applies_to.return_value = True
+        return m
+
+    @fixture
+    def condition(self):
+        return Condition(ReflectiveInput.foo, self.operator)
 
     def test_raises_valueerror_if_argument_not_callable(self):
         assert_raises_regexp(ValueError, 'must be callable', Condition,
@@ -248,10 +251,12 @@ class TestCondition(unittest.TestCase):
 
 class SwitchWithConditions(object):
 
-    def setUp(self):
-        self.switch = Switch('with conditions', state=Switch.states.SELECTIVE)
-        self.switch.conditions.append(self.pessamistic_condition)
-        self.switch.conditions.append(self.pessamistic_condition)
+    @fixture
+    def switch(self):
+        switch = Switch('with conditions', state=Switch.states.SELECTIVE)
+        switch.conditions.append(self.pessamistic_condition)
+        switch.conditions.append(self.pessamistic_condition)
+        return switch
 
     @property
     def pessamistic_condition(self):
@@ -262,10 +267,14 @@ class SwitchWithConditions(object):
 
 class ConcentTest(SwitchWithConditions, unittest.TestCase):
 
+    @fixture
+    def parent(self):
+        p = mock.Mock()
+        p.enabled_for.return_value = False
+        return p
+
     def setUp(self):
         super(ConcentTest, self).setUp()
-        self.parent = mock.Mock()
-        self.parent.enabled_for.return_value = False
         self.switch.parent = self.parent
         self.make_all_conditions(True)
 
@@ -348,8 +357,11 @@ class ManagerTest(unittest.TestCase):
         eq_(Manager(storage=dict(), autocreate=True).autocreate, True)
 
     def test_register_adds_switch_to_storge_keyed_by_its_name(self):
-        self.manager.register(switch)
-        self.mockstorage.__setitem__.assert_called_once_with(switch.name, switch)
+        self.manager.register(self.switch)
+        self.mockstorage.__setitem__.assert_called_once_with(
+            self.switch.name,
+            self.switch
+        )
 
     def test_register_adds_self_as_manager_to_switch(self):
         ok_(self.switch.manager is not self.manager)
@@ -416,8 +428,11 @@ class ManagerTest(unittest.TestCase):
 
 class ActsLikeManager(object):
 
-    def setUp(self):
-        self.manager = Manager(storage=MemoryDict())
+    global_switch = Switch('test')
+
+    @fixture
+    def manager(self):
+        return Manager(storage=MemoryDict())
 
     def new_switch(self, name, parent=None):
         switch = mock.Mock(name=name)
@@ -433,8 +448,8 @@ class ActsLikeManager(object):
 
     def test_switches_list_registed_switches(self):
         eq_(self.manager.switches, [])
-        self.manager.register(switch)
-        eq_(self.manager.switches, [switch])
+        self.manager.register(self.global_switch)
+        eq_(self.manager.switches, [self.global_switch])
 
     def test_active_raises_exception_if_no_switch_found_with_name(self):
         assert_raises(ValueError, self.manager.active, 'junk')

@@ -1,8 +1,9 @@
 import unittest
 from nose.tools import *
 from gargoyle.client import signals
-from tests import fixture
 import mock
+
+from exam import fixture
 
 
 class ActsLikeSignal(object):

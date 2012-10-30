@@ -4,6 +4,8 @@ from gargoyle.client.operators.comparable import *
 from gargoyle.client.operators.identity import *
 from gargoyle.client.operators.misc import *
 
+from exam import fixture
+
 
 class BaseOperator(object):
 
@@ -19,18 +21,18 @@ class BaseOperator(object):
     def test_has_arguments_property(self):
         ok_(hasattr(self.property_class, 'arguments'))
 
-    @property
+    @fixture
     def str(self):
         return str(self.operator)
 
-    @property
+    @fixture
     def property_class(self):
         return type(self.operator)
 
 
 class TestTruthyCondition(BaseOperator, unittest.TestCase):
 
-    @property
+    @fixture
     def operator(self):
         return Truthy()
 
@@ -49,7 +51,7 @@ class TestTruthyCondition(BaseOperator, unittest.TestCase):
 
 class TestEqualsCondition(BaseOperator, unittest.TestCase):
 
-    @property
+    @fixture
     def operator(self):
         return Equals(value='Fred')
 
@@ -72,7 +74,7 @@ class TestEqualsCondition(BaseOperator, unittest.TestCase):
 
 class TestBetweenCondition(BaseOperator, unittest.TestCase):
 
-    @property
+    @fixture
     def operator(self, lower=1, higher=100):
         return Between(lower, higher)
 
@@ -102,7 +104,7 @@ class TestBetweenCondition(BaseOperator, unittest.TestCase):
 
 class TestLessThanCondition(BaseOperator, unittest.TestCase):
 
-    @property
+    @fixture
     def operator(self, upper=500):
         return LessThan(upper)
 
@@ -133,7 +135,7 @@ class TestLessThanCondition(BaseOperator, unittest.TestCase):
 
 class TestLessThanOrEqualToOperator(BaseOperator):
 
-    @property
+    @fixture
     def operator(self, upper=500):
         return LessThanOrEqualTo(upper)
 
@@ -166,7 +168,7 @@ class TestLessThanOrEqualToOperator(BaseOperator):
 
 class TestMoreThanOperator(BaseOperator, unittest.TestCase):
 
-    @property
+    @fixture
     def operator(self, lower=10):
         return MoreThan(lower)
 
@@ -196,7 +198,7 @@ class TestMoreThanOperator(BaseOperator, unittest.TestCase):
 
 class TestMoreThanOrEqualToOperator(BaseOperator, unittest.TestCase):
 
-    @property
+    @fixture
     def operator(self, lower=10):
         return MoreThanOrEqualTo(lower)
 
@@ -244,7 +246,7 @@ class PercentTest(BaseOperator):
 
 class PercentageTest(PercentTest, unittest.TestCase):
 
-    @property
+    @fixture
     def operator(self):
         return Percent(50)
 
@@ -260,7 +262,7 @@ class PercentageTest(PercentTest, unittest.TestCase):
 
 class PercentRangeTest(PercentTest, unittest.TestCase):
 
-    @property
+    @fixture
     def operator(self):
         return self.range_of(10, 20)
 
