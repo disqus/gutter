@@ -1,15 +1,22 @@
 #!/usr/bin/env python
 
+import sys
+from setuptools import find_packages
+
 try:
-    from setuptools import setup, find_packages
+    from notsetuptools import setup
 except ImportError:
-    from ez_setup import use_setuptools
-    use_setuptools()
-    from setuptools import setup, find_packages
+    from setuptools import setup
+
 
 tests_require = [
-    'nose',
+    'nose', 'exam'
 ]
+
+setup_requires = []
+if 'nosetests' in sys.argv[1:]:
+    setup_requires.append('nose')
+
 
 setup(
     name='gargoyle-client',
@@ -20,15 +27,13 @@ setup(
     description='Client to gargoyle feature switches backend',
     packages=find_packages(exclude=["tests"]),
     zip_safe=False,
-    install_requires=[
-        'modeldict>=0.1.0'
-    ],
+    install_requires=['modeldict>=0.1.0'],
+    setup_requires=setup_requires,
     namespace_packages=['gargoyle'],
     license='Apache License 2.0',
     tests_require=tests_require,
     extras_require={'test': tests_require},
-    test_suite='runtests.runtests',
-    include_package_data=True,
+    test_suite='nose.collector',
     classifiers=[
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
