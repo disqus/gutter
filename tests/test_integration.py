@@ -8,6 +8,9 @@ from gargoyle.client.models import Switch, Condition, Manager
 from gargoyle.client.inputs.arguments import Value, Boolean, String
 from gargoyle.client import signals
 
+from exam.decorators import fixture, before, after
+from exam.cases import Exam
+
 
 class User(object):
 
@@ -30,15 +33,20 @@ class User(object):
         return Boolean(self._married)
 
 
-class TestIntegration(unittest.TestCase):
+class TestIntegration(Exam, unittest.TestCase):
 
-    def setUp(self):
-        self.manager = Manager(storage=dict())
+    @fixture
+    def manager(self):
+        return Manager(storage=dict())
+
+    @before
+    def build_objects(self):
         self.setup_inputs()
         self.setup_conditions()
         self.setup_switches()
 
-    def tearDown(self):
+    @after
+    def reset_objects(self):
         signals.switch_registered.reset()
         signals.switch_unregistered.reset()
         signals.switch_updated.reset()

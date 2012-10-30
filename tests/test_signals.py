@@ -3,7 +3,7 @@ from nose.tools import *
 from gargoyle.client import signals
 import mock
 
-from exam import fixture
+from exam.decorators import fixture
 
 
 class ActsLikeSignal(object):

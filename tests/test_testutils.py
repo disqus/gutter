@@ -5,13 +5,16 @@ from gargoyle.client.singleton import gargoyle
 from gargoyle.client.testutils import switches
 from gargoyle.client.models import Switch
 
+from exam.decorators import around
+from exam.cases import Exam
 
-class TestDecorator(unittest.TestCase):
 
-    def setUp(self):
+class TestDecorator(Exam, unittest.TestCase):
+
+    @around
+    def add_and_remove_switch(self):
         gargoyle.register(Switch('foo'))
-
-    def tearDown(self):
+        yield
         gargoyle.flush()
 
     @switches(foo=True)

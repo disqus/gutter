@@ -3,7 +3,7 @@ from mock import MagicMock, Mock
 from nose.tools import *
 from gargoyle.client.inputs.arguments import *
 
-from exam import fixture
+from exam.decorators import fixture
 
 
 class BaseArgument(object):

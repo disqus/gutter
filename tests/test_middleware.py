@@ -1,6 +1,5 @@
 import unittest
 from nose.tools import *
-from tests import fixture
 from gargoyle.client.wsgi import EnabledSwitchesMiddleware, signals
 from gargoyle.client.singleton import gargoyle as singleton_gargoyle
 import mock
@@ -9,8 +8,11 @@ import time
 
 from werkzeug.test import Client
 
+from exam.decorators import fixture, after
+from exam.cases import Exam
 
-class BaseTest(unittest.TestCase):
+
+class BaseTest(Exam, unittest.TestCase):
 
     SWITCH_HEADER_NAME = 'X-Gargoyle-Switch'
 
@@ -25,7 +27,8 @@ class BaseTest(unittest.TestCase):
 
         yield 'Hello World\n'
 
-    def tearDown(self):
+    @after
+    def reset_signal(self):
         signals.switch_active.reset()
 
     @fixture
@@ -112,6 +115,7 @@ class TestSwitchTracking(BaseTest):
         self.call_and_get_headers()
 
         ok_(len(global_called) is 4)
+
 
 class ConcurrencyTest(BaseTest):
 

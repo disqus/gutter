@@ -6,7 +6,8 @@ from modeldict import MemoryDict
 from gargoyle.client import signals
 import mock
 
-from exam import fixture
+from exam.decorators import fixture, before
+from exam.cases import Exam
 
 
 def unbound_method():
@@ -265,7 +266,7 @@ class SwitchWithConditions(object):
         return mck
 
 
-class ConcentTest(SwitchWithConditions, unittest.TestCase):
+class ConcentTest(Exam, SwitchWithConditions, unittest.TestCase):
 
     @fixture
     def parent(self):
@@ -273,9 +274,12 @@ class ConcentTest(SwitchWithConditions, unittest.TestCase):
         p.enabled_for.return_value = False
         return p
 
-    def setUp(self):
-        super(ConcentTest, self).setUp()
+    @before
+    def assign_parent(self):
         self.switch.parent = self.parent
+
+    @before
+    def make_all_conditions_true(self):
         self.make_all_conditions(True)
 
     def make_all_conditions(self, val):
@@ -317,10 +321,10 @@ class DefaultConditionsTest(SwitchWithConditions, unittest.TestCase):
         eq_(self.switch.enabled_for('input'), False)
 
 
-class CompoundedConditionsTest(SwitchWithConditions, unittest.TestCase):
+class CompoundedConditionsTest(Exam, SwitchWithConditions, unittest.TestCase):
 
-    def setUp(self):
-        super(CompoundedConditionsTest, self).setUp()
+    @before
+    def make_switch_compounded(self):
         self.switch.compounded = True
 
     def test_enabled_if_all_conditions_are_true(self):
@@ -575,7 +579,7 @@ class EmptyManagerInstanceTest(ActsLikeManager, unittest.TestCase):
         switch.enabled_for.assert_called_once_with(additional_input)
 
 
-class ManagerWithInputTest(ActsLikeManager, unittest.TestCase):
+class ManagerWithInputTest(Exam, ActsLikeManager, unittest.TestCase):
 
     def build_and_register_switch(self, name, enabled_for=False):
         switch = Switch(name)
@@ -583,8 +587,8 @@ class ManagerWithInputTest(ActsLikeManager, unittest.TestCase):
         self.manager.register(switch)
         return switch
 
-    def setUp(self):
-        super(ManagerWithInputTest, self).setUp()
+    @before
+    def add_to_inputs(self):
         self.manager.input('input 1', 'input 2')
 
     def test_returns_boolean_if_named_switch_is_enabled_for_any_input(self):

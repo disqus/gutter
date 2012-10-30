@@ -5,18 +5,20 @@ import mock
 from gargoyle.client.settings import manager
 import gargoyle.client.models
 
+from exam.decorators import after
+from exam.cases import Exam
 
-class TestGargoyle(unittest.TestCase):
+
+class TestGargoyle(Exam, unittest.TestCase):
 
     other_engine = dict()
+    manager_defaults = dict(storage=manager.storage_engine,
+                             autocreate=manager.autocreate,
+                             operators=manager.operators,
+                             inputs=manager.inputs)
 
-    def setUp(self):
-        self.manager_defaults = dict(storage=manager.storage_engine,
-                                     autocreate=manager.autocreate,
-                                     operators=manager.operators,
-                                     inputs=manager.inputs)
-
-    def tearDown(self):
+    @after
+    def reset_to_defaults(self):
         manager.storage = self.manager_defaults['storage']
         manager.autocreate = self.manager_defaults['autocreate']
         manager.operators = self.manager_defaults['operators']

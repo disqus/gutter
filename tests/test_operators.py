@@ -4,7 +4,7 @@ from gargoyle.client.operators.comparable import *
 from gargoyle.client.operators.identity import *
 from gargoyle.client.operators.misc import *
 
-from exam import fixture
+from exam.decorators import fixture
 
 
 class BaseOperator(object):
