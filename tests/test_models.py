@@ -2,7 +2,7 @@ import unittest
 import threading
 from nose.tools import *
 from gargoyle.client.models import Switch, Manager, Condition
-from modeldict.dict import MemoryDict
+from modeldict import MemoryDict
 from gargoyle.client import signals
 from tests import fixture
 import mock

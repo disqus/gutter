@@ -10,7 +10,7 @@ except ImportError:
 
 
 tests_require = [
-    'nose', 'exam'
+    'nose', 'exam', 'mock'
 ]
 
 setup_requires = []
@@ -27,7 +27,7 @@ setup(
     description='Client to gargoyle feature switches backend',
     packages=find_packages(exclude=["tests"]),
     zip_safe=False,
-    install_requires=['modeldict>=0.1.0'],
+    install_requires=['modeldict>=0.3.1', 'werkzeug'],
     setup_requires=setup_requires,
     namespace_packages=['gargoyle'],
     license='Apache License 2.0',

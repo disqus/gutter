@@ -1,4 +1,4 @@
-from modeldict.dict import MemoryDict
+from modeldict import MemoryDict
 from gargoyle.client.operators.comparable import *
 from gargoyle.client.operators.identity import *
 from gargoyle.client.operators.misc import *
