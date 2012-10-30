@@ -5,3 +5,4 @@ dist/
 build/
 *.egg/
 .arcconfig
+*.sublime-workspace
