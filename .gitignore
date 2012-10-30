@@ -3,6 +3,6 @@
 .DS_Store
 dist/
 build/
-*.egg/
+*.egg
 .arcconfig
 *.sublime-workspace
