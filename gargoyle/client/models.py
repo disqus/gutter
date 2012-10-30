@@ -296,7 +296,16 @@ class Manager(threading.local):
         Keyword Arguments:
         name -- A name of a switch.
         """
-        return self.__get_switch_by_name(name)
+        try:
+            switch = self.__switches[name]
+        except KeyError:
+            if not self.autocreate:
+                raise ValueError("No switch named '%s' registered" % name)
+
+            switch = self.__create_and_register_disabled_switch(name)
+
+        switch.manager = self
+        return switch
 
     def register(self, switch, signal=signals.switch_registered):
         switch.manager = None
@@ -307,13 +316,13 @@ class Manager(threading.local):
 
     def unregister(self, switch_or_name):
         name = getattr(switch_or_name, 'name', switch_or_name)
+        switch = self.switch(name)
 
-        for child in self.__switches[name].children:
+        for child in switch.children:
             self.unregister(child.name)
 
-        to_delete = self.__switches[name]
         del self.__switches[name]
-        signals.switch_unregistered.call(to_delete)
+        signals.switch_unregistered.call(switch)
 
     def input(self, *inputs):
         self.inputs = list(inputs)
@@ -322,7 +331,7 @@ class Manager(threading.local):
         self.inputs = []
 
     def active(self, name, *inputs, **kwargs):
-        switch = self.__get_switch_by_name(name)
+        switch = self.switch(name)
 
         if not kwargs.get('exclusive', False):
             inputs = chain(self.inputs, inputs)
@@ -360,15 +369,3 @@ class Manager(threading.local):
         # TODO: Make this a method on the switch object
         parent_parts = switch.name.split(self.key_separator)[:-1]
         return self.key_separator.join(parent_parts)
-
-    def __get_switch_by_name(self, name):
-        try:
-            switch = self.__switches[name]
-        except KeyError:
-            if not self.autocreate:
-                raise ValueError("No switch named '%s' registered" % name)
-
-            switch = self.__create_and_register_disabled_switch(name)
-
-        switch.manager = self
-        return switch
