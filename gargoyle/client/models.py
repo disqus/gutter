@@ -272,7 +272,7 @@ class Manager(threading.local):
 
     def __init__(self, storage, autocreate=False, switch_class=Switch,
                  operators=[], inputs=[]):
-        self.__switches = storage
+        self.storage = storage
         self.autocreate = autocreate
         self.inputs = inputs
         self.input_classes = []
@@ -284,7 +284,7 @@ class Manager(threading.local):
         """
         List of all switches currently registered.
         """
-        return self.__switches.values()
+        return self.storage.values()
 
     def switch(self, name):
         """
@@ -297,7 +297,7 @@ class Manager(threading.local):
         name -- A name of a switch.
         """
         try:
-            switch = self.__switches[name]
+            switch = self.storage[name]
         except KeyError:
             if not self.autocreate:
                 raise ValueError("No switch named '%s' registered" % name)
@@ -310,7 +310,7 @@ class Manager(threading.local):
     def register(self, switch, signal=signals.switch_registered):
         switch.manager = None
         self.__sync_parental_relationships(switch)
-        self.__switches[switch.name] = switch
+        self.storage[switch.name] = switch
         switch.manager = self
         signal.call(switch)
 
@@ -320,7 +320,7 @@ class Manager(threading.local):
 
         map(self.unregister, switch.children)
 
-        del self.__switches[name]
+        del self.storage[name]
         signals.switch_unregistered.call(switch)
 
     def input(self, *inputs):
@@ -342,7 +342,7 @@ class Manager(threading.local):
 
         if switch.changes.get('name'):
             old_name = switch.changes['name'].get('previous')
-            del self.__switches[old_name]
+            del self.storage[old_name]
 
         switch.reset()
 
@@ -353,7 +353,7 @@ class Manager(threading.local):
         return switch
 
     def __sync_parental_relationships(self, switch):
-        new_parent = self.__switches.get(self.__parent_key_for(switch))
+        new_parent = self.storage.get(self.__parent_key_for(switch))
         old_parent = switch.parent
 
         switch.parent = new_parent
