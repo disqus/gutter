@@ -271,7 +271,7 @@ class Manager(threading.local):
     key_separator = ':'
 
     def __init__(self, storage, autocreate=False, switch_class=Switch,
-                 operators=[], inputs=[]):
+                 operators=[], inputs=[], namespace=[]):
         self.storage = storage
         self.autocreate = autocreate
         self.inputs = inputs
@@ -279,12 +279,21 @@ class Manager(threading.local):
         self.operators = operators
         self.switch_class = switch_class
 
+        if isinstance(namespace, basestring):
+            namespace = [namespace]
+
+        self.namespace = namespace
+
     @property
     def switches(self):
         """
         List of all switches currently registered.
         """
         return self.storage.values()
+        # return [
+        #     switch for switch in self.storage.values()
+        #     if switch.name.starts_with(self.__joined_namespace)
+        # ]
 
     def switch(self, name):
         """
@@ -346,6 +355,19 @@ class Manager(threading.local):
 
         switch.reset()
 
+    def namespaced(self, namespace):
+        copy = list(self.namespace)
+        copy.append(namespace)
+
+        return type(self)(
+            storage=self.storage,
+            autocreate=self.autocreate,
+            inputs=self.inputs,
+            operators=self.operators,
+            switch_class=self.switch_class,
+            namespace=copy,
+        )
+
     def __create_and_register_disabled_switch(self, name):
         switch = self.switch_class(name)
         switch.state = self.switch_class.states.DISABLED
@@ -368,3 +390,10 @@ class Manager(threading.local):
         # TODO: Make this a method on the switch object
         parent_parts = switch.name.split(self.key_separator)[:-1]
         return self.key_separator.join(parent_parts)
+
+    def __namespaced(self, name=''):
+        return self.key_separator.join((self.__joined_namespace, name))
+
+    @property
+    def __joined_namespace(self):
+        return self.key_separator.join(self.namespace)

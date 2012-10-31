@@ -1,5 +1,6 @@
 import unittest
 import threading
+import itertools
 from nose.tools import *
 from gargoyle.client.models import Switch, Manager, Condition
 from modeldict import MemoryDict
@@ -337,6 +338,12 @@ class CompoundedConditionsTest(Exam, SwitchWithConditions, unittest.TestCase):
 
 class ManagerTest(unittest.TestCase):
 
+    storage_with_existing_switches = dict(
+        existing='switch',
+        another='valuable switch'
+    )
+    expected_switches_from_storage = ['switch', 'valuable switch']
+
     @fixture
     def mockstorage(self):
         return mock.MagicMock(dict)
@@ -354,16 +361,26 @@ class ManagerTest(unittest.TestCase):
         switch.manager = None
         return switch
 
+    def namespaced(self, name=''):
+        parts = itertools.chain(self.manager.namespace, (name,))
+        return self.manager.key_separator.join(parts)
+
     def test_autocreate_defaults_to_false(self):
         eq_(Manager(storage=dict()).autocreate, False)
 
     def test_autocreate_can_be_passed_to_init(self):
         eq_(Manager(storage=dict(), autocreate=True).autocreate, True)
 
+    def test_namespace_defaults_to_an_empty_list(self):
+        eq_(Manager(storage=dict()).namespace, [])
+
+    def test_namespace_can_be_set_on_construction(self):
+        eq_(Manager(storage=dict(), namespace='foo').namespace, ['foo'])
+
     def test_register_adds_switch_to_storge_keyed_by_its_name(self):
         self.manager.register(self.switch)
         self.mockstorage.__setitem__.assert_called_once_with(
-            self.switch.name,
+            self.namespaced(self.switch.name),
             self.switch
         )
 
@@ -381,8 +398,8 @@ class ManagerTest(unittest.TestCase):
         self.manager.register(self.switch)
 
     def test_uses_switches_from_storage_on_itialization(self):
-        m = Manager(storage=dict(existing='switch', another='valuable switch'))
-        self.assertItemsEqual(m.switches, ['switch', 'valuable switch'])
+        m = Manager(storage=self.storage_with_existing_switches)
+        self.assertItemsEqual(m.switches, self.expected_switches_from_storage)
 
     def test_update_tells_manager_to_register_with_switch_updated_signal(self):
         self.manager.register = mock.Mock()
@@ -429,16 +446,48 @@ class ManagerTest(unittest.TestCase):
             [3]
         )
 
+    def test_namespaced_returns_new_manager_only_different_by_namespace(self):
+        parent = self.manager
+        child = self.manager.namespaced('ns')
+        grandchild = child.namespaced('other')
+
+        self.assertNotEqual(parent.namespace, child.namespace)
+        self.assertNotEqual(child.namespace, grandchild.namespace)
+
+        eq_(child.namespace, ['ns'])
+        eq_(grandchild.namespace, ['ns', 'other'])
+
+        properties = (
+            'storage',
+            'autocreate',
+            'inputs',
+            'input_classes',
+            'operators',
+            'switch_class'
+        )
+
+        for decendent_manager in (child, grandchild):
+            for prop in properties:
+                eq_(getattr(decendent_manager, prop), getattr(parent, prop))
+
 
 class ActsLikeManager(object):
 
-    global_switch = Switch('test')
+    def namespaced(self, name=''):
+        parts = itertools.chain(self.manager.namespace, (name,))
+        return self.manager.key_separator.join(parts)
 
     @fixture
     def manager(self):
         return Manager(storage=MemoryDict())
 
+    @fixture
+    def test_switch(self):
+        return self.new_switch('test')
+
     def new_switch(self, name, parent=None):
+        name = self.namespaced(name)
+
         switch = mock.Mock(name=name)
         switch.name = name
         switch.parent = parent
@@ -446,14 +495,15 @@ class ActsLikeManager(object):
         return switch
 
     def mock_and_register_switch(self, name, parent=None):
+        name = self.namespaced(name)
         switch = self.new_switch(name, parent)
         self.manager.register(switch)
         return switch
 
     def test_switches_list_registed_switches(self):
         eq_(self.manager.switches, [])
-        self.manager.register(self.global_switch)
-        eq_(self.manager.switches, [self.global_switch])
+        self.manager.register(self.test_switch)
+        eq_(self.manager.switches, [self.test_switch])
 
     def test_active_raises_exception_if_no_switch_found_with_name(self):
         assert_raises(ValueError, self.manager.active, 'junk')
