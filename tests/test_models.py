@@ -361,8 +361,8 @@ class ManagerTest(unittest.TestCase):
         switch.manager = None
         return switch
 
-    def namespaced(self, name=''):
-        parts = itertools.chain(self.manager.namespace, (name,))
+    def namespaced(self, *names):
+        parts = itertools.chain(self.manager.namespace, names)
         return self.manager.key_separator.join(parts)
 
     def test_autocreate_defaults_to_false(self):
@@ -454,8 +454,13 @@ class ManagerTest(unittest.TestCase):
         self.assertNotEqual(parent.namespace, child.namespace)
         self.assertNotEqual(child.namespace, grandchild.namespace)
 
-        eq_(child.namespace, ['ns'])
-        eq_(grandchild.namespace, ['ns', 'other'])
+        child_ns_list = list(itertools.chain(self.manager.namespace, ['ns']))
+        grandchild_ns_list = list(
+            itertools.chain(self.manager.namespace, ['ns', 'other'])
+        )
+
+        eq_(child.namespace, child_ns_list)
+        eq_(grandchild.namespace, grandchild_ns_list)
 
         properties = (
             'storage',
@@ -471,10 +476,17 @@ class ManagerTest(unittest.TestCase):
                 eq_(getattr(decendent_manager, prop), getattr(parent, prop))
 
 
+class NamespacedManagertest(ManagerTest):
+
+    @fixture
+    def manager(self):
+        return Manager(storage=self.mockstorage, namespace=['a', 'b'])
+
+
 class ActsLikeManager(object):
 
-    def namespaced(self, name=''):
-        parts = itertools.chain(self.manager.namespace, (name,))
+    def namespaced(self, *names):
+        parts = itertools.chain(self.manager.namespace, names)
         return self.manager.key_separator.join(parts)
 
     @fixture
@@ -486,8 +498,6 @@ class ActsLikeManager(object):
         return self.new_switch('test')
 
     def new_switch(self, name, parent=None):
-        name = self.namespaced(name)
-
         switch = mock.Mock(name=name)
         switch.name = name
         switch.parent = parent
@@ -495,7 +505,6 @@ class ActsLikeManager(object):
         return switch
 
     def mock_and_register_switch(self, name, parent=None):
-        name = self.namespaced(name)
         switch = self.new_switch(name, parent)
         self.manager.register(switch)
         return switch
@@ -603,7 +612,7 @@ class ActsLikeManager(object):
         switch.changes = dict(name=dict(previous='foo'))
 
         ok_(self.manager.switch('foo'))
-        assert_raises(ValueError, self.manager.switch, ' new name')
+        assert_raises(ValueError, self.manager.switch, 'new name')
         self.manager.update(switch)
         assert_raises(ValueError, self.manager.switch, 'foo')
         ok_(self.manager.switch('new name'))
@@ -627,6 +636,13 @@ class EmptyManagerInstanceTest(ActsLikeManager, unittest.TestCase):
         additional_input = mock.Mock()
         self.manager.active('foo', additional_input)
         switch.enabled_for.assert_called_once_with(additional_input)
+
+
+class NamespacedEmptyManagerInstanceTest(EmptyManagerInstanceTest):
+
+    @fixture
+    def manager(self):
+        return Manager(storage=MemoryDict(), namespace=['a', 'b'])
 
 
 class ManagerWithInputTest(Exam, ActsLikeManager, unittest.TestCase):
@@ -671,3 +687,23 @@ class ManagerWithInputTest(Exam, ActsLikeManager, unittest.TestCase):
         switch = self.build_and_register_switch('foo')
         self.manager.active('foo', 'input 3', exclusive=True)
         switch.enabled_for.assert_called_once_with('input 3')
+
+
+class NamespacedManagerWithInputTest(ManagerWithInputTest):
+
+    @fixture
+    def manager(self):
+        return Manager(storage=MemoryDict(), namespace=['a', 'b'])
+
+
+class ManagerWithNamespaceInputTest(ManagerWithInputTest):
+
+    # def test_switch_only_returns_switches_in_namespace(self):
+    #     fly = self.new_switch('can_fly')
+    #     has_snout = self.new_switch('has_snout')
+
+    #     self.pork_manager.register(has_snout)
+    #     self.chicken_manager.register(fly)
+
+    #     self.pork_manager
+

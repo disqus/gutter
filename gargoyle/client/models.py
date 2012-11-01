@@ -271,17 +271,25 @@ class Manager(threading.local):
     key_separator = ':'
 
     def __init__(self, storage, autocreate=False, switch_class=Switch,
-                 operators=[], inputs=[], namespace=[]):
+                 operators=None, inputs=None, namespace=None):
+
+        if operators is None:
+            operators = []
+
+        if inputs is None:
+            inputs = []
+
+        if namespace is None:
+            namespace = []
+        elif isinstance(namespace, basestring):
+            namespace = [namespace]
+
         self.storage = storage
         self.autocreate = autocreate
         self.inputs = inputs
         self.input_classes = []
         self.operators = operators
         self.switch_class = switch_class
-
-        if isinstance(namespace, basestring):
-            namespace = [namespace]
-
         self.namespace = namespace
 
     @property
@@ -306,7 +314,7 @@ class Manager(threading.local):
         name -- A name of a switch.
         """
         try:
-            switch = self.storage[name]
+            switch = self.storage[self.__namespaced(name)]
         except KeyError:
             if not self.autocreate:
                 raise ValueError("No switch named '%s' registered" % name)
@@ -319,7 +327,8 @@ class Manager(threading.local):
     def register(self, switch, signal=signals.switch_registered):
         switch.manager = None
         self.__sync_parental_relationships(switch)
-        self.storage[switch.name] = switch
+        self.namespace
+        self.storage[self.__namespaced(switch.name)] = switch
         switch.manager = self
         signal.call(switch)
 
@@ -329,7 +338,7 @@ class Manager(threading.local):
 
         map(self.unregister, switch.children)
 
-        del self.storage[name]
+        del self.storage[self.__namespaced(name)]
         signals.switch_unregistered.call(switch)
 
     def input(self, *inputs):
@@ -351,7 +360,7 @@ class Manager(threading.local):
 
         if switch.changes.get('name'):
             old_name = switch.changes['name'].get('previous')
-            del self.storage[old_name]
+            del self.storage[self.__namespaced(old_name)]
 
         switch.reset()
 
@@ -375,7 +384,8 @@ class Manager(threading.local):
         return switch
 
     def __sync_parental_relationships(self, switch):
-        new_parent = self.storage.get(self.__parent_key_for(switch))
+        namespaced_parent = self.__namespaced(self.__parent_key_for(switch))
+        new_parent = self.storage.get(namespaced_parent)
         old_parent = switch.parent
 
         switch.parent = new_parent
@@ -392,7 +402,10 @@ class Manager(threading.local):
         return self.key_separator.join(parent_parts)
 
     def __namespaced(self, name=''):
-        return self.key_separator.join((self.__joined_namespace, name))
+        if not self.__joined_namespace:
+            return name
+        else:
+            return self.key_separator.join((self.__joined_namespace, name))
 
     @property
     def __joined_namespace(self):
