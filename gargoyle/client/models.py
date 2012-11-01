@@ -297,11 +297,16 @@ class Manager(threading.local):
         """
         List of all switches currently registered.
         """
-        return self.storage.values()
-        # return [
-        #     switch for switch in self.storage.values()
-        #     if switch.name.starts_with(self.__joined_namespace)
-        # ]
+        results = [
+            switch for name, switch in self.storage.iteritems()
+            if name.startswith(self.__joined_namespace)
+        ]
+        print results
+
+        for name, switch in self.storage.iteritems():
+            print name, switch, self.__joined_namespace
+
+        return results
 
     def switch(self, name):
         """

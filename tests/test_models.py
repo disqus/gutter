@@ -398,8 +398,11 @@ class ManagerTest(unittest.TestCase):
         self.manager.register(self.switch)
 
     def test_uses_switches_from_storage_on_itialization(self):
-        m = Manager(storage=self.storage_with_existing_switches)
-        self.assertItemsEqual(m.switches, self.expected_switches_from_storage)
+        self.manager.storage = self.storage_with_existing_switches
+        self.assertItemsEqual(
+            self.manager.switches,
+            self.expected_switches_from_storage
+        )
 
     def test_update_tells_manager_to_register_with_switch_updated_signal(self):
         self.manager.register = mock.Mock()
@@ -477,6 +480,18 @@ class ManagerTest(unittest.TestCase):
 
 
 class NamespacedManagertest(ManagerTest):
+
+    storage_with_existing_switches = {
+        'a:b:brother': 'brother switch',
+        'a:b:sister': 'sister switch',
+        'a:b:c:grandchild': 'grandchild switch',
+        'a:c:cousin': 'cousin switch',
+    }
+    expected_switches_from_storage = [
+        'brother switch',
+        'sister switch',
+        'grandchild switch'
+    ]
 
     @fixture
     def manager(self):
@@ -694,16 +709,3 @@ class NamespacedManagerWithInputTest(ManagerWithInputTest):
     @fixture
     def manager(self):
         return Manager(storage=MemoryDict(), namespace=['a', 'b'])
-
-
-class ManagerWithNamespaceInputTest(ManagerWithInputTest):
-
-    # def test_switch_only_returns_switches_in_namespace(self):
-    #     fly = self.new_switch('can_fly')
-    #     has_snout = self.new_switch('has_snout')
-
-    #     self.pork_manager.register(has_snout)
-    #     self.chicken_manager.register(fly)
-
-    #     self.pork_manager
-
