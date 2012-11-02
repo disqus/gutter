@@ -287,3 +287,7 @@ class TestIntegration(Exam, unittest.TestCase):
 
         with self.inputs(germany, self.jeff) as context:
             ok_(context.active('booze', self.timmy, exclusive=True) is False)  # exclusive timmy is 10
+
+    def test_namespace_switches_not_shared_with_parent(self):
+        pass
+

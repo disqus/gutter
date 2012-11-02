@@ -269,6 +269,7 @@ class Manager(threading.local):
     """
 
     key_separator = ':'
+    default_namespace = ['default']
 
     def __init__(self, storage, autocreate=False, switch_class=Switch,
                  operators=None, inputs=None, namespace=None):
@@ -280,7 +281,7 @@ class Manager(threading.local):
             inputs = []
 
         if namespace is None:
-            namespace = []
+            namespace = self.default_namespace
         elif isinstance(namespace, basestring):
             namespace = [namespace]
 
@@ -370,8 +371,14 @@ class Manager(threading.local):
         switch.reset()
 
     def namespaced(self, namespace):
-        copy = list(self.namespace)
-        copy.append(namespace)
+        new_namespace = []
+
+        # Only start with the current namesapce if it's not the default
+        # namespace
+        if self.namespace is not self.default_namespace:
+            new_namespace = list(self.namespace)
+
+        new_namespace.append(namespace)
 
         return type(self)(
             storage=self.storage,
@@ -379,7 +386,7 @@ class Manager(threading.local):
             inputs=self.inputs,
             operators=self.operators,
             switch_class=self.switch_class,
-            namespace=copy,
+            namespace=new_namespace,
         )
 
     def __create_and_register_disabled_switch(self, name):

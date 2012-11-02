@@ -338,11 +338,12 @@ class CompoundedConditionsTest(Exam, SwitchWithConditions, unittest.TestCase):
 
 class ManagerTest(unittest.TestCase):
 
-    storage_with_existing_switches = dict(
-        existing='switch',
-        another='valuable switch'
-    )
+    storage_with_existing_switches = {
+        'default:existing': 'switch',
+        'default:another': 'valuable switch'
+    }
     expected_switches_from_storage = ['switch', 'valuable switch']
+    namespace_base = []
 
     @fixture
     def mockstorage(self):
@@ -371,8 +372,8 @@ class ManagerTest(unittest.TestCase):
     def test_autocreate_can_be_passed_to_init(self):
         eq_(Manager(storage=dict(), autocreate=True).autocreate, True)
 
-    def test_namespace_defaults_to_an_empty_list(self):
-        eq_(Manager(storage=dict()).namespace, [])
+    def test_namespace_defaults_to_default(self):
+        eq_(Manager(storage=dict()).namespace, ['default'])
 
     def test_namespace_can_be_set_on_construction(self):
         eq_(Manager(storage=dict(), namespace='foo').namespace, ['foo'])
@@ -457,9 +458,9 @@ class ManagerTest(unittest.TestCase):
         self.assertNotEqual(parent.namespace, child.namespace)
         self.assertNotEqual(child.namespace, grandchild.namespace)
 
-        child_ns_list = list(itertools.chain(self.manager.namespace, ['ns']))
+        child_ns_list = list(itertools.chain(self.namespace_base, ['ns']))
         grandchild_ns_list = list(
-            itertools.chain(self.manager.namespace, ['ns', 'other'])
+            itertools.chain(self.namespace_base, ['ns', 'other'])
         )
 
         eq_(child.namespace, child_ns_list)
@@ -492,6 +493,7 @@ class NamespacedManagertest(ManagerTest):
         'sister switch',
         'grandchild switch'
     ]
+    namespace_base = ['a', 'b']
 
     @fixture
     def manager(self):
