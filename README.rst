@@ -383,3 +383,25 @@ That said, you would still probably want to know if there was an error checking 
     signals.condition_apply_error.call(condition, inpt, error)
 
 In your connected callback, you can do whatever you would like: log the error, report the exeception, etc.
+
+Namespaces
+==========
+
+``gargoyle-client`` allows the use of "namespaces" to group switches under a single umbrealla, while both not letting one namespace see the switches of another namespace, but allowing them to share the same storage instance, operators and other configuration.
+
+Given an existing vanilla ``Manager`` instance, you can create a namespaced manager by calling the ``namespaced()`` method:
+
+.. code:: python
+
+    notifications = gargoyle.namespaced('notifications')
+
+At this point, ``notifications`` is a copy of ``gargoyle``, inheriting all of its:
+
+* storage
+* ``autocreate`` settting
+* Global inputs
+* Operators
+
+It does **not**, however, share the same switches.  Newly constructed ``Manager`` instances are in the ``default`` namespace.  When ``namespaced()`` is called, ``gargoyle-client`` changes the manager's namespace to ``notifications``.  Any switches in the previous ``default`` namespace are not visible in the ``notifications`` namespace, and vice versa.
+
+This allows you to have separate namespaced "views" of switches, possibly named the exact same name, and not have them comflict with each other.
