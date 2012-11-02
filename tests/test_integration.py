@@ -96,6 +96,7 @@ class TestIntegration(Exam, unittest.TestCase):
 
         [switch.conditions.append(c) for c in conditions]
         kwargs.get('manager', self.manager).register(switch)
+        return switch
 
     class inputs(object):
 
@@ -289,5 +290,19 @@ class TestIntegration(Exam, unittest.TestCase):
             ok_(context.active('booze', self.timmy, exclusive=True) is False)  # exclusive timmy is 10
 
     def test_namespace_switches_not_shared_with_parent(self):
-        pass
+        base = self.manager
+        daughter = self.manager.namespaced('daughter')
+        son = self.manager.namespaced('son')
 
+        ok_(base.switches is not daughter.switches)
+        ok_(base.switches is not son.switches)
+        ok_(daughter.switches is not son.switches)
+
+        daughter_switch = self.add_switch('daughter only', manager=daughter)
+        son_switch = self.add_switch('son only', manager=son)
+
+        eq_(daughter.switches, [daughter_switch])
+        eq_(son.switches, [son_switch])
+
+        ok_(daughter_switch not in base.switches)
+        ok_(son_switch not in base.switches)
