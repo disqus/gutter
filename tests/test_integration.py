@@ -56,6 +56,7 @@ class TestIntegration(Exam, unittest.TestCase):
         self.frank = User('frank', 10, location="Seattle")
         self.larry = User('bill', 70, location="Yakima", married=True)
         self.timmy = User('timmy', 12)
+        self.steve = User('timmy', 19)
 
     def setup_conditions(self):
         self.age_65_and_up = Condition(User.age, MoreThanOrEqualTo(65))
@@ -94,7 +95,7 @@ class TestIntegration(Exam, unittest.TestCase):
             conditions.append(condition)
 
         [switch.conditions.append(c) for c in conditions]
-        self.manager.register(switch)
+        kwargs.get('manager', self.manager).register(switch)
 
     class inputs(object):
 
@@ -245,3 +246,44 @@ class TestIntegration(Exam, unittest.TestCase):
         eq_(change[0], switch)
         changes = change[1]
         eq_(changes['name'], dict(current='from save() call', previous='a new name'))
+
+    def test_namespaes_keep_switches_isloated(self):
+        germany = self.manager.namespaced('germany')
+        usa = self.manager.namespaced('usa')
+
+        self.add_switch('booze', condition=self.age_21_plus, manager=usa)
+        self.add_switch('booze', condition=self.age_not_under_18, manager=germany)
+
+        eq_(len(germany.switches), 1)
+        eq_(len(usa.switches), 1)
+
+        eq_(usa.switches[0].conditions, [self.age_21_plus])
+        eq_(germany.switches[0].conditions, [self.age_not_under_18])
+
+        with self.inputs(usa, self.jeff) as context:
+            ok_(context.active('booze') is True)
+
+        with self.inputs(usa, self.jeff, self.timmy) as context:
+            ok_(context.active('booze') is True)  # Jeff is 21, so he counts
+            ok_(context.active('booze', self.timmy, exclusive=True) is False)  # Timmy is 10
+
+        with self.inputs(usa, self.timmy) as context:
+            ok_(context.active('booze') is False)
+
+        with self.inputs(usa, self.timmy, self.steve) as context:
+            ok_(context.active('booze') is False)
+
+        with self.inputs(germany, self.timmy) as context:
+            ok_(context.active('booze') is False)  # 10 is still too young
+
+        with self.inputs(germany, self.steve) as context:
+            ok_(context.active('booze') is True)  # 19 is old enough!
+
+        with self.inputs(germany, self.timmy, self.steve) as context:
+            ok_(context.active('booze') is True)  # Cause steve is 19
+
+        with self.inputs(germany, self.jeff, self.timmy) as context:
+            ok_(context.active('booze') is True)  # Cause jeff is 21
+
+        with self.inputs(germany, self.jeff) as context:
+            ok_(context.active('booze', self.timmy, exclusive=True) is False)  # exclusive timmy is 10
