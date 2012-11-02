@@ -127,13 +127,8 @@ For the 10% percentage range, you want it to be active for 10% of the inputs.  T
 
 That said, you don't absolutely **have** to use ``Argument`` objects.  For obvious cases, like ``use.age > some_value`` your ``User`` instance will work just fine, but to play it safe you should use ``Argument`` objects.  Using ``Argument`` objects also ensure that if you updatate ``gargoyle-client`` any new ``Operator`` types that are added will work correctly with your ``Argument``s.
 
-Switches and Conditions
-============================================
-
-The next phase of ``gargoyle-client`` usage is defining switches and conditions
-
 Switches
-~~~~~~~~
+============================================
 
 Switches encapsulate the concept of an item that is either 'on' or 'off' depending on the input.  The swich determines its on/off status by checking each of its ``conditions`` and seeing if it applies to a certain input.
 
@@ -156,14 +151,14 @@ Swiches can be constructed in a certain state or the property can be changed lat
     another_switch.state = Switch.states.DISABLED
 
 Compounded
-``````````
+~~~~~~~~~~
 
 When in the ``SELECTIVE`` state, normally only one condition needs be true for the Switch to be enabled for a particular input. If ``switch.componded`` is set to ``True``, then **all** of the switches conditions need to be true in order to be enabled::
 
     switch = Switch('require alll conditions', compounded=True)
 
 Heriarchical Switches
-`````````````````````
+~~~~~~~~~~~~~~~~~~~~~
 
 You can create switches using a specific heirarchical naming scheme.  Switch namespaces are divided by the colon character (":"), and heirarchies of switches can be constructed in this fashion:
 
@@ -177,7 +172,7 @@ You can create switches using a specific heirarchical naming scheme.  Switch nam
 In the above example, the ``child1`` switch is a child of the ``"movies"`` switch because it has ``movies:`` as a prefix to the switch name.  Both ``child1`` and ``child2`` are "children of the parent ``parent`` switch.  And ``grandchild`` is a child of the ``child1`` switch, but *not* the ``child2`` switch.
 
 Concent
-```````
+~~~~~~~
 
 By default, each switch makes its "am I active?" decision independent of other switches in the Manager (including its parent), and only consults its own conditions to check if it is enabled for the Input.  However, this is not always the case.  Perhaps you have a cool new feature that is only available to a certain class of user.  And of *those* users, you want 10% to be be exposed to a different user interface to see how they behave vs the other 90%.
 
@@ -193,43 +188,6 @@ For example:
 For example, because ``child`` was constructed with ``concent=True``, even if ``child`` is enabled for an input, it will only return ``True`` if ``parent`` is **also** enbaled for that same input.
 
 **Note:** Even switches in a ``GLOBAL`` or ``DISABLED`` state (see "Switch" section above) still concent their parent before checking themselves.  That means that even if a particular switch is ``GLOBAL``, if it has ``concent`` set to ``True`` and its parent is **not** enabled for the input, the switch itself will return ``False``.
-
-Conditions
-~~~~~~~~~~
-
-Each Swtich can have one-to-many conditions, which decribe the conditions under which that swtich is active.  ``Condition`` objects are constructed with two values: a ``argument`` and ``operator``
-
-An ``argument`` is an ``Argument`` object returned from an ``Input`` class, like the one you defined earlier.  From the previous example, ``UserInput.age`` is an argument.  A condition's ``operator`` is some sort of check applied against that argument.  For instance, is the ``Argument`` greater than some value?  Equal to some value?  Within a range of values?  Etc.
-
-Let's say you wanted a ``Condition`` that checks if the user's age is > 65 years old?  You would construct a Condition that way:
-
-.. code:: python
-
-    from gargoyle.client.operators.comparable import MoreThan
-
-    condition = (Conditionargument=UserInput.age, operator=MoreThan(65))
-
-This Condition will be true if any input instance has an ``age`` that is more than ``65``.
-
-Please see the ``gargoyle.operators`` for a list of available operators.
-
-Conditions can also be constructed with a ``negative`` argument, which negates the condition.  For example:
-
-.. code:: python
-
-    from gargoyle.client.operators.comparable import MoreThan
-
-    condition = Condition(argument=UserInput.age, operator=MoreThan(65), negative=True)
-
-This Condition is now ``True`` if the condition evaluates to ``False``.  In this case if the user's ``age`` is **not** more than ``65``.
-
-Conditions then need to be appended to a swtich instance like so:
-
-.. code:: python
-
-    switch.conditions.append(condition)
-
-You can append as many conditions as you would like to a swtich, there is no limit.
 
 Registering a Switch
 ~~~~~~~~~~~~~~~~~~~~
@@ -275,6 +233,44 @@ Existing switches may be removed from the Manager by calling ``unregister()`` wi
     gargoyle.unregister(a_switch_instance)
 
 **Note:** If the switch is part of a heirarchy and has children switches (see the "Heriarchical Switches" section abobve), all decendent switches (children, grandchildren, etc) will also be unregistered and deleted.
+
+
+Conditions
+==========
+
+Each Swtich can have one-to-many conditions, which decribe the conditions under which that swtich is active.  ``Condition`` objects are constructed with two values: a ``argument`` and ``operator``
+
+An ``argument`` is an ``Argument`` object returned from an ``Input`` class, like the one you defined earlier.  From the previous example, ``UserInput.age`` is an argument.  A condition's ``operator`` is some sort of check applied against that argument.  For instance, is the ``Argument`` greater than some value?  Equal to some value?  Within a range of values?  Etc.
+
+Let's say you wanted a ``Condition`` that checks if the user's age is > 65 years old?  You would construct a Condition that way:
+
+.. code:: python
+
+    from gargoyle.client.operators.comparable import MoreThan
+
+    condition = (Conditionargument=UserInput.age, operator=MoreThan(65))
+
+This Condition will be true if any input instance has an ``age`` that is more than ``65``.
+
+Please see the ``gargoyle.operators`` for a list of available operators.
+
+Conditions can also be constructed with a ``negative`` argument, which negates the condition.  For example:
+
+.. code:: python
+
+    from gargoyle.client.operators.comparable import MoreThan
+
+    condition = Condition(argument=UserInput.age, operator=MoreThan(65), negative=True)
+
+This Condition is now ``True`` if the condition evaluates to ``False``.  In this case if the user's ``age`` is **not** more than ``65``.
+
+Conditions then need to be appended to a swtich instance like so:
+
+.. code:: python
+
+    switch.conditions.append(condition)
+
+You can append as many conditions as you would like to a swtich, there is no limit.
 
 Checking Switches as Active
 ===========================
