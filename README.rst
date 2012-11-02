@@ -35,7 +35,9 @@ This behavior is off by default, but can be enabled through a setting.  More on 
 Configuring Settings
 ~~~~~~~~~~~~~~~~~~~~
 
-To change the ``storage`` and/or ``autocreate`` settings, simply import the settings module and set the appropriate variables:: python
+To change the ``storage`` and/or ``autocreate`` settings, simply import the settings module and set the appropriate variables:
+
+.. code:: python
 
     from gargoyle.client.settings import manager as manager_settings
     from modeldict.dict import RedisDict
@@ -49,7 +51,9 @@ In this case, we are changing the engine to modeldict's ``RedisDict`` and turnin
 Setup
 =====
 
-Once the ``Manager``'s storage engine has been condfigured, you can import gargoyle-client's singleton ``Manager`` object, which is your main interface with ``gargoyle-client``:: python
+Once the ``Manager``'s storage engine has been condfigured, you can import gargoyle-client's singleton ``Manager`` object, which is your main interface with ``gargoyle-client``:
+
+.. code:: python
 
     from gargoyle.client.singleton import gargoyle
 
@@ -60,7 +64,9 @@ Inputs
 
 The first step in your usage of ``gargoyle-client`` should be to define your Inputs that you will be checking switches against.  An "Input" is an object which understands the business logic and object in your system (users, requests, etc) and knows how to validate and transform them into arguments for ``Switch`` conditions.
 
-For instance, your system may have a ``User`` object that has properties like ``is_admin``, ``date_joined``, etc.  To switch against it, you would then create a ``UserInput`` object, which wraps a ``User`` instance, and provides an API of methods that return ``Argument`` objects:: python
+For instance, your system may have a ``User`` object that has properties like ``is_admin``, ``date_joined``, etc.  To switch against it, you would then create a ``UserInput`` object, which wraps a ``User`` instance, and provides an API of methods that return ``Argument`` objects:
+
+.. code:: python
 
     from gargoyle.client.input import Base
     from gargoyle.client.input.arguments import String, Boolean, Value
@@ -100,11 +106,15 @@ First, it means you don't clutter your business logic or objects with code to su
 Secondly, and most importantly, returning ``Argument`` objects ensures that ``gargoyle-client`` conditions work correctly.  This is mostly relevant to the percentage-based operators, and is best illustrated with an
 example.
 
-Imagine you have a ``User`` class with an ``is_vip`` boolean field.  Let's say you wanted to turn on a feature for only 10% of your VIP customers.  To do that, you would write a condition that says, "10% of the time when I'm called with the argument, I should be true."  That line of code would probably do something like this:: python
+Imagine you have a ``User`` class with an ``is_vip`` boolean field.  Let's say you wanted to turn on a feature for only 10% of your VIP customers.  To do that, you would write a condition that says, "10% of the time when I'm called with the argument, I should be true."  That line of code would probably do something like this:
+
+.. code:: python
 
     return 0 <= (hash(argument) % 100) < 10
 
-The issue is that if ``argument == True``, then ``hash(argument) % 100`` will always be the same value for **every** ``User`` with ``is_vip`` of ``True``:: python
+The issue is that if ``argument == True``, then ``hash(argument) % 100`` will always be the same value for **every** ``User`` with ``is_vip`` of ``True``:
+
+.. code:: python
 
     >>> hash(True)
     1
@@ -127,7 +137,9 @@ Switches
 
 Switches encapsulate the concept of an item that is either 'on' or 'off' depending on the input.  The swich determines its on/off status by checking each of its ``conditions`` and seeing if it applies to a certain input.
 
-Switches are constructed with only one required argument, a ``name``:: python
+Switches are constructed with only one required argument, a ``name``:
+
+.. code:: python
 
     from gargoyle.client.models import Switch
 
@@ -135,7 +147,9 @@ Switches are constructed with only one required argument, a ``name``:: python
 
 Switches can be in 3 core states: ``GLOBAL``, ``DISABLED`` and ``SELECTIVE``.  In the ``GLOBAL`` state, the Switch is enabled for every input no matter what.  ``DISABLED`` Switches are not **disabled** for any input, no matter what.  ``SELECTIVE`` Switches enabled based on their conditions.
 
-Swiches can be constructed in a certain state or the property can be changed later:: python
+Swiches can be constructed in a certain state or the property can be changed later:
+
+.. code:: python
 
     switch = Switch('new feature', state=Switch.states.DISABLED)
     another_switch = Switch('new feature')
@@ -151,7 +165,9 @@ When in the ``SELECTIVE`` state, normally only one condition needs be true for t
 Heriarchical Switches
 `````````````````````
 
-You can create switches using a specific heirarchical naming scheme.  Switch namespaces are divided by the colon character (":"), and heirarchies of switches can be constructed in this fashion:: python
+You can create switches using a specific heirarchical naming scheme.  Switch namespaces are divided by the colon character (":"), and heirarchies of switches can be constructed in this fashion:
+
+.. code:: python
 
     parent = Switch('movies')
     child1 = Switch('movies:star_wars')
@@ -167,7 +183,9 @@ By default, each switch makes its "am I active?" decision independent of other s
 
 ``gargoyle-client`` allows you to set a ``concent`` flag on a switch that instructs it to check its parental switch first, before checking itself.  If it checks its parent and it is not enabled for the same input, the switch immediatly returns ``False``.  If its parent *is* enabled for the input, then the switch will continue and check its own conditions, returning as it would normally.
 
-For example:: python
+For example:
+
+.. code:: python
 
     parent = Switch('cool_new_feature')
     child = Switch('cool_new_feature:new_ui', concent=True)
@@ -183,7 +201,9 @@ Each Swtich can have one-to-many conditions, which decribe the conditions under 
 
 An ``argument`` is an ``Argument`` object returned from an ``Input`` class, like the one you defined earlier.  From the previous example, ``UserInput.age`` is an argument.  A condition's ``operator`` is some sort of check applied against that argument.  For instance, is the ``Argument`` greater than some value?  Equal to some value?  Within a range of values?  Etc.
 
-Let's say you wanted a ``Condition`` that checks if the user's age is > 65 years old?  You would construct a Condition that way:: python
+Let's say you wanted a ``Condition`` that checks if the user's age is > 65 years old?  You would construct a Condition that way:
+
+.. code:: python
 
     from gargoyle.client.operators.comparable import MoreThan
 
@@ -193,7 +213,9 @@ This Condition will be true if any input instance has an ``age`` that is more th
 
 Please see the ``gargoyle.operators`` for a list of available operators.
 
-Conditions can also be constructed with a ``negative`` argument, which negates the condition.  For example:: python
+Conditions can also be constructed with a ``negative`` argument, which negates the condition.  For example:
+
+.. code:: python
 
     from gargoyle.client.operators.comparable import MoreThan
 
@@ -201,7 +223,9 @@ Conditions can also be constructed with a ``negative`` argument, which negates t
 
 This Condition is now ``True`` if the condition evaluates to ``False``.  In this case if the user's ``age`` is **not** more than ``65``.
 
-Conditions then need to be appended to a swtich instance like so:: python
+Conditions then need to be appended to a swtich instance like so:
+
+.. code:: python
 
     switch.conditions.append(condition)
 
@@ -210,7 +234,9 @@ You can append as many conditions as you would like to a swtich, there is no lim
 Registering a Switch
 ~~~~~~~~~~~~~~~~~~~~
 
-Once your ``Switch`` is constsructed with the right conditions, you need to retister it with a ``Manager`` instance to preserve it for future use.  Otherwise it will only exist in memory for the current process.  If you've imported your ``Manager`` instance it via the ``singleton``, then it's likely the global ``gargoyle`` object:: python
+Once your ``Switch`` is constsructed with the right conditions, you need to retister it with a ``Manager`` instance to preserve it for future use.  Otherwise it will only exist in memory for the current process.  If you've imported your ``Manager`` instance it via the ``singleton``, then it's likely the global ``gargoyle`` object:
+
+.. code:: python
 
     gargoyle.register(switch)
 
@@ -219,7 +245,9 @@ The Switch is now stored in the Manager's storage and can be checked if active t
 Updating a Switch
 ~~~~~~~~~~~~~~~~~
 
-If you need to update your Switch, simply make the changes to the ``Switch`` object, then call the ``Manager``'s ``update()`` method with the switch to tell it to update the switch with the new object:: python
+If you need to update your Switch, simply make the changes to the ``Switch`` object, then call the ``Manager``'s ``update()`` method with the switch to tell it to update the switch with the new object:
+
+.. code:: python
 
     switch = Switch('cool switch')
     manager.register(switch)
@@ -228,7 +256,9 @@ If you need to update your Switch, simply make the changes to the ``Switch`` obj
 
     manager.update(switch)  # Switch is now updated in the manager
 
-Since this is a common pattern (retrieve switch from the manager, then update it), gargoyle-client provides a shorthand API in which you ask the manager for a switch by name, and then call ``save()`` on the **switch** to update it in the ``Manager`` it was retreived from:: python
+Since this is a common pattern (retrieve switch from the manager, then update it), gargoyle-client provides a shorthand API in which you ask the manager for a switch by name, and then call ``save()`` on the **switch** to update it in the ``Manager`` it was retreived from:
+
+.. code:: python
 
     switch = manager.switch('existing switch')
     switch.name = 'a new name'  # Switch is not updated in manager yet
@@ -237,7 +267,9 @@ Since this is a common pattern (retrieve switch from the manager, then update it
 Unregistering a Switch
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Existing switches may be removed from the Manager by calling ``unregister()`` with the switch name or switch instance:: python
+Existing switches may be removed from the Manager by calling ``unregister()`` with the switch name or switch instance:
+
+.. code:: python
 
     gargoyle.unregister('deprecated switch')
     gargoyle.unregister(a_switch_instance)
@@ -254,19 +286,25 @@ As stated before, switches are checked against **instances** of ``Input`` object
 
 A common use case of gargoyle-client is to use it during the processing of a web request.  During execution of code, different code paths are taken depending on if certain swtiches are active or not.  Often times there are mutliple switches in existence at any one time and they all need to be checked against multiple arguments.  To handle this use case, Gargoyle provides a higher-level API.
 
-To check if a ``Switch`` is active, simply call ``gargoyle.active()`` with the Switch name:: python
+To check if a ``Switch`` is active, simply call ``gargoyle.active()`` with the Switch name:
+
+.. code:: python
 
     gargoyle.active('my cool feature')
     >>> True
 
 The switch is checked against some number of ``Input`` objects.  Inputs can be added to the ``active()`` check one of two ways: locally, passed in to the ``active()`` call or globally, configured ahead of time.
 
-To check agianst local inputs, ``active()`` takes any number of Input objects after the switch name to check the switch against.  In this example, the switch named ``'my cool feature'`` is checked against input objects ``input1`` and ``input2``:: python
+To check agianst local inputs, ``active()`` takes any number of Input objects after the switch name to check the switch against.  In this example, the switch named ``'my cool feature'`` is checked against input objects ``input1`` and ``input2``:
+
+.. code:: python
 
     gargoyle.active('my cool feature', input1, input2)
     >>> True
 
-If you have global Input objects you would like to use for every check, you can set them up by calling the Manager's ``input()`` method:: python
+If you have global Input objects you would like to use for every check, you can set them up by calling the Manager's ``input()`` method:
+
+.. code:: python
 
     gargoyle.input(input1, input2)
 
@@ -274,13 +312,17 @@ Now, ``input1`` and ``input2`` are checked against for every ``active`` call.  F
 
     gargoyle.active('my cool feature', input3)
 
-Once you're doing using global inputs, perhaps at the end of a request, you should call the Manager's ``flush()`` method to remove all the inputs:: python
+Once you're doing using global inputs, perhaps at the end of a request, you should call the Manager's ``flush()`` method to remove all the inputs:
+
+.. code:: python
 
     gargoyle.flush()
 
 The Manager is now setup and ready for its next set of inputs.
 
-When calling ``active()`` with a local ``Input``s, you can skip checking the ``Switch`` against the global inputs and **only** check against your locally passed in Inputs by passing ``exclusive=True`` as a keyword argument to ``active()``:: python
+When calling ``active()`` with a local ``Input``s, you can skip checking the ``Switch`` against the global inputs and **only** check against your locally passed in Inputs by passing ``exclusive=True`` as a keyword argument to ``active()``:
+
+.. code:: python
 
     gargoyle.input(input1, input2)
     gargoyle.active('my cool feature', input3, exclusive=True)
@@ -300,7 +342,9 @@ There are 3 signals related to Switch changes:
 2. ``switch_unregistered`` - Called when a switch is unregistered with the Manager.
 3. ``switch_updated`` - Called with a switch was updated.
 
-To use a signal, simply call the signal's ``connect()`` method and pass in a callable object.  When the signal is fired, it will call your callable with the switch that is being register/unregistered/updated.  I.e.:: python
+To use a signal, simply call the signal's ``connect()`` method and pass in a callable object.  When the signal is fired, it will call your callable with the switch that is being register/unregistered/updated.  I.e.:
+
+.. code:: python
 
     from gargoyle.client.signals import switch_updated
 
@@ -312,7 +356,9 @@ To use a signal, simply call the signal's ``connect()`` method and pass in a cal
 Understanding Switch Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``switch_updated`` signal can be connected to in order to be notified when a switch has been changed.  To know *what* changed in the switch, you can consult its ``changes`` property:: python
+The ``switch_updated`` signal can be connected to in order to be notified when a switch has been changed.  To know *what* changed in the switch, you can consult its ``changes`` property:
+
+.. code:: python
 
     >>> from gargoyle.client.models import Switch
     >>> switch = Switch('test')
@@ -334,7 +380,9 @@ When a ``Switch`` checks an ``Input`` object against its conditions, there is a 
 
 While catching all exceptions is generally bad form and hides error, most of the time you do not want to fail an application request just because there was an error checking a switch condition, *especially* if there was an error during checking a ``Condition`` for which a user would not have applied in the first place.
 
-That said, you would still probably want to know if there was an error checking a Condition.  To acomplish this, ``gargoyle``-client provides a ``condition_apply_error`` signal which is called when there was an error checking a ``Condition``.  The signal is called with an instance of the condition, the ``Input`` which caused the error and the instance of the Exception class itself:: python
+That said, you would still probably want to know if there was an error checking a Condition.  To acomplish this, ``gargoyle``-client provides a ``condition_apply_error`` signal which is called when there was an error checking a ``Condition``.  The signal is called with an instance of the condition, the ``Input`` which caused the error and the instance of the Exception class itself:
+
+.. code:: python
 
     signals.condition_apply_error.call(condition, inpt, error)
 
