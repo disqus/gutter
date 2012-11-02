@@ -339,8 +339,8 @@ class CompoundedConditionsTest(Exam, SwitchWithConditions, unittest.TestCase):
 class ManagerTest(unittest.TestCase):
 
     storage_with_existing_switches = {
-        'default:existing': 'switch',
-        'default:another': 'valuable switch'
+        'default.existing': 'switch',
+        'default.another': 'valuable switch'
     }
     expected_switches_from_storage = ['switch', 'valuable switch']
     namespace_base = []
@@ -364,7 +364,7 @@ class ManagerTest(unittest.TestCase):
 
     def namespaced(self, *names):
         parts = itertools.chain(self.manager.namespace, names)
-        return self.manager.key_separator.join(parts)
+        return self.manager.namespace_separator.join(parts)
 
     def test_autocreate_defaults_to_false(self):
         eq_(Manager(storage=dict()).autocreate, False)
@@ -483,10 +483,10 @@ class ManagerTest(unittest.TestCase):
 class NamespacedManagertest(ManagerTest):
 
     storage_with_existing_switches = {
-        'a:b:brother': 'brother switch',
-        'a:b:sister': 'sister switch',
-        'a:b:c:grandchild': 'grandchild switch',
-        'a:c:cousin': 'cousin switch',
+        'a.b.brother': 'brother switch',
+        'a.b.sister': 'sister switch',
+        'a.b.c.grandchild': 'grandchild switch',
+        'a.c.cousin': 'cousin switch',
     }
     expected_switches_from_storage = [
         'brother switch',

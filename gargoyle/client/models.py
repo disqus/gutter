@@ -269,6 +269,7 @@ class Manager(threading.local):
     """
 
     key_separator = ':'
+    namespace_separator = '.'
     default_namespace = ['default']
 
     def __init__(self, storage, autocreate=False, switch_class=Switch,
@@ -417,8 +418,10 @@ class Manager(threading.local):
         if not self.__joined_namespace:
             return name
         else:
-            return self.key_separator.join((self.__joined_namespace, name))
+            return self.namespace_separator.join(
+                (self.__joined_namespace, name)
+            )
 
     @property
     def __joined_namespace(self):
-        return self.key_separator.join(self.namespace)
+        return self.namespace_separator.join(self.namespace)
