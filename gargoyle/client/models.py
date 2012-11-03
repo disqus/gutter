@@ -47,6 +47,19 @@ class Switch(object):
         self.manager = manager
         self.reset()
 
+    def __repr__(self):
+        kwargs = dict(
+            state=self.state,
+            compounded=self.compounded,
+            concent=self.concent
+        )
+        parts = ["%s=%s" % (k, v) for k, v in kwargs.items()]
+        return '<Switch("%s") conditions=%s, %s>' % (
+            self.name,
+            len(self.conditions),
+            ', '.join(parts)
+        )
+
     def enabled_for(self, inpt):
         """
         Checks to see if this switch is enabled for the provided input.
@@ -199,6 +212,15 @@ class Condition(object):
         self.operator = operator
         self.negative = negative
 
+    def __repr__(self):
+        argument = "%s.%s.%s" % (
+            self.argument_dict['module'],
+            self.argument_dict['klass'],
+            self.argument_dict['func']
+
+        )
+        return '<Condition "%s" %s>' % (argument, self.operator)
+
     @property
     def argument(self):
         # These gymnasticas are neccessary because instancemethod types in
@@ -303,10 +325,6 @@ class Manager(threading.local):
             switch for name, switch in self.storage.iteritems()
             if name.startswith(self.__joined_namespace)
         ]
-        print results
-
-        for name, switch in self.storage.iteritems():
-            print name, switch, self.__joined_namespace
 
         return results
 

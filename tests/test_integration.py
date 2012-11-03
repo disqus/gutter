@@ -114,7 +114,6 @@ class TestIntegration(Exam, unittest.TestCase):
             self.manager.flush()
 
     def test_basic_switches_work_with_conditions(self):
-
         with self.inputs(self.manager, self.larry) as context:
             ok_(context.active('can drink') is True)
             ok_(context.active('can drink in europe') is True)
