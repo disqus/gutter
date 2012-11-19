@@ -60,6 +60,14 @@ class Switch(object):
             ', '.join(parts)
         )
 
+    def __eq__(self, other):
+            return (
+                self.name == other.name and
+                self.state is other.state and
+                self.compounded is other.compounded and
+                self.concent is other.concent
+            )
+
     def enabled_for(self, inpt):
         """
         Checks to see if this switch is enabled for the provided input.

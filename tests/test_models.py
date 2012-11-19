@@ -1,6 +1,7 @@
 import unittest
 import threading
 import itertools
+
 from nose.tools import *
 from gargoyle.client.models import Switch, Manager, Condition
 from modeldict import MemoryDict
@@ -26,6 +27,13 @@ class ReflectiveInput(object):
 
 
 class TestSwitch(unittest.TestCase):
+
+    possible_properties = [
+        ('name', ('foo', 'bar')),
+        ('state', (Switch.states.DISABLED, Switch.states.SELECTIVE)),
+        ('compounded', (True, False)),
+        ('concent', (True, False))
+    ]
 
     def test_switch_has_state_constants(self):
         self.assertTrue(Switch.states.DISABLED)
@@ -130,6 +138,29 @@ class TestSwitch(unittest.TestCase):
         switch = Switch('foo', manager='manager', state=Switch.states.DISABLED)
         eq_(switch.enabled_for('causing input'), False)
         eq_(signal.call.called, False)
+
+    def test_switches_are_equal_if_they_have_the_same_properties(self):
+        a = Switch('a')
+        b = Switch('b')
+
+        for prop, (a_value, b_value) in self.possible_properties:
+            setattr(a, prop, a_value)
+            setattr(b, prop, b_value)
+            self.assertNotEqual(a, b, "expected %s to not be equals" % prop)
+
+            setattr(b, prop, a_value)
+            eq_(a, b, "expected %s to be equals" % prop)
+
+    def test_switches_are_still_equal_with_different_managers(self):
+        a = Switch('a')
+        b = Switch('a')
+
+        eq_(a, b)
+
+        a.manager = 'foo'
+        b.manager = 'bar'
+
+        eq_(a, b)
 
 
 class TestSwitchChanges(unittest.TestCase):
