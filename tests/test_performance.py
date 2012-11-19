@@ -1,0 +1,24 @@
+from test_integration import TestIntegration
+from noseperf.testcases import PerformanceTest
+
+from redis import Redis
+from modeldict.redis import RedisDict
+
+from exam.decorators import before, fixture
+
+from gargoyle.client.models import Manager
+
+
+class TestPerformance(TestIntegration, PerformanceTest):
+
+    @before
+    def switch_to_redis_backend(self):
+        pass
+
+    @fixture
+    def redis(self):
+        return Redis()
+
+    @fixture
+    def manager(self):
+        return Manager(storage=RedisDict('gargoyle-tests', self.redis))
