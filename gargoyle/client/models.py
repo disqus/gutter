@@ -293,9 +293,6 @@ class Condition(object):
     def __is_same_class_as_argument(self, inpt):
         return inpt.__class__ is self.argument.im_class
 
-    def function(self):
-        pass
-
 
 class Manager(threading.local):
     """
@@ -372,7 +369,6 @@ class Manager(threading.local):
     def register(self, switch, signal=signals.switch_registered):
         switch.manager = None
         self.__sync_parental_relationships(switch)
-        self.namespace
         self.storage[self.__namespaced(switch.name)] = switch
         switch.manager = self
         signal.call(switch)
