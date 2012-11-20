@@ -229,6 +229,13 @@ class Condition(object):
         )
         return '<Condition "%s" %s>' % (argument, self.operator)
 
+    def __eq__(self, other):
+        return (
+            self.argument_dict == other.argument_dict and
+            self.operator == other.operator and
+            self.negative is other.negative
+        )
+
     @property
     def argument(self):
         # These gymnasticas are neccessary because instancemethod types in

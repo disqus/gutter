@@ -201,6 +201,19 @@ class TestSwitchChanges(unittest.TestCase):
 
 class TestCondition(unittest.TestCase):
 
+    def argument_dict(name):
+        return dict(
+            module='module%s' % name,
+            klass='klass%s' % name,
+            func='func%s' % name
+        )
+
+    possible_properties = [
+        ('argument_dict', (argument_dict('1'), argument_dict('2'))),
+        ('operator', ('o1', 'o2')),
+        ('negative', (False, True))
+    ]
+
     @fixture
     def operator(self):
         m = mock.Mock(name='operator')
@@ -280,6 +293,19 @@ class TestCondition(unittest.TestCase):
         rebuilt = pickle.loads(string)
         eq_(rebuilt.operator, condition.operator)
         eq_(rebuilt.argument, condition.argument)
+
+    def test_equals_if_has_the_same_properties(self):
+        a = Condition(Argument.bar, bool)
+        b = Condition(Argument.bar, bool)
+
+        for prop, (a_val, b_val) in self.possible_properties:
+            setattr(a, prop, a_val)
+            setattr(b, prop, b_val)
+
+            self.assertNotEqual(a, b)
+
+            setattr(b, prop, a_val)
+            eq_(a, b)
 
 
 class SwitchWithConditions(object):

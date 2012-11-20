@@ -21,6 +21,13 @@ class BaseOperator(object):
     def test_has_arguments_property(self):
         ok_(hasattr(self.property_class, 'arguments'))
 
+    def test_instances_with_identical_properties_are_equals(self):
+        eq_(self.make_operator(), self.make_operator())
+
+    @fixture
+    def operator(self):
+        return self.make_operator()
+
     @fixture
     def str(self):
         return str(self.operator)
@@ -32,8 +39,7 @@ class BaseOperator(object):
 
 class TestTruthyCondition(BaseOperator, unittest.TestCase):
 
-    @fixture
-    def operator(self):
+    def make_operator(self):
         return Truthy()
 
     def test_applies_to_if_argument_is_truthy(self):
@@ -51,8 +57,7 @@ class TestTruthyCondition(BaseOperator, unittest.TestCase):
 
 class TestEqualsCondition(BaseOperator, unittest.TestCase):
 
-    @fixture
-    def operator(self):
+    def make_operator(self):
         return Equals(value='Fred')
 
     def test_applies_to_if_argument_is_equal_to_value(self):
@@ -74,8 +79,7 @@ class TestEqualsCondition(BaseOperator, unittest.TestCase):
 
 class TestBetweenCondition(BaseOperator, unittest.TestCase):
 
-    @fixture
-    def operator(self, lower=1, higher=100):
+    def make_operator(self, lower=1, higher=100):
         return Between(lower, higher)
 
     def test_applies_to_if_between_lower_and_upper_bound(self):
@@ -104,8 +108,7 @@ class TestBetweenCondition(BaseOperator, unittest.TestCase):
 
 class TestLessThanCondition(BaseOperator, unittest.TestCase):
 
-    @fixture
-    def operator(self, upper=500):
+    def make_operator(self, upper=500):
         return LessThan(upper)
 
     def test_applies_to_if_value_less_than_argument(self):
@@ -135,8 +138,7 @@ class TestLessThanCondition(BaseOperator, unittest.TestCase):
 
 class TestLessThanOrEqualToOperator(BaseOperator):
 
-    @fixture
-    def operator(self, upper=500):
+    def make_operator(self, upper=500):
         return LessThanOrEqualTo(upper)
 
     def test_applies_if_value_is_less_than_or_equal_to_argument(self):
@@ -168,8 +170,7 @@ class TestLessThanOrEqualToOperator(BaseOperator):
 
 class TestMoreThanOperator(BaseOperator, unittest.TestCase):
 
-    @fixture
-    def operator(self, lower=10):
+    def make_operator(self, lower=10):
         return MoreThan(lower)
 
     def test_applies_to_if_value_more_than_argument(self):
@@ -198,8 +199,7 @@ class TestMoreThanOperator(BaseOperator, unittest.TestCase):
 
 class TestMoreThanOrEqualToOperator(BaseOperator, unittest.TestCase):
 
-    @fixture
-    def operator(self, lower=10):
+    def make_operator(self, lower=10):
         return MoreThanOrEqualTo(lower)
 
     def test_applies_to_if_value_more_than_argument(self):
@@ -246,8 +246,7 @@ class PercentTest(BaseOperator):
 
 class PercentageTest(PercentTest, unittest.TestCase):
 
-    @fixture
-    def operator(self):
+    def make_operator(self):
         return Percent(50)
 
     def test_applies_to_percentage_passed_in(self):
@@ -262,8 +261,7 @@ class PercentageTest(PercentTest, unittest.TestCase):
 
 class PercentRangeTest(PercentTest, unittest.TestCase):
 
-    @fixture
-    def operator(self):
+    def make_operator(self):
         return self.range_of(10, 20)
 
     def range_of(self, lower, upper):
