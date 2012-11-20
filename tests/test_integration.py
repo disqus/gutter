@@ -305,3 +305,24 @@ class TestIntegration(Exam, unittest.TestCase):
 
         ok_(daughter_switch not in base.switches)
         ok_(son_switch not in base.switches)
+
+    def test_retrieved_switches_can_be_updated(self):
+        switch = Switch('foo')
+        self.manager.register(switch)
+
+        switch.name = 'steve'
+        switch.save()
+
+        self.assertRaises(ValueError, self.manager.switch, 'foo')
+        self.assertEquals(self.manager.switch('steve').name, 'steve')
+
+        switch.name = 'bob'
+        switch.state = Switch.states.GLOBAL
+        switch.save()
+
+        self.assertEquals(self.manager.switch('bob').name, 'bob')
+        self.assertEquals(
+            self.manager.switch('bob').state,
+            Switch.states.GLOBAL
+        )
+        self.assertRaises(ValueError, self.manager.switch, 'steve')
