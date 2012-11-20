@@ -331,6 +331,11 @@ class Manager(threading.local):
         self.switch_class = switch_class
         self.namespace = namespace
 
+    def __getstate__(self):
+        inner_dict = vars(self).copy()
+        inner_dict.pop('storage', False)
+        return inner_dict
+
     @property
     def switches(self):
         """

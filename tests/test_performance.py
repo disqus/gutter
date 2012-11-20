@@ -19,6 +19,10 @@ class TestPerformance(TestIntegration, PerformanceTest):
     def redis(self):
         return Redis()
 
+    @before
+    def flush_redis(self):
+        self.redis.flushdb()
+
     @fixture
     def manager(self):
         return Manager(storage=RedisDict('gargoyle-tests', self.redis))

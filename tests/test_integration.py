@@ -35,6 +35,39 @@ class User(object):
 
 class TestIntegration(Exam, unittest.TestCase):
 
+    class Callback(object):
+
+        def __init__(self):
+            self.register_calls = []
+            self.unregister_calls = []
+            self.update_calls = []
+
+        def switch_added(self, switch):
+            self.register_calls.append(switch)
+
+        def switch_removed(self, switch):
+            self.unregister_calls.append(switch)
+
+        def switch_updated(self, switch):
+            self.update_calls.append((switch, switch.changes))
+
+    class inputs(object):
+
+        def __init__(self, manager, *inputs):
+            self.manager = manager
+            self.manager.input(*inputs)
+
+        def __enter__(self):
+            return self
+
+        def active(self, *args, **kwargs):
+            return self.manager.active(*args, **kwargs)
+
+        def __exit__(self, type, value, traceback):
+            self.manager.flush()
+
+    callback = fixture(Callback)
+
     @fixture
     def manager(self):
         return Manager(storage=dict())
@@ -97,21 +130,6 @@ class TestIntegration(Exam, unittest.TestCase):
         [switch.conditions.append(c) for c in conditions]
         kwargs.get('manager', self.manager).register(switch)
         return switch
-
-    class inputs(object):
-
-        def __init__(self, manager, *inputs):
-            self.manager = manager
-            self.manager.input(*inputs)
-
-        def __enter__(self):
-            return self
-
-        def active(self, *args, **kwargs):
-            return self.manager.active(*args, **kwargs)
-
-        def __exit__(self, type, value, traceback):
-            self.manager.flush()
 
     def test_basic_switches_work_with_conditions(self):
         with self.inputs(self.manager, self.larry) as context:
@@ -191,49 +209,31 @@ class TestIntegration(Exam, unittest.TestCase):
             context.manager.autocreate = True
             ok_(context.active('can drink') is False)
 
-    class Callback(object):
-
-        register_calls = []
-        unregister_calls = []
-        update_calls = []
-
-        @classmethod
-        def switch_added(klass, switch):
-            klass.register_calls.append(switch)
-
-        @classmethod
-        def switch_removed(klass, switch):
-            klass.unregister_calls.append(switch)
-
-        @classmethod
-        def switch_updated(klass, switch):
-            klass.update_calls.append((switch, switch.changes))
-
     def test_can_register_signals_and_get_notified(self):
-        signals.switch_registered.connect(self.Callback.switch_added)
-        signals.switch_unregistered.connect(self.Callback.switch_removed)
-        signals.switch_updated.connect(self.Callback.switch_updated)
+        signals.switch_registered.connect(self.callback.switch_added)
+        signals.switch_unregistered.connect(self.callback.switch_removed)
+        signals.switch_updated.connect(self.callback.switch_updated)
 
-        eq_(self.Callback.register_calls, [])
-        eq_(self.Callback.unregister_calls, [])
-        eq_(self.Callback.update_calls, [])
+        eq_(self.callback.register_calls, [])
+        eq_(self.callback.unregister_calls, [])
+        eq_(self.callback.update_calls, [])
 
         switch = Switch('foo')
 
         self.manager.register(switch)
-        eq_(self.Callback.register_calls, [switch])
+        eq_(self.callback.register_calls, [switch])
 
         self.manager.unregister(switch.name)
-        eq_(self.Callback.unregister_calls, [switch])
+        eq_(self.callback.unregister_calls, [switch])
 
         self.manager.register(switch)
-        eq_(self.Callback.register_calls, [switch, switch])
+        eq_(self.callback.register_calls, [switch, switch])
 
         switch.name = 'a new name'
         switch.state = Switch.states.GLOBAL
         self.manager.update(switch)
 
-        change = self.Callback.update_calls[0]
+        change = self.callback.update_calls[0]
         eq_(change[0], switch)
         changes = change[1]
         eq_(changes['name'], dict(current='a new name', previous='foo'))
@@ -242,7 +242,7 @@ class TestIntegration(Exam, unittest.TestCase):
         switch.name = 'from save() call'
         switch.save()
 
-        change = self.Callback.update_calls[1]
+        change = self.callback.update_calls[1]
         eq_(change[0], switch)
         changes = change[1]
         eq_(changes['name'], dict(current='from save() call', previous='a new name'))
