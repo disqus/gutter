@@ -10,7 +10,7 @@ except ImportError:
 
 
 tests_require = [
-    'nose', 'exam', 'mock', 'nose-performance'
+    'nose', 'exam', 'mock', 'nose-performance', 'django'
 ]
 
 setup_requires = []
