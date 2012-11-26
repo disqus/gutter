@@ -7,7 +7,7 @@ gargoyle.models
 """
 
 from gargoyle.client import signals
-from itertools import chain
+from gargoyle.client import inputs as gargoyle_inputs
 from functools import partial
 import threading
 import inspect
@@ -255,10 +255,12 @@ class Condition(object):
         Returns if the condition applies to the ``inpt``.
 
         If the class ``inpt`` is an instance of is not the same class as the
-        condition's own ``argument``, then ``False`` is returned.  Otherwise,
-        ``argument`` is called, with ``inpt`` as the instance and the value is
-        compared to the ``operator`` and the Value is returned.  If the
-        condition is ``negative``, then then ``not`` the value is returned.
+        condition's own ``argument``, then ``False`` is returned.  This also
+        applies to the ``NONE`` input.
+
+        Otherwise, ``argument`` is called, with ``inpt`` as the instance and
+        the value is compared to the ``operator`` and the Value is returned.  If
+        the condition is ``negative``, then then ``not`` the value is returned.
 
         Keyword Arguments:
         inpt -- An instance of the ``Input`` class.
@@ -392,7 +394,12 @@ class Manager(threading.local):
         switch = self.switch(name)
 
         if not kwargs.get('exclusive', False):
-            inputs = chain(self.inputs, inputs)
+            inputs = tuple(self.inputs) + inputs
+
+        # Also check the switches against "NONE" input. This ensures there will
+        # be at least one input checked.
+        if not inputs:
+            inputs = (gargoyle_inputs.NONE,)
 
         return any(map(switch.enabled_for, inputs))
 

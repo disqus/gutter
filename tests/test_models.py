@@ -4,6 +4,7 @@ import itertools
 
 from nose.tools import *
 from gargoyle.client.models import Switch, Manager, Condition
+from gargoyle.client import inputs
 from modeldict import MemoryDict
 from gargoyle.client import signals
 import mock
@@ -267,6 +268,9 @@ class TestCondition(unittest.TestCase):
     def test_if_apply_explodes_it_returns_false(self):
         self.operator.applies_to.side_effect = Exception
         eq_(self.condition.call(ReflectiveInput()), False)
+
+    def test_if_input_is_NONE_it_returns_false(self):
+        eq_(self.condition.call(inputs.NONE), False)
 
     @mock.patch('gargoyle.client.signals.condition_apply_error')
     def test_if_apply_explodes_it_signals_condition_apply_error(self, signal):
@@ -710,6 +714,14 @@ class EmptyManagerInstanceTest(ActsLikeManager, unittest.TestCase):
         additional_input = mock.Mock()
         self.manager.active('foo', additional_input)
         switch.enabled_for.assert_called_once_with(additional_input)
+
+    def test_checks_against_NONE_input_if_no_inputs(self):
+        switch = self.mock_and_register_switch('global')
+        eq_(self.manager.inputs, [])
+
+        self.manager.active('global')
+
+        switch.enabled_for.assert_called_once_with(inputs.NONE)
 
 
 class NamespacedEmptyManagerInstanceTest(EmptyManagerInstanceTest):

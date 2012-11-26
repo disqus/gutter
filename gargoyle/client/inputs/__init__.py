@@ -34,3 +34,8 @@ class Base(object):
             raise ValueError("'%s' not valid Input Argument" % argument)
 
         return True
+
+
+#: Special singleton used to represent a "no input" which arguments can look
+#: for and ignore
+NONE = object()
