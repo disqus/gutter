@@ -415,7 +415,7 @@ Templates
 
 ``gargoyle-client`` has a ``ifswitch`` template tag that you can use in your Django templates.  To use it, simply load the ``gargoyle`` template helpers and pass ``ifswitch`` the switch name.  If the switch is active, the content between ``ifswitch`` and ``endifswitch`` will be rendered.
 
-.. code:: python
+.. code::
 
     {% load gargoyle %}
     {% ifswitch cool_feature %}
@@ -424,7 +424,7 @@ Templates
 
 You can also use an ``else`` tag to render content if the switch is not active:
 
-.. code:: python
+.. code::
 
     {% load gargoyle %}
     {% ifswitch cool_feature %}
@@ -435,7 +435,7 @@ You can also use an ``else`` tag to render content if the switch is not active:
 
 Like ``gargoyle.active``, ``ifswitch`` takes any number of input objects to check the switch against:
 
-.. code:: python
+.. code::
 
     {% load gargoyle %}
     {% ifswitch cool_feature user project %}
