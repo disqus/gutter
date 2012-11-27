@@ -13,3 +13,5 @@ except Exception, e:
 
 #: Default manager instance
 from chimera.client.singleton import chimera
+
+from chimera.client.autodiscovery import discover as autodiscover
