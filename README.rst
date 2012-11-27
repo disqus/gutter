@@ -11,7 +11,8 @@ Table of Contents
 * Configuration_
 * Setup_
 * Inputs_
-* `Switches and Conditions`_
+* `Switches`_
+* `Conditions`_
 * `Checking Switches as Active`_
 * Signals_
 
