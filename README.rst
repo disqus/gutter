@@ -55,31 +55,31 @@ In this case, we are changing the engine to modeldict's ``RedisDict`` and turnin
 Setup
 =====
 
-Once the ``Manager``'s storage engine has been condfigured, you can import chimera-client's singleton ``Manager`` object, which is your main interface with ``chimera-client``:
+Once the ``Manager``'s storage engine has been condfigured, you can import chimera-client's default ``Manager`` object, which is your main interface with ``chimera-client``:
 
 .. code:: python
 
-    from chimera.client.singleton import chimera
+    from chimera.client import chimera
 
-At this point the ``chimera`` object is an instance of the ``Manager`` class, which holds all methods to register switches and check if they are active.  In most installations and usage scenarios, the ``chimera`` singleton will be your main interface.
+At this point the ``chimera`` object is an instance of the ``Manager`` class, which holds all methods to register switches and check if they are active.  In most installations and usage scenarios, the ``chimera.client.chimera`` manager will be your main interface.
 
 Using a different default Manager
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you would like to construct and use a different default manager, but still have it accessible via ``chimera.client.singleton.chimera``, you can construct and then assign a ``Manager`` instance to ``settings.manager.default`` value:
+If you would like to construct and use a different default manager, but still have it accessible via ``chimera.client.chimera``, you can construct and then assign a ``Manager`` instance to ``settings.manager.default`` value:
 
 .. code:: python
 
     from chimera.client.settings import manager as manager_settings
     from chimera.client.models import Manager
 
-    manager_settings.default = Manager({})   # Must be done before importing the singleton
+    manager_settings.default = Manager({})   # Must be done before importing the defualt manager
 
-    from chimera.client.singleton import chimera
+    from chimera.client import chimera
 
     assert manager_settings.defaultis chimera
 
-Note that the ``settings.manager.default`` value must be set **before** importing the singleton ``chimera`` instance.
+Note that the ``settings.manager.default`` value must be set **before** importing the default ``chimera`` instance.
 
 Inputs
 ======
@@ -460,7 +460,7 @@ Like ``chimera.active``, ``ifswitch`` takes any number of input objects to check
     switch active for user or project!
     {% endifswitch %}
 
-NOTE: By default, the `chimera` instance used in the template tags is the ``chimera.client.singleton.chimera`` instance.
+NOTE: By default, the `chimera` instance used in the template tags is the ``chimera.client.chimera`` instance.
 
 Testing Utilities
 ===============
@@ -474,7 +474,7 @@ For instance, with this code here, by passing ``cool_feature=True`` to the ``swi
 .. code:: python
 
     from chimera.client.testutils import switches
-    from chimera.singleton import chimera
+    from chimera import chimera
 
     with switches(cool_feature=True):
         chimera.active('cool_feature')  # True
@@ -485,7 +485,7 @@ And when using ``switches`` as a decorator:
 .. code:: python
 
     from chimera.client.testutils import switches
-    from chimera.singleton import chimera
+    from chimera import chimera
 
     @switches(cool_feature=True)
     def run(self):
