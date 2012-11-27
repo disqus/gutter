@@ -5,24 +5,31 @@ import mock
 from gargoyle.client.settings import manager
 import gargoyle.client.models
 
-from exam.decorators import after
+from exam.decorators import after, around
 from exam.cases import Exam
 
 
 class TestGargoyle(Exam, unittest.TestCase):
 
     other_engine = dict()
-    manager_defaults = dict(storage=manager.storage_engine,
-                             autocreate=manager.autocreate,
-                             operators=manager.operators,
-                             inputs=manager.inputs)
+    manager_defaults = dict(
+        storage=manager.storage_engine,
+        autocreate=manager.autocreate,
+        operators=manager.operators,
+        inputs=manager.inputs
+    )
 
     @after
     def reset_to_defaults(self):
-        manager.storage = self.manager_defaults['storage']
-        manager.autocreate = self.manager_defaults['autocreate']
-        manager.operators = self.manager_defaults['operators']
-        manager.inputs = self.manager_defaults['inputs']
+        for key, val in self.manager_defaults.items():
+            setattr(manager, key, val)
+
+    @around
+    def preserve_default_singleton(self):
+        import gargoyle.client.singleton
+        original_singleton = gargoyle.client.singleton.gargoyle
+        yield
+        gargoyle.client.singleton.gargoyle = original_singleton
 
     def test_gargoyle_global_is_a_switch_manager(self):
         reload(gargoyle.client.singleton)
@@ -44,5 +51,18 @@ class TestGargoyle(Exam, unittest.TestCase):
             manager.inputs = [4]
             manager.operators = [5]
             reload(gargoyle.client.singleton)
-            expected = ((), dict(storage=self.other_engine, autocreate=True, inputs=[4], operators=[5]))
+            expected = (
+                (),
+                dict(
+                    storage=self.other_engine,
+                    autocreate=True,
+                    inputs=[4],
+                    operators=[5]
+                )
+            )
             eq_(init.call_args, expected)
+
+    def test_uses_default_manager_if_set(self):
+        manager.default = mock.sentinel.default_manager
+        reload(gargoyle.client.singleton)
+        eq_(gargoyle.client.singleton.gargoyle, mock.sentinel.default_manager)

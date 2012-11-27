@@ -63,6 +63,24 @@ Once the ``Manager``'s storage engine has been condfigured, you can import gargo
 
 At this point the ``gargoyle`` object is an instance of the ``Manager`` class, which holds all methods to register switches and check if they are active.  In most installations and usage scenarios, the ``gargoyle`` singleton will be your main interface.
 
+Using a different default Manager
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you would like to construct a use a different default manager, but still have it accessible via ``gargoyle.client.singleton.gargoyle``, you can construct and then assign a ``Manager`` instance to ``settings.manager.default`` value:
+
+.. code:: python
+
+    from gargoyle.client.settings import manager as manager_settings
+    from gargoyle.client.models import Manager
+
+    manager_settings.default = Manager({})   # Must be done before importing the singleton
+
+    from gargoyle.client.singleton import gargoyle
+
+    assert manager_settings.default == gargoyle
+
+Note that the ``settings.manager.default`` value must be set **before** importing the singleton ``gargoyle`` instance.
+
 Inputs
 ======
 
@@ -196,7 +214,7 @@ For example, because ``child`` was constructed with ``concent=True``, even if ``
 Registering a Switch
 ~~~~~~~~~~~~~~~~~~~~
 
-Once your ``Switch`` is constsructed with the right conditions, you need to retister it with a ``Manager`` instance to preserve it for future use.  Otherwise it will only exist in memory for the current process.  If you've imported your ``Manager`` instance it via the ``singleton``, then it's likely the global ``gargoyle`` object:
+Once your ``Switch`` is constsructed with the right conditions, you need to retister it with a ``Manager`` instance to preserve it for future use.  Otherwise it will only exist in memory for the current process.  Register a switch via the ``register`` method on a ``Manager`` instance:
 
 .. code:: python
 

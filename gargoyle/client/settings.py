@@ -10,3 +10,4 @@ class manager(object):
     inputs = []
     operators = (Equals, Between, LessThan, LessThanOrEqualTo, MoreThan,
                  MoreThanOrEqualTo, Truthy, Percent, PercentRange)
+    default = None
