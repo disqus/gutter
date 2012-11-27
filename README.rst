@@ -66,7 +66,7 @@ At this point the ``gargoyle`` object is an instance of the ``Manager`` class, w
 Using a different default Manager
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you would like to construct a use a different default manager, but still have it accessible via ``gargoyle.client.singleton.gargoyle``, you can construct and then assign a ``Manager`` instance to ``settings.manager.default`` value:
+If you would like to construct and use a different default manager, but still have it accessible via ``gargoyle.client.singleton.gargoyle``, you can construct and then assign a ``Manager`` instance to ``settings.manager.default`` value:
 
 .. code:: python
 
@@ -77,7 +77,7 @@ If you would like to construct a use a different default manager, but still have
 
     from gargoyle.client.singleton import gargoyle
 
-    assert manager_settings.default == gargoyle
+    assert manager_settings.defaultis gargoyle
 
 Note that the ``settings.manager.default`` value must be set **before** importing the singleton ``gargoyle`` instance.
 
