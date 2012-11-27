@@ -8,31 +8,31 @@ from mock import Mock, sentinel
 from exam.decorators import fixture, around
 from exam.cases import Exam
 
-from gargoyle.client.models import Switch
-import gargoyle.client.singleton
+from chimera.client.models import Switch
+import chimera.client.singleton
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', __name__)
-INSTALLED_APPS = ('gargoyle.client',)
+INSTALLED_APPS = ('chimera.client',)
 
 
 class TempateTagTest(Exam, unittest.TestCase):
 
     @around
     def maintain_manager_state(self):
-        self.gargoyle.register(self.switch)
+        self.chimera.register(self.switch)
         yield
-        self.gargoyle.flush()
+        self.chimera.flush()
 
     @around
     def patch_singleton(self):
-        old_active = self.gargoyle.active
-        self.gargoyle.active = Mock(return_value=False)
+        old_active = self.chimera.active
+        self.chimera.active = Mock(return_value=False)
         yield
-        self.gargoyle.active = old_active
+        self.chimera.active = old_active
 
     @property
-    def gargoyle(self):
-        return gargoyle.client.singleton.gargoyle
+    def chimera(self):
+        return chimera.client.singleton.chimera
 
     @fixture
     def switch(self):
@@ -42,7 +42,7 @@ class TempateTagTest(Exam, unittest.TestCase):
     def ifswitch(self):
         return Template(
             """
-            {% load gargoyle %}
+            {% load chimera %}
             {% ifswitch test %}
             switch active!
             {% endifswitch %}
@@ -53,7 +53,7 @@ class TempateTagTest(Exam, unittest.TestCase):
     def ifswitch_with_else(self):
         return Template(
             """
-            {% load gargoyle %}
+            {% load chimera %}
             {% ifswitch test %}
             switch active!
             {% else %}
@@ -66,7 +66,7 @@ class TempateTagTest(Exam, unittest.TestCase):
     def ifswitch_with_input(self):
         return Template(
             """
-            {% load gargoyle %}
+            {% load chimera %}
             {% ifswitch test input %}
             switch active!
             {% endifswitch %}
@@ -86,7 +86,7 @@ class TempateTagTest(Exam, unittest.TestCase):
 
     def test_renders_content_inside_if_enabled_switch(self):
         self.assertContentNotInTemplate('switch active', self.ifswitch)
-        self.gargoyle.active.return_value = True
+        self.chimera.active.return_value = True
         self.assertContentInTemplate('switch active', self.ifswitch)
 
     def test_works_with_else_switch(self):
@@ -94,13 +94,13 @@ class TempateTagTest(Exam, unittest.TestCase):
             'switch not active',
             self.ifswitch_with_else
         )
-        self.gargoyle.active.return_value = True
+        self.chimera.active.return_value = True
         self.assertContentInTemplate(
             'switch active',
             self.ifswitch_with_else
         )
 
-    def test_calls_gargoyle_active_for_inputs_passed_in(self):
+    def test_calls_chimera_active_for_inputs_passed_in(self):
         self.render(self.ifswitch_with_input)
-        self.gargoyle.active.assert_called_once_with('test', sentinel.input)
+        self.chimera.active.assert_called_once_with('test', sentinel.input)
 

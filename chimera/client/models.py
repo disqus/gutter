@@ -1,13 +1,13 @@
 """
-gargoyle.models
+chimera.models
 ~~~~~~~~~~~~~~~
 
 :copyright: (c) 2010-2012 DISQUS.
 :license: Apache License 2.0, see LICENSE for more details.
 """
 
-from gargoyle.client import signals
-from gargoyle.client import inputs as gargoyle_inputs
+from chimera.client import signals
+from chimera.client import inputs as chimera_inputs
 from functools import partial
 import threading
 import inspect
@@ -298,7 +298,7 @@ class Condition(object):
 
 class Manager(threading.local):
     """
-    The Manager holds all state for Gargoyle.  It knows what Switches have been
+    The Manager holds all state for Chimera.  It knows what Switches have been
     registered, and also what Input objects are currently being applied.  It
     also offers an ``active`` method to ask it if a given switch name is
     active, given its conditions and current inputs.
@@ -399,7 +399,7 @@ class Manager(threading.local):
         # Also check the switches against "NONE" input. This ensures there will
         # be at least one input checked.
         if not inputs:
-            inputs = (gargoyle_inputs.NONE,)
+            inputs = (chimera_inputs.NONE,)
 
         return any(map(switch.enabled_for, inputs))
 

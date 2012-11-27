@@ -1,7 +1,7 @@
 import unittest
 from nose.tools import *
-from gargoyle.client.inputs import Base as BaseInput
-from gargoyle.client.inputs.arguments import Value as ValueArgument
+from chimera.client.inputs import Base as BaseInput
+from chimera.client.inputs.arguments import Value as ValueArgument
 
 
 class DumbInput(BaseInput):

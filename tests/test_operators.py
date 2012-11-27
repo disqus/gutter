@@ -1,8 +1,8 @@
 import unittest
 from nose.tools import *
-from gargoyle.client.operators.comparable import *
-from gargoyle.client.operators.identity import *
-from gargoyle.client.operators.misc import *
+from chimera.client.operators.comparable import *
+from chimera.client.operators.identity import *
+from chimera.client.operators.misc import *
 
 from exam.decorators import fixture
 

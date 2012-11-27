@@ -1,5 +1,5 @@
 """
-gargoyle.testutils
+chimera.testutils
 ~~~~~~~~~~~~~~~~~~
 
 :copyright: (c) 2010-2012 DISQUS.
@@ -7,7 +7,7 @@ gargoyle.testutils
 """
 
 from functools import wraps
-from gargoyle.client.singleton import gargoyle
+from chimera.client.singleton import chimera
 
 
 class SwitchContextManager(object):
@@ -18,22 +18,22 @@ class SwitchContextManager(object):
 
     >>> @switches(my_switch_name=True)
     >>> def foo():
-    >>>     print gargoyle.active('my_switch_name')
+    >>>     print chimera.active('my_switch_name')
 
     >>> def foo():
     >>>     with switches(my_switch_name=True):
-    >>>         print gargoyle.active('my_switch_name')
+    >>>         print chimera.active('my_switch_name')
 
     You may also optionally pass an instance of ``SwitchManager``
     as the first argument.
 
     >>> def foo():
-    >>>     with switches(gargoyle, my_switch_name=True):
-    >>>         print gargoyle.active('my_switch_name')
+    >>>     with switches(chimera, my_switch_name=True):
+    >>>         print chimera.active('my_switch_name')
     """
-    def __init__(self, gargoyle=gargoyle, **keys):
-        self.previous_active_func = gargoyle.active
-        self.gargoyle = gargoyle
+    def __init__(self, chimera=chimera, **keys):
+        self.previous_active_func = chimera.active
+        self.chimera = chimera
         self.keys = keys
 
     def __call__(self, func):
@@ -46,8 +46,8 @@ class SwitchContextManager(object):
 
     def __enter__(self):
 
-        def patched_active(gargoyle):
-            real_active = gargoyle.active
+        def patched_active(chimera):
+            real_active = chimera.active
 
             def wrapped(key, *args, **kwargs):
                 if key in self.keys:
@@ -57,9 +57,9 @@ class SwitchContextManager(object):
 
             return wrapped
 
-        self.gargoyle.active = patched_active(self.gargoyle)
+        self.chimera.active = patched_active(self.chimera)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.gargoyle.active = self.previous_active_func
+        self.chimera.active = self.previous_active_func
 
 switches = SwitchContextManager

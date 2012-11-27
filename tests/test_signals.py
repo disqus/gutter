@@ -1,6 +1,6 @@
 import unittest
 from nose.tools import *
-from gargoyle.client import signals
+from chimera.client import signals
 import mock
 
 from exam.decorators import fixture

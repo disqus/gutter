@@ -1,7 +1,7 @@
 import unittest
 from nose.tools import *
-from gargoyle.client.wsgi import EnabledSwitchesMiddleware, signals
-from gargoyle.client.singleton import gargoyle as singleton_gargoyle
+from chimera.client.wsgi import EnabledSwitchesMiddleware, signals
+from chimera.client.singleton import chimera as singleton_chimera
 import mock
 import threading
 import time
@@ -14,7 +14,7 @@ from exam.cases import Exam
 
 class BaseTest(Exam, unittest.TestCase):
 
-    SWITCH_HEADER_NAME = 'X-Gargoyle-Switch'
+    SWITCH_HEADER_NAME = 'X-Chimera-Switch'
 
     @fixture
     def switch_active_signal_args(self):
@@ -54,13 +54,13 @@ class TestInterface(BaseTest):
         ware = EnabledSwitchesMiddleware('app')
         ware.application = 'app'
 
-    def test_can_be_constructed_with_a_gargoyle_instance(self):
-        ware = EnabledSwitchesMiddleware('app', 'gargoyle')
-        ware.gargoyle = 'gargoyle'
+    def test_can_be_constructed_with_a_chimera_instance(self):
+        ware = EnabledSwitchesMiddleware('app', 'chimera')
+        ware.chimera = 'chimera'
 
-    def test_uses_gargoyle_singleton_if_constructed_with_no_gargoyle(self):
+    def test_uses_chimera_singleton_if_constructed_with_no_chimera(self):
         ware = EnabledSwitchesMiddleware('app')
-        eq_(ware.gargoyle, singleton_gargoyle)
+        eq_(ware.chimera, singleton_chimera)
 
     def test_is_callable_with_environ_and_start_response(self):
         self.middleware_app('environ', self.start_response)
@@ -90,18 +90,18 @@ class TestSwitchTracking(BaseTest):
         return dict(start_response.call_args[0][1])
 
     @fixture
-    def gargoyle_header(self):
+    def chimera_header(self):
         return self.call_and_get_headers()[self.SWITCH_HEADER_NAME]
 
-    def test_calls_start_response_with_x_gargoyle_switches_header(self):
+    def test_calls_start_response_with_x_chimera_switches_header(self):
         ok_(self.SWITCH_HEADER_NAME in self.call_and_get_headers())
 
-    def test_adds_comma_separated_list_of_switches_to_x_gargoyle_header(self):
-        eq_(self.gargoyle_header, 'active=switch,switch2')
+    def test_adds_comma_separated_list_of_switches_to_x_chimera_header(self):
+        eq_(self.chimera_header, 'active=switch,switch2')
 
     def test_returns_empty_active_list_when_no_switches_are_applied(self):
         self.switch_active_signal_args = []
-        eq_(self.gargoyle_header, 'active=')
+        eq_(self.chimera_header, 'active=')
 
     def test_does_not_stop_other_global_switch_active_signals(self):
         global_called = []

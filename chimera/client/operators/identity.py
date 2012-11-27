@@ -1,4 +1,4 @@
-from gargoyle.client.operators import Base
+from chimera.client.operators import Base
 
 
 class Truthy(Base):
