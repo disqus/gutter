@@ -2,6 +2,7 @@
 *.egg-info/
 .DS_Store
 dist/
+docs/
 build/
 *.egg
 .arcconfig
