@@ -15,6 +15,9 @@ Table of Contents
 * `Conditions`_
 * `Checking Switches as Active`_
 * Signals_
+* Namespaces_
+* Templates_
+* `Testing Utilities`_
 
 Configuration
 =============
@@ -406,3 +409,79 @@ At this point, ``notifications`` is a copy of ``gargoyle``, inheriting all of it
 It does **not**, however, share the same switches.  Newly constructed ``Manager`` instances are in the ``default`` namespace.  When ``namespaced()`` is called, ``gargoyle-client`` changes the manager's namespace to ``notifications``.  Any switches in the previous ``default`` namespace are not visible in the ``notifications`` namespace, and vice versa.
 
 This allows you to have separate namespaced "views" of switches, possibly named the exact same name, and not have them comflict with each other.
+
+Templates
+=========
+
+``gargoyle-client`` has a ``ifswitch`` template tag that you can use in your Django templates.  To use it, simply load the ``gargoyle`` template helpers and pass ``ifswitch`` the switch name.  If the switch is active, the content between ``ifswitch`` and ``endifswitch`` will be rendered.
+
+.. code:: python
+
+    {% load gargoyle %}
+    {% ifswitch cool_feature %}
+    switch active!
+    {% endifswitch %}
+
+You can also use an ``else`` tag to render content if the switch is not active:
+
+.. code:: python
+
+    {% load gargoyle %}
+    {% ifswitch cool_feature %}
+    switch active!
+    {% else %}
+    switch not active!
+    {% endifswitch %}
+
+Like ``gargoyle.active``, ``ifswitch`` takes any number of input objects to check the switch against:
+
+.. code:: python
+
+    {% load gargoyle %}
+    {% ifswitch cool_feature user project %}
+    switch active for user or project!
+    {% endifswitch %}
+
+NOTE: By default, the `gargoyle` instance used in the template tags is the ``gargoyle.client.singleton.gargoyle`` instance.
+
+Testing Utilities
+===============
+
+If you would like to test code that uses ``gargoyle-client`` and have the ``gargoyle`` manager return predictable results, you can use the ``switches`` object from the ``testutils`` module.
+
+The ``swtiches`` object can be used as both a context manager and a decorator.  It is passed ``kwargs`` of switch names and their``active`` return values.
+
+For instance, with this code here, by passing ``cool_feature=True`` to the ``switches`` object as a context manager, any call to ``gargoyle.active('cool_feature')`` will return ``True``.  Calls to ``active()`` with other switch names will return their actual live switch status:
+
+.. code:: python
+
+    from gargoyle.client.testutils import switches
+    from gargoyle.singleton import gargoyle
+
+    with switches(cool_feature=True):
+        gargoyle.active('cool_feature')  # True
+
+
+And when using ``switches`` as a decorator:
+
+.. code:: python
+
+    from gargoyle.client.testutils import switches
+    from gargoyle.singleton import gargoyle
+
+    @switches(cool_feature=True)
+    def run(self):
+        gargoyle.active('cool_feature')  # True
+
+Additionally, you may pass an alternamte ``Manager`` instance to ``switches`` to use that manager instead of the default one:
+
+.. code:: python
+
+    from gargoyle.client.testutils import switches
+    from gargoyle.client.models import Manager
+
+    my_manager = Manager({})
+
+    @switches(my_manager, cool_feature=True)
+    def run(self):
+        gargoyle.active('cool_feature')  # True
