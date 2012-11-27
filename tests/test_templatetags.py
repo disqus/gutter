@@ -3,7 +3,9 @@ import os
 
 from django.template import Context, Template  # TemplateSyntaxError
 
-from exam.decorators import fixture, before, around
+from mock import Mock, sentinel
+
+from exam.decorators import fixture, around
 from exam.cases import Exam
 
 from gargoyle.client.models import Switch
@@ -21,11 +23,14 @@ class TempateTagTest(Exam, unittest.TestCase):
         yield
         self.gargoyle.flush()
 
-    @before
-    def reload_singleton(self):
-        reload(gargoyle.client.singleton)
+    @around
+    def patch_singleton(self):
+        old_active = self.gargoyle.active
+        self.gargoyle.active = Mock(return_value=False)
+        yield
+        self.gargoyle.active = old_active
 
-    @fixture
+    @property
     def gargoyle(self):
         return gargoyle.client.singleton.gargoyle
 
@@ -34,26 +39,68 @@ class TempateTagTest(Exam, unittest.TestCase):
         return Switch('test', state=Switch.states.GLOBAL)
 
     @fixture
-    def vanilla_ifswitch(self):
+    def ifswitch(self):
         return Template(
             """
             {% load gargoyle %}
             {% ifswitch test %}
-            hello world!
+            switch active!
+            {% endifswitch %}
+            """
+        )
+
+    @fixture
+    def ifswitch_with_else(self):
+        return Template(
+            """
+            {% load gargoyle %}
+            {% ifswitch test %}
+            switch active!
+            {% else %}
+            switch not active!
+            {% endifswitch %}
+            """
+        )
+
+    @fixture
+    def ifswitch_with_input(self):
+        return Template(
+            """
+            {% load gargoyle %}
+            {% ifswitch test input %}
+            switch active!
             {% endifswitch %}
             """
         )
 
     def render(self, template):
-        return template.render(Context())
+        return template.render(Context({'input': sentinel.input}))
 
-    def assertContentInTemplate(self, content):
-        rendered = self.render(self.vanilla_ifswitch)
+    def assertContentInTemplate(self, content, template):
+        rendered = self.render(template)
         self.assertIn(content, rendered)
 
-    def test_does_not_render_content_with_disabled_switch(self):
-        self.assertContentInTemplate('hello world')
+    def assertContentNotInTemplate(self, content, template):
+        rendered = self.render(template)
+        self.assertNotIn(content, rendered)
 
-    def test_defaults_to_false_for_incorrect_switc_names(self):
-        pass
+    def test_renders_content_inside_if_enabled_switch(self):
+        self.assertContentNotInTemplate('switch active', self.ifswitch)
+        self.gargoyle.active.return_value = True
+        self.assertContentInTemplate('switch active', self.ifswitch)
+
+    def test_works_with_else_switch(self):
+        self.assertContentInTemplate(
+            'switch not active',
+            self.ifswitch_with_else
+        )
+        self.gargoyle.active.return_value = True
+        self.assertContentInTemplate(
+            'switch active',
+            self.ifswitch_with_else
+        )
+
+    def test_calls_gargoyle_active_for_inputs_passed_in(self):
+        self.render(self.ifswitch_with_input)
+        self.gargoyle.active.assert_called_once_with('test', sentinel.input)
 

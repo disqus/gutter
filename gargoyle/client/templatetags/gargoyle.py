@@ -37,12 +37,12 @@ class SwitchNode(template.Node):
         self.if_false = if_false
 
     def render(self, context):
-        if gargoyle.active(self.name, *self.resolved_inputs(context)):
+        if gargoyle.active(self.name, *self.resolved_inputs_for(context)):
             return self.if_true.render(context)
         else:
             return self.if_false.render(context)
 
-    def resolved_inputs(self, context):
+    def resolved_inputs_for(self, context):
         return [i.resolve(context) for i in self.inputs]
 
 
