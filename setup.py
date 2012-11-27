@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import os
 from setuptools import find_packages
 
 try:
@@ -10,12 +11,15 @@ except ImportError:
 
 
 tests_require = [
-    'nose', 'exam', 'mock', 'nose-performance', 'django'
+    'nose', 'exam==0.3.1', 'mock', 'nose-performance', 'django', 'redis'
 ]
 
 setup_requires = []
 if 'nosetests' in sys.argv[1:]:
     setup_requires.append('nose')
+
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', __name__)
+    INSTALLED_APPS = ('chimera.client',)
 
 
 setup(

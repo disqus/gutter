@@ -1,5 +1,4 @@
 import unittest
-import os
 
 from django.template import Context, Template  # TemplateSyntaxError
 
@@ -10,9 +9,6 @@ from exam.cases import Exam
 
 from chimera.client.models import Switch
 import chimera.client.singleton
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', __name__)
-INSTALLED_APPS = ('chimera.client',)
 
 
 class TempateTagTest(Exam, unittest.TestCase):
