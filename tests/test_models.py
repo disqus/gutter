@@ -3,6 +3,7 @@ import threading
 import itertools
 
 from nose.tools import *
+from chimera.client.arguments import Base as BaseArgument
 from chimera.client.models import Switch, Manager, Condition
 from modeldict import MemoryDict
 from chimera.client import signals
@@ -21,9 +22,13 @@ class Argument(object):
         pass
 
 
-class ReflectiveInput(object):
+class ReflectiveArgument(BaseArgument):
+
+    applies = True
+
+    @property
     def foo(self):
-        return (42, self)
+        return (42, self.input)
 
 
 class TestSwitch(unittest.TestCase):
@@ -222,51 +227,36 @@ class TestCondition(unittest.TestCase):
 
     @fixture
     def condition(self):
-        return Condition(ReflectiveInput.foo, self.operator)
+        return Condition(ReflectiveArgument, 'foo', self.operator)
 
-    def test_raises_valueerror_if_argument_not_callable(self):
-        assert_raises_regexp(ValueError, 'must be callable', Condition,
-                             True, self.operator)
-
-    def test_raises_value_error_if_argument_has_arity_of_0(self):
-        assert_raises_regexp(ValueError, 'must have an arity > 0', Condition,
-                             unbound_method, self.operator)
-
-    def test_returns_false_if_input_is_not_same_class_as_argument_class(self):
-        eq_(self.condition.call(object()), False)
+    @fixture
+    def input(self):
+        return mock.Mock(name='input')
 
     def test_returns_results_from_calling_operator_with_argument_value(self):
-        """
-        This test verifies that when a condition is called with an instance of
-        an Input as the argument, the vaue that the condition's operator is
-        asked if it applies to is calculated by calling the condition's own
-        argument function as bound to the instance of the Input originally
-        passed to the condition.
-
-        By using the ReflectiveInput class, we can verify that it was called
-        with expected arguments, which are returned in a tuple with an extra
-        value (42), and that that tuple is passed to the operator's applied_to
-        method.
-        """
-
-        input_instance = ReflectiveInput()
-        self.condition.call(input_instance)
-        self.operator.applies_to.assert_called_once_with((42, input_instance))
+        self.condition.call(self.input)
+        self.operator.applies_to.assert_called_once_with((42, self.input))
 
     def test_condition_can_be_negated(self):
-        eq_(self.condition.call(ReflectiveInput()), True)
+        eq_(self.condition.call(self.input), True)
         self.condition.negative = True
-        eq_(self.condition.call(ReflectiveInput()), False)
+        eq_(self.condition.call(self.input), False)
 
     def test_can_be_negated_via_init_argument(self):
-        condition = Condition(ReflectiveInput.foo, self.operator)
-        eq_(condition.call(ReflectiveInput()), True)
-        condition = Condition(ReflectiveInput.foo, self.operator, negative=True)
-        eq_(condition.call(ReflectiveInput()), False)
+        condition = Condition(ReflectiveArgument, 'foo', self.operator)
+        eq_(condition.call(self.input), True)
+        condition = Condition(ReflectiveArgument, 'foo', self.operator, negative=True)
+        eq_(condition.call(self.input), False)
 
     def test_if_apply_explodes_it_returns_false(self):
         self.operator.applies_to.side_effect = Exception
-        eq_(self.condition.call(ReflectiveInput()), False)
+        eq_(self.condition.call(self.input), False)
+
+    def test_returns_false_if_argument_does_not_apply_to_input(self):
+        self.condition.argument = mock.Mock()
+        eq_(self.condition.call(self.input), True)
+        self.condition.argument.return_value.applies = False
+        eq_(self.condition.call(self.input), False)
 
     def test_if_input_is_NONE_it_returns_false(self):
         eq_(self.condition.call(Manager.NONE_INPUT), False)
@@ -274,7 +264,7 @@ class TestCondition(unittest.TestCase):
     @mock.patch('chimera.client.signals.condition_apply_error')
     def test_if_apply_explodes_it_signals_condition_apply_error(self, signal):
         error = Exception('boom!')
-        inpt = ReflectiveInput()
+        inpt = self.input
 
         self.operator.applies_to.side_effect = error
         self.condition.call(inpt)
@@ -286,20 +276,11 @@ class TestCondition(unittest.TestCase):
             return 'str of operator'
 
         self.operator.__str__ = local_str
-        eq_(str(self.condition), "ReflectiveInput.foo str of operator")
-
-    def test_can_pickle_instancemethods(self):
-        import pickle
-        condition = Condition(Argument.bar, bool)
-
-        string = pickle.dumps(condition)
-        rebuilt = pickle.loads(string)
-        eq_(rebuilt.operator, condition.operator)
-        eq_(rebuilt.argument, condition.argument)
+        eq_(str(self.condition), "ReflectiveArgument.foo str of operator")
 
     def test_equals_if_has_the_same_properties(self):
-        a = Condition(Argument.bar, bool)
-        b = Condition(Argument.bar, bool)
+        a = Condition(Argument, 'bar', bool)
+        b = Condition(Argument, 'bar', bool)
 
         for prop, (a_val, b_val) in self.possible_properties:
             setattr(a, prop, a_val)

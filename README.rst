@@ -10,7 +10,7 @@ Table of Contents
 
 * Configuration_
 * Setup_
-* Inputs_
+* Arguments_
 * `Switches`_
 * `Conditions`_
 * `Checking Switches as Active`_
@@ -85,62 +85,62 @@ Note that the ``settings.manager.default`` value must be set **before** importin
 Autodiscovery
 ~~~~~~~~~~~~~
 
-If used with Django, you may call ``chimera.client.autodiscover()`` to have chimera look for, and import, any ``chimera`` modules for every app in ``INSTALLED_APPS``.  These modules should be used to configure your Inputs or custom Condition objects your app requires.  More info on what those objects are and how you use them is in the rest of this README.
+If used with Django, you may call ``chimera.client.autodiscover()`` to have chimera look for, and import, any ``chimera`` modules for every app in ``INSTALLED_APPS``.  These modules should be used to configure your Arguments or custom Condition objects your app requires.  More info on what those objects are and how you use them is in the rest of this README.
 
-Inputs
-======
+Arguments
+=========
 
-The first step in your usage of ``chimera-client`` should be to define your Inputs that you will be checking switches against.  An "Input" is an object which understands the business logic and object in your system (users, requests, etc) and knows how to validate and transform them into arguments for ``Switch`` conditions.
+The first step in your usage of ``chimera-client`` should be to define your Arguments that you will be checking switches against.  An "Argument" is an object which understands the business logic and object in your system (users, requests, etc) and knows how to validate, transform and extract variables from those business objects for ``Switch`` conditions.
 
-For instance, your system may have a ``User`` object that has properties like ``is_admin``, ``date_joined``, etc.  To switch against it, you would then create a ``UserInput`` object, which wraps a ``User`` instance, and provides an API of methods that return ``Argument`` objects:
+For instance, your system may have a ``User`` object that has properties like ``is_admin``, ``date_joined``, etc.  To switch against it, you would then create a ``UserArgument`` object, which wraps a ``User`` instance, and provides an API of methods that return ``Variable`` objects:
 
 .. code:: python
 
-    from chimera.client.input import Base
-    from chimera.client.input.arguments import String, Boolean, Value
+    from chimera.client.arguments import Base
+    from chimera.client.arguments.variables import String, Boolean, Value
 
-    class UserInput(Base):
+    class UserArgument(Base):
 
         def __init__(self, user):
             self._user = user
 
+        @property
         def name(self):
             return String(self._user.name)
 
+        @property
         def is_admin(self):
             return Boolean(self._user.is_admin)
 
+        @property
         def age(self):
             return Value(self._user.age)
 
 
 There are a few things going on here, so let's break down what they all mean.
 
-1. An ``Input`` object has some number methods defined, which return the values you want to check a ``Switch`` conditions against.  In the above example, we'll want to make some switches active based on a user's ``name``, ``is_admin`` status and ``age``.
-2. Methods **must** return an instance of an ``Argument`` object.  All arguments must subclass ``chimera.input.arguments.Base``.  At present there are 3 subclasses: ``Value`` for general values, ``Boolean`` for boolean values and ``String`` for string values.
-3. ``Argument`` objects understand ``Switch`` conditions and operators, and implement the correct magic methods which allow themselves to be appropriatly compared.
+1. An ``Argument`` object has some number of properties defined, which return the variables you want to check a ``Switch`` conditions against.  In the above example, we'll want to make some switches active based on a user's ``name``, ``is_admin`` status and ``age``.
+2. Pproperties **must** return an instance of an ``Variable`` object.  All variables must subclass ``chimera.input.arguments.variables.Base``.  At present there are 3 subclasses: ``Value`` for general values, ``Boolean`` for boolean values and ``String`` for string values.
+3. ``Variable`` objects understand ``Switch`` conditions and operators, and implement the correct API to allow themselves to be appropriatly compared.
 
-By default, any callable public attribute of an ``Input`` is considered an argument. Subclasses that wish to change that behavior must implement their own implementation of the``arguments`` property on their ``Input`` subclass.
+Rationale for Arguments
+~~~~~~~~~~~~~~~~~~~~~~~
 
-Rationale for Inputs
-~~~~~~~~~~~~~~~~~~~~
+You might be asking, why have these ``Argument`` objects at all?  They seem to just wrap an object in my system and provide the same API.  Why can't I just use my business object **itself** and compare it against my switch conditions?
 
-You might be asking, why have these ``Input`` objects at all?  They seem to just wrap an object in my system and provide the same API.  Why can't I just use my business object **itself** and compare it against my switch conditions?
+The short answer is that ``Argument`` objects provide a translation layer to translate your business objects into objects that ``chimera-client`` understands.  This is important for a couple reasons.
 
-The short answer is that ``Input`` objects provide a translation layer to translate your business objects into objects that ``chimera-client`` understand.  This is important for a couple reasons.
+First, it means you don't clutter your business logic/objects with code to support ``chimera-client``.  You declare all the arguments you wish to provide to switches in one location (an Argument) whose single responsibilty it to interface with ``chimera-client``.  You can also contruct more savvy Argument objects that may be the combination of multiple business objects, consult 3rd party services, etc.  All still not cluttering your main application code or business objects.
 
-First, it means you don't clutter your business logic/objects with code to support ``chimera-client``.  You declare all the arguments you wish to provide to switches in one location (Input) whose single responsibilty it to interface with ``chimera-client``.  You can also contruct more savvy Input objects that may be the combination of multiple business objects and/or consult 3rd party services, all still not cluttering your main application code or business objects.
+Secondly, and most importantly, Arguments return ``Variable`` objects, whih ensure ``chimera-client`` conditions work correctly.  This is mostly relevant to the percentage-based operators, and is best illustrated with an example.
 
-Secondly, and most importantly, returning ``Argument`` objects ensures that ``chimera-client`` conditions work correctly.  This is mostly relevant to the percentage-based operators, and is best illustrated with an
-example.
-
-Imagine you have a ``User`` class with an ``is_vip`` boolean field.  Let's say you wanted to turn on a feature for only 10% of your VIP customers.  To do that, you would write a condition that says, "10% of the time when I'm called with the argument, I should be true."  That line of code would probably do something like this:
+Imagine you have a ``User`` class with an ``is_vip`` boolean field.  Let's say you wanted to turn on a feature for only 10% of your VIP customers.  To do that, you would write a condition that says, "10% of the time when I'm called with the variable, I should be true."  That line of code would probably do something like this:
 
 .. code:: python
 
-    return 0 <= (hash(argument) % 100) < 10
+    return 0 <= (hash(variable) % 100) < 10
 
-The issue is that if ``argument = True``, then ``hash(argument) % 100`` will always be the same value for **every** ``User`` with ``is_vip`` of ``True``:
+The issue is that if ``variable = True``, then ``hash(variable) % 100`` will always be the same value for **every** ``User`` with ``is_vip`` of ``True``:
 
 .. code:: python
 
@@ -151,9 +151,9 @@ The issue is that if ``argument = True``, then ``hash(argument) % 100`` will alw
 
 This is because in Python `True` objects alaways have the same hash value, and thus the percentage check doesn't work.  This is not the behavior you want.
 
-For the 10% percentage range, you want it to be active for 10% of the inputs.  Therefore, each input must have a unique hash value, exactly the feature the ``Boolean`` argument provides.  Every ``Argument`` has known characteristics against conditions, while your objects may not.
+For the 10% percentage range, you want it to be active for 10% of the inputs.  Therefore, each input must have a unique hash value, exactly the feature the ``Boolean`` variable provides.  Every ``Variable`` has known characteristics against conditions, while your objects may not.
 
-That said, you don't absolutely **have** to use ``Argument`` objects.  For obvious cases, like ``use.age > some_value`` your ``User`` instance will work just fine, but to play it safe you should use ``Argument`` objects.  Using ``Argument`` objects also ensure that if you updatate ``chimera-client`` any new ``Operator`` types that are added will work correctly with your ``Argument``s.
+That said, you don't absolutely **have** to use ``Variable`` objects.  For obvious cases, like ``use.age > some_value`` your ``User`` instance will work just fine, but to play it safe you should use ``Variable`` objects.  Using ``Variable`` objects also ensure that if you updatate ``chimera-client`` any new ``Operator`` types that are added will work correctly with your ``Variable``s.
 
 Switches
 ============================================
@@ -202,7 +202,7 @@ In the above example, the ``child1`` switch is a child of the ``"movies"`` switc
 Concent
 ~~~~~~~
 
-By default, each switch makes its "am I active?" decision independent of other switches in the Manager (including its parent), and only consults its own conditions to check if it is enabled for the Input.  However, this is not always the case.  Perhaps you have a cool new feature that is only available to a certain class of user.  And of *those* users, you want 10% to be be exposed to a different user interface to see how they behave vs the other 90%.
+By default, each switch makes its "am I active?" decision independent of other switches in the Manager (including its parent), and only consults its own conditions to check if it is enabled for the input.  However, this is not always the case.  Perhaps you have a cool new feature that is only available to a certain class of user.  And of *those* users, you want 10% to be be exposed to a different user interface to see how they behave vs the other 90%.
 
 ``chimera-client`` allows you to set a ``concent`` flag on a switch that instructs it to check its parental switch first, before checking itself.  If it checks its parent and it is not enabled for the same input, the switch immediatly returns ``False``.  If its parent *is* enabled for the input, then the switch will continue and check its own conditions, returning as it would normally.
 
@@ -266,9 +266,9 @@ Existing switches may be removed from the Manager by calling ``unregister()`` wi
 Conditions
 ==========
 
-Each Swtich can have 0+ conditions, which decribe the conditions under which that swtich is active.  ``Condition`` objects are constructed with two values: a ``argument`` and ``operator``
+Each Swtich can have 0+ conditions, which decribe the conditions under which that swtich is active.  ``Condition`` objects are constructed with three values: a ``argument``, ``attribute`` and ``operator``.
 
-An ``argument`` is an ``Argument`` object returned from an ``Input`` class, like the one you defined earlier.  From the previous example, ``UserInput.age`` is an argument.  A condition's ``operator`` is some sort of check applied against that argument.  For instance, is the ``Argument`` greater than some value?  Equal to some value?  Within a range of values?  Etc.
+An ``argument`` is any ``Argument`` class, like the one you defined earlier.  From the previous example, ``UserArgument`` is an argument object.  ``attribute`` is the attribute on a argument instance that you want this condution to check.  ``operator`` is some sort of check applied against that attribute.  For instance, is the ``UserArgument.age`` greater than some value?  Equal to some value?  Within a range of values?  Etc.
 
 Let's say you wanted a ``Condition`` that checks if the user's age is > 65 years old?  You would construct a Condition that way:
 
@@ -276,7 +276,7 @@ Let's say you wanted a ``Condition`` that checks if the user's age is > 65 years
 
     from chimera.client.operators.comparable import MoreThan
 
-    condition = Condition(argument=UserInput.age, operator=MoreThan(65))
+    condition = Condition(argument=UserArgument, attribute='age', operator=MoreThan(65))
 
 This Condition will be true if any input instance has an ``age`` that is more than ``65``.
 
@@ -288,7 +288,7 @@ Conditions can also be constructed with a ``negative`` argument, which negates t
 
     from chimera.client.operators.comparable import MoreThan
 
-    condition = Condition(argument=UserInput.age, operator=MoreThan(65), negative=True)
+    condition = Condition(argument=UserArgument, attribute='age', operator=MoreThan(65), negative=True)
 
 This Condition is now ``True`` if the condition evaluates to ``False``.  In this case if the user's ``age`` is **not** more than ``65``.
 
@@ -303,7 +303,7 @@ You can append as many conditions as you would like to a swtich, there is no lim
 Checking Switches as Active
 ===========================
 
-As stated before, switches are checked against **instances** of ``Input`` objects.  To do this, you would call the switch's ``enabled_for()`` method with the instance of your input.  You may call ``enabled_for()`` with any input instance, even ones where the Switch has no ``Condition`` for that class of ``Input``.  If the ``Switch`` is active for your input, ``enabled_for`` will return ``True``.  Otherwise, it will return ``False``.
+As stated before, switches are checked against input objects.  To do this, you would call the switch's ``enabled_for()`` method with a ``User`` instance, for instance.  You may call ``enabled_for()`` with any input object, it will ignore inputs for which it knows nothing about. If the ``Switch`` is active for your input, ``enabled_for`` will return ``True``.  Otherwise, it will return ``False``.
 
 ``chimera.active()`` API
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -317,16 +317,16 @@ To check if a ``Switch`` is active, simply call ``chimera.active()`` with the Sw
     chimera.active('my cool feature')
     >>> True
 
-The switch is checked against some number of ``Input`` objects.  Inputs can be added to the ``active()`` check one of two ways: locally, passed in to the ``active()`` call or globally, configured ahead of time.
+The switch is checked against some number of input objects.  Inputs can be added to the ``active()`` check one of two ways: locally, passed in to the ``active()`` call or globally, configured ahead of time.
 
-To check agianst local inputs, ``active()`` takes any number of Input objects after the switch name to check the switch against.  In this example, the switch named ``'my cool feature'`` is checked against input objects ``input1`` and ``input2``:
+To check agianst local inputs, ``active()`` takes any number of input objects after the switch name to check the switch against.  In this example, the switch named ``'my cool feature'`` is checked against input objects ``input1`` and ``input2``:
 
 .. code:: python
 
     chimera.active('my cool feature', input1, input2)
     >>> True
 
-If you have global Input objects you would like to use for every check, you can set them up by calling the Manager's ``input()`` method:
+If you have global input objects you would like to use for every check, you can set them up by calling the Manager's ``input()`` method:
 
 .. code:: python
 
@@ -344,7 +344,7 @@ Once you're doing using global inputs, perhaps at the end of a request, you shou
 
 The Manager is now setup and ready for its next set of inputs.
 
-When calling ``active()`` with a local ``Input``s, you can skip checking the ``Switch`` against the global inputs and **only** check against your locally passed in Inputs by passing ``exclusive=True`` as a keyword argument to ``active()``:
+When calling ``active()`` with a local inputs, you can skip checking the ``Switch`` against the global inputs and **only** check against your locally passed in inputss by passing ``exclusive=True`` as a keyword argument to ``active()``:
 
 .. code:: python
 
@@ -400,11 +400,11 @@ You can use these values inside your signal callback to make decisions based on 
 Condition Application Error Signal
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-When a ``Switch`` checks an ``Input`` object against its conditions, there is a good possibility that the ``Argument`` value may be some sort of unexpected value, and can cause an exception.  Whenever there is an exception raised during ``Condition`` checking itself against an ``Input``, the ``Condition`` will catch that exception and return ``False``.
+When a ``Switch`` checks an input object against its conditions, there is a good possibility that the ``Argument`` value may be some sort of unexpected value, and can cause an exception.  Whenever there is an exception raised during ``Condition`` checking itself against an input, the ``Condition`` will catch that exception and return ``False``.
 
 While catching all exceptions is generally bad form and hides error, most of the time you do not want to fail an application request just because there was an error checking a switch condition, *especially* if there was an error during checking a ``Condition`` for which a user would not have applied in the first place.
 
-That said, you would still probably want to know if there was an error checking a Condition.  To acomplish this, ``chimera``-client provides a ``condition_apply_error`` signal which is called when there was an error checking a ``Condition``.  The signal is called with an instance of the condition, the ``Input`` which caused the error and the instance of the Exception class itself:
+That said, you would still probably want to know if there was an error checking a Condition.  To acomplish this, ``chimera``-client provides a ``condition_apply_error`` signal which is called when there was an error checking a ``Condition``.  The signal is called with an instance of the condition, the input which caused the error and the instance of the Exception class itself:
 
 .. code:: python
 

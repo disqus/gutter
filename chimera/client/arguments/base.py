@@ -6,10 +6,9 @@ class Base(object):
     the specified input.
     """
 
-    @classmethod
-    def applies_to(cls, input):
-        """
-        Informs users of argument if it applies to the specified input.  By
-        default, returns False.
-        """
+    def __init__(self, inpt):
+        self.input = inpt
+
+    @property
+    def applies(self):
         return False

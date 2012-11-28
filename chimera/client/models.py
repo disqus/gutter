@@ -173,81 +173,59 @@ class Switch(object):
 
 class Condition(object):
     """
-    A Condition is the configuration of an argument and an operator, and tells
-    you if the operator applies to the argument as it exists in the input
-    instance passed in.  The previous sentence probably doesn't make any sense,
-    so read on!
+    A Condition is the configuration of an argument, its attribute and an
+    operator. It tells you if it itself is true or false given an input.
 
-    The argument defines what this condition is checking.  Perhaps it's the
-    request's IP address or the user's name.  Literally, an argumenet is an
-    unbound function attached to an available Input class.  For example, for the
-    request IP address, you would define an ``ip`` function inside the
-    ``RequestInput`` class, and that function object, ``RequestInput.ip`` would
-    be the Condition's argument,.
+    The ``argument`` defines what this condition is checking.  Perhaps it's a
+    ``User`` or ``Request`` object. The ``attribute`` name is then extracted out
+    of an instance of the argument to produce a variable. That variable is then
+    compared to the operator to determine if the condition applies to the input
+    or not.
 
-    When the Condition is called, it extracts the same argument from the passed
-    in Input.  The extacted ``value`` is then checked against the operator.  An
-    operator will tell you if the value meets **its** criteria, like if the
-    value is > some number or within a range or percetnage.
+    For example, for the request IP address, you would define a ``Request``
+    argument, that had an ``ip`` property.  A condition would then be constrcted
+    like so:
+
+    from myapp.chimera import RequestArgument
+    from chimera.client.models import Condition
+
+        >> condition = Condition(argument=RequestArgument, attribute='ip', operator=some_operator)
+
+    When the Condition is called, it is passed the input. The argument is then
+    called (constructed) with input object to produce an instance.  The
+    attribute is then extracted from that instance to produce the variable.
+    The extacted variable is then checked against the operator.
 
     To put it another way, say you wanted a condition to only allow your switch
     to people between 15 and 30 years old.  To make the condition:
 
-        1. You would create a ``UserInput`` class wraps your own User object,
-            with a ``age`` method which returns the user's age.
+        1. You would create a ``UserArgument`` class that takes a user object in
+           its constructor.  The class also has an ``age`` method which returns
+           the user object's age.
         2. You would then create a new Condition via:
-           ``Condition(argument=UserInput.age, operator=Between(15, 30))``.
-        3. You then call that condition with an **instance** of a ``UserInput``,
-           and it would return True if the age of the user the ``UserInput``
-           class wraps is between 15 and 30.
+           ``Condition(argument=UserInput, attriibute='age', operator=Between(15, 30))``.
+        3. You then call that condition with a ``User``, and it would return
+           ``True`` if the age of the user the ``UserArgument`` instance wraps
+           is between 15 and 30.
     """
 
-    def __init__(self, argument, operator, negative=False):
-        if not callable(argument):
-            raise ValueError('argument must be callable')
-
-        (args, varargs, keywords, defaults) = inspect.getargspec(argument)
-
-        if not len(args) > 0:
-            raise ValueError('argument must have an arity > 0')
-
-        self.argument_dict = dict(
-            module=argument.__module__,
-            klass=argument.im_class.__name__,
-            func=argument.__func__.__name__
-        )
+    def __init__(self, argument, attribute, operator, negative=False):
+        self.attribute = attribute
+        self.argument = argument
         self.operator = operator
         self.negative = negative
 
     def __repr__(self):
-        argument = "%s.%s.%s" % (
-            self.argument_dict['module'],
-            self.argument_dict['klass'],
-            self.argument_dict['func']
-
-        )
+        argument = ".".join((self.argument.__name__, self.attribute))
         return '<Condition "%s" %s>' % (argument, self.operator)
 
     def __eq__(self, other):
         return (
-            self.argument_dict == other.argument_dict and
+            self.argument == other.argument and
+            self.attribute == other.attribute and
             self.operator == other.operator and
             self.negative is other.negative
         )
-
-    @property
-    def argument(self):
-        # These gymnasticas are neccessary because instancemethod types in
-        # Python are not pickleable, so we deconstruct the argumente on the way
-        # in, into its module, class and function, and then rebuild it here when
-        # first requested.  The result is cached for future requests.
-        if not getattr(self, '__argument', False):
-            d = self.argument_dict
-            mod = __import__(d['module'], fromlist=(d['klass'],))
-            klass = getattr(mod, d['klass'])
-            self.__argument = getattr(klass, d['func'])
-
-        return self.__argument
 
     def call(self, inpt):
         """
@@ -264,10 +242,16 @@ class Condition(object):
         Keyword Arguments:
         inpt -- An instance of the ``Input`` class.
         """
-        if not self.__is_same_class_as_argument(inpt):
+        if inpt is Manager.NONE_INPUT:
             return False
 
-        application = self.__apply(inpt)
+        # Call (construct) the argument with the input object
+        argument_instance = self.argument(inpt)
+
+        if not argument_instance.applies:
+            return False
+
+        application = self.__apply(argument_instance, inpt)
 
         if self.negative:
             application = not application
@@ -276,23 +260,20 @@ class Condition(object):
 
     @property
     def argument_string(self):
-        parts = [self.argument_dict['klass'], self.argument_dict['func']]
+        parts = [self.argument.__name__, self.attribute]
         return '.'.join(map(str, parts))
 
     def __str__(self):
         return "%s %s" % (self.argument_string, self.operator)
 
-    def __apply(self, inpt):
-        value = self.argument(inpt)
+    def __apply(self, argument_instance, inpt):
+        variable = getattr(argument_instance, self.attribute)
 
         try:
-            return self.operator.applies_to(value)
+            return self.operator.applies_to(variable)
         except Exception as error:
             signals.condition_apply_error.call(self, inpt, error)
             return False
-
-    def __is_same_class_as_argument(self, inpt):
-        return inpt.__class__ is self.argument.im_class
 
 
 class Manager(threading.local):
@@ -310,7 +291,6 @@ class Manager(threading.local):
     #: Special singleton used to represent a "no input" which arguments can look
     #: for and ignore
     NONE_INPUT = object()
-
 
     def __init__(self, storage, autocreate=False, switch_class=Switch,
                  operators=None, inputs=None, namespace=None):
