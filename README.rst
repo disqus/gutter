@@ -129,7 +129,7 @@ You might be asking, why have these ``Input`` objects at all?  They seem to just
 
 The short answer is that ``Input`` objects provide a translation layer to translate your business objects into objects that ``chimera-client`` understand.  This is important for a couple reasons.
 
-First, it means you don't clutter your business logic or objects with code to support ``chimera-client``.  You declare all the arguments you wish to provide to switches in one location whose single responsibilty it to interface with ``chimera-client``.
+First, it means you don't clutter your business logic/objects with code to support ``chimera-client``.  You declare all the arguments you wish to provide to switches in one location (Input) whose single responsibilty it to interface with ``chimera-client``.  You can also contruct more savvy Input objects that may be the combination of multiple business objects and/or consult 3rd party services, all still not cluttering your main application code or business objects.
 
 Secondly, and most importantly, returning ``Argument`` objects ensures that ``chimera-client`` conditions work correctly.  This is mostly relevant to the percentage-based operators, and is best illustrated with an
 example.
@@ -140,7 +140,7 @@ Imagine you have a ``User`` class with an ``is_vip`` boolean field.  Let's say y
 
     return 0 <= (hash(argument) % 100) < 10
 
-The issue is that if ``argument == True``, then ``hash(argument) % 100`` will always be the same value for **every** ``User`` with ``is_vip`` of ``True``:
+The issue is that if ``argument = True``, then ``hash(argument) % 100`` will always be the same value for **every** ``User`` with ``is_vip`` of ``True``:
 
 .. code:: python
 
@@ -266,7 +266,7 @@ Existing switches may be removed from the Manager by calling ``unregister()`` wi
 Conditions
 ==========
 
-Each Swtich can have one-to-many conditions, which decribe the conditions under which that swtich is active.  ``Condition`` objects are constructed with two values: a ``argument`` and ``operator``
+Each Swtich can have 0+ conditions, which decribe the conditions under which that swtich is active.  ``Condition`` objects are constructed with two values: a ``argument`` and ``operator``
 
 An ``argument`` is an ``Argument`` object returned from an ``Input`` class, like the one you defined earlier.  From the previous example, ``UserInput.age`` is an argument.  A condition's ``operator`` is some sort of check applied against that argument.  For instance, is the ``Argument`` greater than some value?  Equal to some value?  Within a range of values?  Etc.
 
@@ -276,7 +276,7 @@ Let's say you wanted a ``Condition`` that checks if the user's age is > 65 years
 
     from chimera.client.operators.comparable import MoreThan
 
-    condition = (Conditionargument=UserInput.age, operator=MoreThan(65))
+    condition = Condition(argument=UserInput.age, operator=MoreThan(65))
 
 This Condition will be true if any input instance has an ``age`` that is more than ``65``.
 
