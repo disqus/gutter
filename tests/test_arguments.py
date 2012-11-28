@@ -1,7 +1,7 @@
 import unittest
 from mock import MagicMock, Mock
 from nose.tools import *
-from chimera.client.inputs.arguments import *
+from chimera.client.arguments.variables import *
 
 from exam.decorators import fixture
 

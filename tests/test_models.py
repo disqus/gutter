@@ -4,7 +4,6 @@ import itertools
 
 from nose.tools import *
 from chimera.client.models import Switch, Manager, Condition
-from chimera.client import inputs
 from modeldict import MemoryDict
 from chimera.client import signals
 import mock
@@ -270,7 +269,7 @@ class TestCondition(unittest.TestCase):
         eq_(self.condition.call(ReflectiveInput()), False)
 
     def test_if_input_is_NONE_it_returns_false(self):
-        eq_(self.condition.call(inputs.NONE), False)
+        eq_(self.condition.call(Manager.NONE_INPUT), False)
 
     @mock.patch('chimera.client.signals.condition_apply_error')
     def test_if_apply_explodes_it_signals_condition_apply_error(self, signal):
@@ -721,7 +720,7 @@ class EmptyManagerInstanceTest(ActsLikeManager, unittest.TestCase):
 
         self.manager.active('global')
 
-        switch.enabled_for.assert_called_once_with(inputs.NONE)
+        switch.enabled_for.assert_called_once_with(Manager.NONE_INPUT)
 
 
 class NamespacedEmptyManagerInstanceTest(EmptyManagerInstanceTest):

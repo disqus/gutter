@@ -7,7 +7,6 @@ chimera.models
 """
 
 from chimera.client import signals
-from chimera.client import inputs as chimera_inputs
 from functools import partial
 import threading
 import inspect
@@ -308,6 +307,11 @@ class Manager(threading.local):
     namespace_separator = '.'
     default_namespace = ['default']
 
+    #: Special singleton used to represent a "no input" which arguments can look
+    #: for and ignore
+    NONE_INPUT = object()
+
+
     def __init__(self, storage, autocreate=False, switch_class=Switch,
                  operators=None, inputs=None, namespace=None):
 
@@ -399,7 +403,7 @@ class Manager(threading.local):
         # Also check the switches against "NONE" input. This ensures there will
         # be at least one input checked.
         if not inputs:
-            inputs = (chimera_inputs.NONE,)
+            inputs = (self.NONE_INPUT,)
 
         return any(map(switch.enabled_for, inputs))
 
