@@ -1,12 +1,31 @@
 import unittest
-from mock import MagicMock, Mock
+from mock import MagicMock, Mock, sentinel
 from nose.tools import *
+
 from chimera.client.arguments.variables import *
+from chimera.client.arguments import Base
 
 from exam.decorators import fixture
 
 
-class BaseArgument(object):
+class TestBase(unittest.TestCase):
+
+    argument = fixture(Base, sentinel.input)
+
+    def test_applies_is_false_if_compatible_type_is_none(self):
+        eq_(self.argument.COMPATIBLE_TYPE, None)
+        eq_(self.argument.applies, False)
+
+    def applies_is_true_if_input_type_is_compatible_type(self):
+        self.argument.COMPATIBLE_TYPE = int
+        ok_(type(self.argument.input) is not int)
+
+        self.assertFalse(self.argument.applies)
+        self.argument.input = 9
+        self.assertTrue(self.argument.applies)
+
+
+class BaseVariableTest(object):
 
     interface_functions = ['__cmp__', '__hash__', '__nonzero__']
 
@@ -37,13 +56,13 @@ class DelegateToValue(object):
             values_function.assert_called_once_with(self.valid_comparison_value)
 
 
-class ValueTest(BaseArgument, DelegateToValue, unittest.TestCase):
+class ValueTest(BaseVariableTest, DelegateToValue, unittest.TestCase):
 
     klass = Value
     valid_comparison_value = 'marv'
 
 
-class BooleanTest(BaseArgument, DelegateToValue, unittest.TestCase):
+class BooleanTest(BaseVariableTest, DelegateToValue, unittest.TestCase):
 
     klass = Boolean
     valid_comparison_value = True
@@ -62,7 +81,7 @@ class BooleanTest(BaseArgument, DelegateToValue, unittest.TestCase):
         assert_not_equals(hash(boolean), hash(Boolean(True)))
 
 
-class StringTest(BaseArgument, DelegateToValue, unittest.TestCase):
+class StringTest(BaseVariableTest, DelegateToValue, unittest.TestCase):
 
     klass = String
     valid_comparison_value = 'foobazzle'

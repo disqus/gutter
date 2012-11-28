@@ -6,9 +6,11 @@ class Base(object):
     the specified input.
     """
 
+    COMPATIBLE_TYPE = None
+
     def __init__(self, inpt):
         self.input = inpt
 
     @property
     def applies(self):
-        return False
+        return type(self.input) is self.COMPATIBLE_TYPE

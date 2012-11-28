@@ -92,6 +92,12 @@ Arguments
 
 The first step in your usage of ``chimera-client`` should be to define your Arguments that you will be checking switches against.  An "Argument" is an object which understands the business logic and object in your system (users, requests, etc) and knows how to validate, transform and extract variables from those business objects for ``Switch`` conditions.
 
+The only requirements of arguments are:
+
+1. They must be callable (constructable) with one argument, the input they are wrapping.
+2. They support an ``applies`` property, which returns ``True`` or ``False`` if the argument instance applies (can extract data out of) the input object it was given.
+3. Some number of other properties which expose variables you want to compare conditions against.
+
 For instance, your system may have a ``User`` object that has properties like ``is_admin``, ``date_joined``, etc.  To switch against it, you would then create a ``UserArgument`` object, which wraps a ``User`` instance, and provides an API of methods that return ``Variable`` objects:
 
 .. code:: python
@@ -99,7 +105,11 @@ For instance, your system may have a ``User`` object that has properties like ``
     from chimera.client.arguments import Base
     from chimera.client.arguments.variables import String, Boolean, Value
 
+    from myapp import User
+
     class UserArgument(Base):
+
+        COMPATIBLE_TYPE = User
 
         def __init__(self, user):
             self._user = user
@@ -122,6 +132,7 @@ There are a few things going on here, so let's break down what they all mean.
 1. An ``Argument`` object has some number of properties defined, which return the variables you want to check a ``Switch`` conditions against.  In the above example, we'll want to make some switches active based on a user's ``name``, ``is_admin`` status and ``age``.
 2. Pproperties **must** return an instance of an ``Variable`` object.  All variables must subclass ``chimera.input.arguments.variables.Base``.  At present there are 3 subclasses: ``Value`` for general values, ``Boolean`` for boolean values and ``String`` for string values.
 3. ``Variable`` objects understand ``Switch`` conditions and operators, and implement the correct API to allow themselves to be appropriatly compared.
+4. ``COMPATIBLE_TYPE`` declares that this argument only works with ``User`` instances.  This works with the default implementation of ``applies`` in the ``Base`` argument that checks if the ``type`` of the input is the same as ``COMPATIBLE_TYPE``.
 
 Rationale for Arguments
 ~~~~~~~~~~~~~~~~~~~~~~~
