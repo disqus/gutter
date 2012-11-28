@@ -5,7 +5,8 @@ from chimera.client.operators.comparable import *
 from chimera.client.operators.identity import *
 from chimera.client.operators.misc import *
 from chimera.client.models import Switch, Condition, Manager
-from chimera.client.inputs.arguments import Value, Boolean, String
+from chimera.client.arguments import Base
+from chimera.client.arguments.variables import Value, Boolean, String
 from chimera.client import signals
 
 from exam.decorators import fixture, before, after
@@ -15,22 +16,31 @@ from exam.cases import Exam
 class User(object):
 
     def __init__(self, name, age, location='San Francisco', married=False):
-        self._name = name
-        self._age = age
-        self._location = location
-        self._married = married
+        self.name = name
+        self.age = age
+        self.location = location
+        self.married = married
 
+
+class UserArgument(Base):
+
+    COMPATIBLE_TYPE = User
+
+    @property
     def name(self):
-        return String(self._name)
+        return String(self.input.name)
 
+    @property
     def age(self):
-        return Value(self._age)
+        return Value(self.input.age)
 
+    @property
     def location(self):
-        return String(self._location)
+        return String(self.input.location)
 
+    @property
     def married(self):
-        return Boolean(self._married)
+        return Boolean(self.input.married)
 
 
 class TestIntegration(Exam, unittest.TestCase):
@@ -92,18 +102,18 @@ class TestIntegration(Exam, unittest.TestCase):
         self.steve = User('timmy', 19)
 
     def setup_conditions(self):
-        self.age_65_and_up = Condition(User.age, MoreThanOrEqualTo(65))
-        self.age_under_18 = Condition(User.age, LessThan(18))
-        self.age_not_under_18 = Condition(User.age, LessThan(18), negative=True)
-        self.age_21_plus = Condition(User.age, MoreThanOrEqualTo(21))
-        self.age_between_13_and_18 = Condition(User.age, Between(13, 18))
+        self.age_65_and_up = Condition(UserArgument, 'age', MoreThanOrEqualTo(65))
+        self.age_under_18 = Condition(UserArgument, 'age', LessThan(18))
+        self.age_not_under_18 = Condition(UserArgument, 'age', LessThan(18), negative=True)
+        self.age_21_plus = Condition(UserArgument, 'age', MoreThanOrEqualTo(21))
+        self.age_between_13_and_18 = Condition(UserArgument, 'age', Between(13, 18))
 
-        self.in_sf = Condition(User.location, Equals('San Francisco'))
-        self.has_location = Condition(User.location, Truthy())
+        self.in_sf = Condition(UserArgument, 'location', Equals('San Francisco'))
+        self.has_location = Condition(UserArgument, 'location', Truthy())
 
-        self.three_quarters_married = Condition(User.married, Percent(75))
-        self.ten_percent = Condition(User.name, Percent(10))
-        self.upper_50_percent = Condition(User.name, PercentRange(50, 100))
+        self.three_quarters_married = Condition(UserArgument, 'married', Percent(75))
+        self.ten_percent = Condition(UserArgument, 'name', Percent(10))
+        self.upper_50_percent = Condition(UserArgument, 'name', PercentRange(50, 100))
 
     def setup_switches(self):
         self.add_switch('can drink', condition=self.age_21_plus)
