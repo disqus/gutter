@@ -17,6 +17,7 @@ Table of Contents
 * Signals_
 * Namespaces_
 * Templates_
+* Decorators_
 * `Testing Utilities`_
 
 Configuration
@@ -80,6 +81,11 @@ If you would like to construct and use a different default manager, but still ha
     assert manager_settings.defaultis chimera
 
 Note that the ``settings.manager.default`` value must be set **before** importing the default ``chimera`` instance.
+
+Autodiscovery
+~~~~~~~~~~~~~
+
+If used with Django, you may call ``chimera.client.autodiscover()`` to have chimera look for, and import, any ``chimera`` modules for every app in ``INSTALLED_APPS``.  These modules should be used to configure your Inputs or custom Condition objects your app requires.  More info on what those objects are and how you use them is in the rest of this README.
 
 Inputs
 ======
@@ -461,6 +467,32 @@ Like ``chimera.active``, ``ifswitch`` takes any number of input objects to check
     {% endifswitch %}
 
 NOTE: By default, the `chimera` instance used in the template tags is the ``chimera.client.chimera`` instance.
+
+Decorators
+==========
+
+Chimera features a ``@switch_active`` decorator you can use to decorate your Django views.  When decorated, if the switch named as the first argument of the ``@switch_decorated`` decorator is False, a ``Http404`` exception is raised.  However, if you also pass a ``redirect_to=`` kwarg, the decorator will return a ``HttpResponseRedirect`` instance, redirecting to that location.  If the switch is active, then the view runs as normal.
+
+For example, here is a view decorated with ``@switch_active``:
+
+
+.. code:: python
+
+    from chimera.client.decorators import switch_active
+
+    @switch_active('cool_feature')
+    def my_view(request):
+        return 'foo'
+
+As stated above, if the ``cool_feature`` switch is inactive, this view will raise a ``Http404`` exception.
+
+If, however, the decorator was constructed with a ``redirect_to=`` kwarg:
+
+.. code:: python
+
+    @switch_active('cool_feature', redirect_to=reverse('upsell-page'))
+
+Then a ``HttpResponseRedirect`` instance will be returned, redirecting to ``reverse('upsell-page')``.
 
 Testing Utilities
 ===============
