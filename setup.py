@@ -39,6 +39,7 @@ setup(
     extras_require={'test': tests_require},
     test_suite='nose.collector',
     classifiers=[
+        'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'Operating System :: OS Independent',
