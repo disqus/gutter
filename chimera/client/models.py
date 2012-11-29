@@ -267,7 +267,7 @@ class Condition(object):
         return "%s %s" % (self.argument_string, self.operator)
 
     def __apply(self, argument_instance, inpt):
-        variable = getattr(argument_instance, self.attribute)
+        variable = getattr(argument_instance, self.attribute)()
 
         try:
             return self.operator.applies_to(variable)

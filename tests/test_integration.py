@@ -26,21 +26,17 @@ class UserArgument(Base):
 
     COMPATIBLE_TYPE = User
 
-    @property
     def name(self):
-        return String(self.input.name)
+        return String(self._input.name)
 
-    @property
     def age(self):
-        return Value(self.input.age)
+        return Value(self._input.age)
 
-    @property
     def location(self):
-        return String(self.input.location)
+        return String(self._input.location)
 
-    @property
     def married(self):
-        return Boolean(self.input.married)
+        return Boolean(self._input.married)
 
 
 class TestIntegration(Exam, unittest.TestCase):

@@ -1,3 +1,13 @@
+import types
+
+
+def is_valid_variable(thing):
+    return (
+        isinstance(thing, types.MethodType) and
+        not thing.__name__.startswith('_')
+    )
+
+
 class Base(object):
     """
     Base class for Arguments, which are responsible for understanding inputs
@@ -9,8 +19,13 @@ class Base(object):
     COMPATIBLE_TYPE = None
 
     def __init__(self, inpt):
-        self.input = inpt
+        self._input = inpt
+
+    @property
+    def variables(self):
+        things = (getattr(type(self), prop) for prop in dir(type(self)))
+        return filter(is_valid_variable, things)
 
     @property
     def applies(self):
-        return type(self.input) is self.COMPATIBLE_TYPE
+        return type(self._input) is self.COMPATIBLE_TYPE

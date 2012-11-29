@@ -8,6 +8,26 @@ from chimera.client.arguments import Base
 from exam.decorators import fixture
 
 
+class MyArgument(Base):
+
+    class_var = True
+
+    def __init__(self, *args, **kwargs):
+        self.instance_var = True
+        super(MyArgument, self).__init__(*args, **kwargs)
+
+    def instance_method(self):
+        pass
+
+    @staticmethod
+    def static_method(self):
+        pass
+
+    @property
+    def property(self):
+        pass
+
+
 class TestBase(unittest.TestCase):
 
     argument = fixture(Base, sentinel.input)
@@ -23,6 +43,12 @@ class TestBase(unittest.TestCase):
         self.assertFalse(self.argument.applies)
         self.argument.input = 9
         self.assertTrue(self.argument.applies)
+
+    def test_arguments_defaults_to_nothing(self):
+        eq_(self.argument.variables, [])
+
+    def test_only_returns_valid_instance_methods_for_subclasses(self):
+        eq_(MyArgument(sentinel.input).variables, [MyArgument.instance_method])
 
 
 class BaseVariableTest(object):

@@ -26,9 +26,8 @@ class ReflectiveArgument(BaseArgument):
 
     applies = True
 
-    @property
     def foo(self):
-        return (42, self.input)
+        return (42, self._input)
 
 
 class TestSwitch(unittest.TestCase):
