@@ -60,7 +60,7 @@ Once the ``Manager``'s storage engine has been condfigured, you can import chime
 
 .. code:: python
 
-    from chimera.client import chimera
+    from chimera.client.default import chimera
 
 At this point the ``chimera`` object is an instance of the ``Manager`` class, which holds all methods to register switches and check if they are active.  In most installations and usage scenarios, the ``chimera.client.chimera`` manager will be your main interface.
 
@@ -76,7 +76,7 @@ If you would like to construct and use a different default manager, but still ha
 
     manager_settings.default = Manager({})   # Must be done before importing the defualt manager
 
-    from chimera.client import chimera
+    from chimera.client.default import chimera
 
     assert manager_settings.defaultis chimera
 
@@ -514,7 +514,7 @@ For instance, with this code here, by passing ``cool_feature=True`` to the ``swi
 .. code:: python
 
     from chimera.client.testutils import switches
-    from chimera import chimera
+    from chimera.client.default import chimera
 
     with switches(cool_feature=True):
         chimera.active('cool_feature')  # True
@@ -525,7 +525,7 @@ And when using ``switches`` as a decorator:
 .. code:: python
 
     from chimera.client.testutils import switches
-    from chimera import chimera
+    from chimera.client.default import chimera
 
     @switches(cool_feature=True)
     def run(self):
