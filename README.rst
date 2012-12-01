@@ -1,9 +1,9 @@
-Chimera-Client
+Chimera
 --------
 
 **NOTE:** This repo is the client for Gargoyle 2, known as "Chimera".  It does not work with the exsiting `Gargoyle 1 codebase <https://github.com/disqus/gargoyle/>`_.
 
-Chimera-Client is feature swtich management library.  It allows users to create feature swtiches and setup conditions those switches will be enabled for.  Once configured, switches can then be checked against inputs (requests, user objects, etc) to see if the switches are active.
+Chimera is feature swtich management library.  It allows users to create feature swtiches and setup conditions those switches will be enabled for.  Once configured, switches can then be checked against inputs (requests, user objects, etc) to see if the switches are active.
 
 Table of Contents
 =================
@@ -23,17 +23,17 @@ Table of Contents
 Configuration
 =============
 
-Chimera-client requires a small bit of configuration before usage.
+Chimera requires a small bit of configuration before usage.
 
 Choosing Storage
 ~~~~~~~~~~~~~~~~
 
-Switches are persisted in a ``storage`` object, which is a `dict` or any object which provides the ``types.MappingType`` interface (``__setitem__`` and ``__getitem__`` methods).  By default, ``chimera-client`` uses an instance of `MemoryDict` from the `modeldict library <https://github.com/disqus/modeldict>`_.  This engine **does not persist data once the process ends** so a more persistant data store should be used.
+Switches are persisted in a ``storage`` object, which is a `dict` or any object which provides the ``types.MappingType`` interface (``__setitem__`` and ``__getitem__`` methods).  By default, ``chimera`` uses an instance of `MemoryDict` from the `modeldict library <https://github.com/disqus/modeldict>`_.  This engine **does not persist data once the process ends** so a more persistant data store should be used.
 
 Autocreate
 ~~~~~~~~~~
 
-``chimera-client`` can also "autocreate" switches.  If ``autocreate`` is enabled, and ``chimera-client`` is asked if the switch is active but the switch has not been created yet, ``chimera-client`` will create the switch automatically.  When autocreated, a switch's state is set to "disabled."
+``chimera`` can also "autocreate" switches.  If ``autocreate`` is enabled, and ``chimera`` is asked if the switch is active but the switch has not been created yet, ``chimera`` will create the switch automatically.  When autocreated, a switch's state is set to "disabled."
 
 This behavior is off by default, but can be enabled through a setting.  More on "settings" below.
 
@@ -56,7 +56,7 @@ In this case, we are changing the engine to modeldict's ``RedisDict`` and turnin
 Setup
 =====
 
-Once the ``Manager``'s storage engine has been condfigured, you can import chimera-client's default ``Manager`` object, which is your main interface with ``chimera-client``:
+Once the ``Manager``'s storage engine has been condfigured, you can import chimera's default ``Manager`` object, which is your main interface with ``chimera``:
 
 .. code:: python
 
@@ -90,7 +90,7 @@ If used with Django, you may call ``chimera.client.autodiscover()`` to have chim
 Arguments
 =========
 
-The first step in your usage of ``chimera-client`` should be to define your Arguments that you will be checking switches against.  An "Argument" is an object which understands the business logic and object in your system (users, requests, etc) and knows how to validate, transform and extract variables from those business objects for ``Switch`` conditions.
+The first step in your usage of ``chimera`` should be to define your Arguments that you will be checking switches against.  An "Argument" is an object which understands the business logic and object in your system (users, requests, etc) and knows how to validate, transform and extract variables from those business objects for ``Switch`` conditions.
 
 The only requirements of arguments are:
 
@@ -136,11 +136,11 @@ Rationale for Arguments
 
 You might be asking, why have these ``Argument`` objects at all?  They seem to just wrap an object in my system and provide the same API.  Why can't I just use my business object **itself** and compare it against my switch conditions?
 
-The short answer is that ``Argument`` objects provide a translation layer to translate your business objects into objects that ``chimera-client`` understands.  This is important for a couple reasons.
+The short answer is that ``Argument`` objects provide a translation layer to translate your business objects into objects that ``chimera`` understands.  This is important for a couple reasons.
 
-First, it means you don't clutter your business logic/objects with code to support ``chimera-client``.  You declare all the arguments you wish to provide to switches in one location (an Argument) whose single responsibilty it to interface with ``chimera-client``.  You can also contruct more savvy Argument objects that may be the combination of multiple business objects, consult 3rd party services, etc.  All still not cluttering your main application code or business objects.
+First, it means you don't clutter your business logic/objects with code to support ``chimera``.  You declare all the arguments you wish to provide to switches in one location (an Argument) whose single responsibilty it to interface with ``chimera``.  You can also contruct more savvy Argument objects that may be the combination of multiple business objects, consult 3rd party services, etc.  All still not cluttering your main application code or business objects.
 
-Secondly, and most importantly, Arguments return ``Variable`` objects, whih ensure ``chimera-client`` conditions work correctly.  This is mostly relevant to the percentage-based operators, and is best illustrated with an example.
+Secondly, and most importantly, Arguments return ``Variable`` objects, whih ensure ``chimera`` conditions work correctly.  This is mostly relevant to the percentage-based operators, and is best illustrated with an example.
 
 Imagine you have a ``User`` class with an ``is_vip`` boolean field.  Let's say you wanted to turn on a feature for only 10% of your VIP customers.  To do that, you would write a condition that says, "10% of the time when I'm called with the variable, I should be true."  That line of code would probably do something like this:
 
@@ -161,7 +161,7 @@ This is because in Python `True` objects alaways have the same hash value, and t
 
 For the 10% percentage range, you want it to be active for 10% of the inputs.  Therefore, each input must have a unique hash value, exactly the feature the ``Boolean`` variable provides.  Every ``Variable`` has known characteristics against conditions, while your objects may not.
 
-That said, you don't absolutely **have** to use ``Variable`` objects.  For obvious cases, like ``use.age > some_value`` your ``User`` instance will work just fine, but to play it safe you should use ``Variable`` objects.  Using ``Variable`` objects also ensure that if you updatate ``chimera-client`` any new ``Operator`` types that are added will work correctly with your ``Variable``s.
+That said, you don't absolutely **have** to use ``Variable`` objects.  For obvious cases, like ``use.age > some_value`` your ``User`` instance will work just fine, but to play it safe you should use ``Variable`` objects.  Using ``Variable`` objects also ensure that if you updatate ``chimera`` any new ``Operator`` types that are added will work correctly with your ``Variable``s.
 
 Switches
 ============================================
@@ -212,7 +212,7 @@ Concent
 
 By default, each switch makes its "am I active?" decision independent of other switches in the Manager (including its parent), and only consults its own conditions to check if it is enabled for the input.  However, this is not always the case.  Perhaps you have a cool new feature that is only available to a certain class of user.  And of *those* users, you want 10% to be be exposed to a different user interface to see how they behave vs the other 90%.
 
-``chimera-client`` allows you to set a ``concent`` flag on a switch that instructs it to check its parental switch first, before checking itself.  If it checks its parent and it is not enabled for the same input, the switch immediatly returns ``False``.  If its parent *is* enabled for the input, then the switch will continue and check its own conditions, returning as it would normally.
+``chimera`` allows you to set a ``concent`` flag on a switch that instructs it to check its parental switch first, before checking itself.  If it checks its parent and it is not enabled for the same input, the switch immediatly returns ``False``.  If its parent *is* enabled for the input, then the switch will continue and check its own conditions, returning as it would normally.
 
 For example:
 
@@ -250,7 +250,7 @@ If you need to update your Switch, simply make the changes to the ``Switch`` obj
 
     manager.update(switch)  # Switch is now updated in the manager
 
-Since this is a common pattern (retrieve switch from the manager, then update it), chimera-client provides a shorthand API in which you ask the manager for a switch by name, and then call ``save()`` on the **switch** to update it in the ``Manager`` it was retreived from:
+Since this is a common pattern (retrieve switch from the manager, then update it), chimera provides a shorthand API in which you ask the manager for a switch by name, and then call ``save()`` on the **switch** to update it in the ``Manager`` it was retreived from:
 
 .. code:: python
 
@@ -316,7 +316,7 @@ As stated before, switches are checked against input objects.  To do this, you w
 ``chimera.active()`` API
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A common use case of chimera-client is to use it during the processing of a web request.  During execution of code, different code paths are taken depending on if certain swtiches are active or not.  Often times there are mutliple switches in existence at any one time and they all need to be checked against multiple arguments.  To handle this use case, Chimera provides a higher-level API.
+A common use case of chimera is to use it during the processing of a web request.  During execution of code, different code paths are taken depending on if certain swtiches are active or not.  Often times there are mutliple switches in existence at any one time and they all need to be checked against multiple arguments.  To handle this use case, Chimera provides a higher-level API.
 
 To check if a ``Switch`` is active, simply call ``chimera.active()`` with the Switch name:
 
@@ -364,7 +364,7 @@ In the above example, since ``exclusive=True`` is passed, the switch named ``'my
 Signals
 =======
 
-Chimera-client provides 4 total signals to connect to: 3 about changes to Switches, and 1 about errors applying Conditions.  They are all avilable from the ``chimera.signals`` module
+Chimera provides 4 total signals to connect to: 3 about changes to Switches, and 1 about errors applying Conditions.  They are all avilable from the ``chimera.signals`` module
 
 Switch Signals
 ~~~~~~~~~~~~~~
@@ -423,7 +423,7 @@ In your connected callback, you can do whatever you would like: log the error, r
 Namespaces
 ==========
 
-``chimera-client`` allows the use of "namespaces" to group switches under a single umbrealla, while both not letting one namespace see the switches of another namespace, but allowing them to share the same storage instance, operators and other configuration.
+``chimera`` allows the use of "namespaces" to group switches under a single umbrealla, while both not letting one namespace see the switches of another namespace, but allowing them to share the same storage instance, operators and other configuration.
 
 Given an existing vanilla ``Manager`` instance, you can create a namespaced manager by calling the ``namespaced()`` method:
 
@@ -438,14 +438,14 @@ At this point, ``notifications`` is a copy of ``chimera``, inheriting all of its
 * Global inputs
 * Operators
 
-It does **not**, however, share the same switches.  Newly constructed ``Manager`` instances are in the ``default`` namespace.  When ``namespaced()`` is called, ``chimera-client`` changes the manager's namespace to ``notifications``.  Any switches in the previous ``default`` namespace are not visible in the ``notifications`` namespace, and vice versa.
+It does **not**, however, share the same switches.  Newly constructed ``Manager`` instances are in the ``default`` namespace.  When ``namespaced()`` is called, ``chimera`` changes the manager's namespace to ``notifications``.  Any switches in the previous ``default`` namespace are not visible in the ``notifications`` namespace, and vice versa.
 
 This allows you to have separate namespaced "views" of switches, possibly named the exact same name, and not have them comflict with each other.
 
 Templates
 =========
 
-``chimera-client`` has a ``ifswitch`` template tag that you can use in your Django templates.  To use it, simply load the ``chimera`` template helpers and pass ``ifswitch`` the switch name.  If the switch is active, the content between ``ifswitch`` and ``endifswitch`` will be rendered.
+``chimera`` has a ``ifswitch`` template tag that you can use in your Django templates.  To use it, simply load the ``chimera`` template helpers and pass ``ifswitch`` the switch name.  If the switch is active, the content between ``ifswitch`` and ``endifswitch`` will be rendered.
 
 .. code::
 
@@ -505,7 +505,7 @@ Then a ``HttpResponseRedirect`` instance will be returned, redirecting to ``reve
 Testing Utilities
 ===============
 
-If you would like to test code that uses ``chimera-client`` and have the ``chimera`` manager return predictable results, you can use the ``switches`` object from the ``testutils`` module.
+If you would like to test code that uses ``chimera`` and have the ``chimera`` manager return predictable results, you can use the ``switches`` object from the ``testutils`` module.
 
 The ``swtiches`` object can be used as both a context manager and a decorator.  It is passed ``kwargs`` of switch names and their``active`` return values.
 

@@ -23,11 +23,11 @@ if 'nosetests' in sys.argv[1:]:
 
 
 setup(
-    name='chimera-client',
+    name='chimera',
     version='0.1.0',
     author='DISQUS',
     author_email='opensource@disqus.com',
-    url='http://github.com/disqus/chimera-client',
+    url='http://github.com/disqus/chimera',
     description='Client to chimera feature switches backend',
     packages=find_packages(exclude=["tests"]),
     zip_safe=False,
