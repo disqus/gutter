@@ -1,6 +1,15 @@
 import types
 
 
+class classproperty(object):
+
+    def __init__(self, getter):
+        self.getter = getter
+
+    def __get__(self, instance, owner):
+        return self.getter(owner)
+
+
 def is_valid_variable(thing):
     return (
         isinstance(thing, types.MethodType) and
@@ -21,10 +30,12 @@ class Base(object):
     def __init__(self, inpt):
         self._input = inpt
 
-    @property
-    def variables(self):
-        things = (getattr(type(self), prop) for prop in dir(type(self)))
-        return filter(is_valid_variable, things)
+    @classproperty
+    def variables(cls):
+        return [
+            getattr(cls, key) for key, value in vars(cls).items()
+            if callable(value) and is_valid_variable(getattr(cls, key))
+        ]
 
     @property
     def applies(self):

@@ -48,7 +48,7 @@ class TestBase(unittest.TestCase):
         eq_(self.argument.variables, [])
 
     def test_only_returns_valid_instance_methods_for_subclasses(self):
-        eq_(MyArgument(sentinel.input).variables, [MyArgument.instance_method])
+        eq_(MyArgument.variables, [MyArgument.instance_method])
 
 
 class BaseVariableTest(object):
