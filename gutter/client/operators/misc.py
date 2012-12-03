@@ -1,4 +1,4 @@
-from chimera.client.operators import Base
+from gutter.client.operators import Base
 
 
 class PercentRange(Base):

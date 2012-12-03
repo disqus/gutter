@@ -1,8 +1,8 @@
 import unittest
 from nose.tools import *
-from chimera.client.operators.comparable import *
-from chimera.client.operators.identity import *
-from chimera.client.operators.misc import *
+from gutter.client.operators.comparable import *
+from gutter.client.operators.identity import *
+from gutter.client.operators.misc import *
 
 from exam.decorators import fixture
 

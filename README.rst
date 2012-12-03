@@ -1,9 +1,9 @@
-Chimera
+Gutter
 --------
 
-**NOTE:** This repo is the client for Gargoyle 2, known as "Chimera".  It does not work with the exsiting `Gargoyle 1 codebase <https://github.com/disqus/gargoyle/>`_.
+**NOTE:** This repo is the client for Gargoyle 2, known as "Gutter".  It does not work with the exsiting `Gargoyle 1 codebase <https://github.com/disqus/gargoyle/>`_.
 
-Chimera is feature swtich management library.  It allows users to create feature swtiches and setup conditions those switches will be enabled for.  Once configured, switches can then be checked against inputs (requests, user objects, etc) to see if the switches are active.
+Gutter is feature swtich management library.  It allows users to create feature swtiches and setup conditions those switches will be enabled for.  Once configured, switches can then be checked against inputs (requests, user objects, etc) to see if the switches are active.
 
 Table of Contents
 =================
@@ -23,17 +23,17 @@ Table of Contents
 Configuration
 =============
 
-Chimera requires a small bit of configuration before usage.
+Gutter requires a small bit of configuration before usage.
 
 Choosing Storage
 ~~~~~~~~~~~~~~~~
 
-Switches are persisted in a ``storage`` object, which is a `dict` or any object which provides the ``types.MappingType`` interface (``__setitem__`` and ``__getitem__`` methods).  By default, ``chimera`` uses an instance of `MemoryDict` from the `modeldict library <https://github.com/disqus/modeldict>`_.  This engine **does not persist data once the process ends** so a more persistant data store should be used.
+Switches are persisted in a ``storage`` object, which is a `dict` or any object which provides the ``types.MappingType`` interface (``__setitem__`` and ``__getitem__`` methods).  By default, ``gutter`` uses an instance of `MemoryDict` from the `modeldict library <https://github.com/disqus/modeldict>`_.  This engine **does not persist data once the process ends** so a more persistant data store should be used.
 
 Autocreate
 ~~~~~~~~~~
 
-``chimera`` can also "autocreate" switches.  If ``autocreate`` is enabled, and ``chimera`` is asked if the switch is active but the switch has not been created yet, ``chimera`` will create the switch automatically.  When autocreated, a switch's state is set to "disabled."
+``gutter`` can also "autocreate" switches.  If ``autocreate`` is enabled, and ``gutter`` is asked if the switch is active but the switch has not been created yet, ``gutter`` will create the switch automatically.  When autocreated, a switch's state is set to "disabled."
 
 This behavior is off by default, but can be enabled through a setting.  More on "settings" below.
 
@@ -44,11 +44,11 @@ To change the ``storage`` and/or ``autocreate`` settings, simply import the sett
 
 .. code:: python
 
-    from chimera.client.settings import manager as manager_settings
+    from gutter.client.settings import manager as manager_settings
     from modeldict.dict import RedisDict
     from redis import RedisClient
 
-    manager_settings.storage_engine = RedisDict('chimera', RedisClient()))
+    manager_settings.storage_engine = RedisDict('gutter', RedisClient()))
     manager_settings.autocreate = True
 
 In this case, we are changing the engine to modeldict's ``RedisDict`` and turning on ``autocreate``.  These settings will then apply to all newly constructed ``Manager`` instances.  More on what a ``Manager`` is and how you use it later in this document.
@@ -56,41 +56,41 @@ In this case, we are changing the engine to modeldict's ``RedisDict`` and turnin
 Setup
 =====
 
-Once the ``Manager``'s storage engine has been condfigured, you can import chimera's default ``Manager`` object, which is your main interface with ``chimera``:
+Once the ``Manager``'s storage engine has been condfigured, you can import gutter's default ``Manager`` object, which is your main interface with ``gutter``:
 
 .. code:: python
 
-    from chimera.client.default import chimera
+    from gutter.client.default import gutter
 
-At this point the ``chimera`` object is an instance of the ``Manager`` class, which holds all methods to register switches and check if they are active.  In most installations and usage scenarios, the ``chimera.client.chimera`` manager will be your main interface.
+At this point the ``gutter`` object is an instance of the ``Manager`` class, which holds all methods to register switches and check if they are active.  In most installations and usage scenarios, the ``gutter.client.gutter`` manager will be your main interface.
 
 Using a different default Manager
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you would like to construct and use a different default manager, but still have it accessible via ``chimera.client.chimera``, you can construct and then assign a ``Manager`` instance to ``settings.manager.default`` value:
+If you would like to construct and use a different default manager, but still have it accessible via ``gutter.client.gutter``, you can construct and then assign a ``Manager`` instance to ``settings.manager.default`` value:
 
 .. code:: python
 
-    from chimera.client.settings import manager as manager_settings
-    from chimera.client.models import Manager
+    from gutter.client.settings import manager as manager_settings
+    from gutter.client.models import Manager
 
     manager_settings.default = Manager({})   # Must be done before importing the defualt manager
 
-    from chimera.client.default import chimera
+    from gutter.client.default import gutter
 
-    assert manager_settings.defaultis chimera
+    assert manager_settings.defaultis gutter
 
-Note that the ``settings.manager.default`` value must be set **before** importing the default ``chimera`` instance.
+Note that the ``settings.manager.default`` value must be set **before** importing the default ``gutter`` instance.
 
 Autodiscovery
 ~~~~~~~~~~~~~
 
-If used with Django, you may call ``chimera.client.autodiscover()`` to have chimera look for, and import, any ``chimera`` modules for every app in ``INSTALLED_APPS``.  These modules should be used to configure your Arguments or custom Condition objects your app requires.  More info on what those objects are and how you use them is in the rest of this README.
+If used with Django, you may call ``gutter.client.autodiscover()`` to have gutter look for, and import, any ``gutter`` modules for every app in ``INSTALLED_APPS``.  These modules should be used to configure your Arguments or custom Condition objects your app requires.  More info on what those objects are and how you use them is in the rest of this README.
 
 Arguments
 =========
 
-The first step in your usage of ``chimera`` should be to define your Arguments that you will be checking switches against.  An "Argument" is an object which understands the business logic and object in your system (users, requests, etc) and knows how to validate, transform and extract variables from those business objects for ``Switch`` conditions.
+The first step in your usage of ``gutter`` should be to define your Arguments that you will be checking switches against.  An "Argument" is an object which understands the business logic and object in your system (users, requests, etc) and knows how to validate, transform and extract variables from those business objects for ``Switch`` conditions.
 
 The only requirements of arguments are:
 
@@ -102,8 +102,8 @@ For instance, your system may have a ``User`` object that has properties like ``
 
 .. code:: python
 
-    from chimera.client.arguments import Base
-    from chimera.client.arguments.variables import String, Boolean, Value
+    from gutter.client.arguments import Base
+    from gutter.client.arguments.variables import String, Boolean, Value
 
     from myapp import User
 
@@ -127,7 +127,7 @@ For instance, your system may have a ``User`` object that has properties like ``
 There are a few things going on here, so let's break down what they all mean.
 
 1. An ``Argument`` object has some number of instance methods defined, which return the variables you want to check a ``Switch`` conditions against.  In the above example, we'll want to make some switches active based on a user's ``name``, ``is_admin`` status and ``age``.
-2. Those instance methods **must** return an instance of a ``Variable`` object.  All variables must subclass ``chimera.input.arguments.variables.Base``.  At present there are 3 subclasses: ``Value`` for general values, ``Boolean`` for boolean values and ``String`` for string values.
+2. Those instance methods **must** return an instance of a ``Variable`` object.  All variables must subclass ``gutter.input.arguments.variables.Base``.  At present there are 3 subclasses: ``Value`` for general values, ``Boolean`` for boolean values and ``String`` for string values.
 3. ``Variable`` objects understand ``Switch`` conditions and operators, and implement the correct API to allow themselves to be appropriatly compared.
 4. ``COMPATIBLE_TYPE`` declares that this argument only works with ``User`` instances.  This works with the default implementation of ``applies`` in the ``Base`` argument that checks if the ``type`` of the input is the same as ``COMPATIBLE_TYPE``.
 
@@ -136,11 +136,11 @@ Rationale for Arguments
 
 You might be asking, why have these ``Argument`` objects at all?  They seem to just wrap an object in my system and provide the same API.  Why can't I just use my business object **itself** and compare it against my switch conditions?
 
-The short answer is that ``Argument`` objects provide a translation layer to translate your business objects into objects that ``chimera`` understands.  This is important for a couple reasons.
+The short answer is that ``Argument`` objects provide a translation layer to translate your business objects into objects that ``gutter`` understands.  This is important for a couple reasons.
 
-First, it means you don't clutter your business logic/objects with code to support ``chimera``.  You declare all the arguments you wish to provide to switches in one location (an Argument) whose single responsibilty it to interface with ``chimera``.  You can also contruct more savvy Argument objects that may be the combination of multiple business objects, consult 3rd party services, etc.  All still not cluttering your main application code or business objects.
+First, it means you don't clutter your business logic/objects with code to support ``gutter``.  You declare all the arguments you wish to provide to switches in one location (an Argument) whose single responsibilty it to interface with ``gutter``.  You can also contruct more savvy Argument objects that may be the combination of multiple business objects, consult 3rd party services, etc.  All still not cluttering your main application code or business objects.
 
-Secondly, and most importantly, Arguments return ``Variable`` objects, whih ensure ``chimera`` conditions work correctly.  This is mostly relevant to the percentage-based operators, and is best illustrated with an example.
+Secondly, and most importantly, Arguments return ``Variable`` objects, whih ensure ``gutter`` conditions work correctly.  This is mostly relevant to the percentage-based operators, and is best illustrated with an example.
 
 Imagine you have a ``User`` class with an ``is_vip`` boolean field.  Let's say you wanted to turn on a feature for only 10% of your VIP customers.  To do that, you would write a condition that says, "10% of the time when I'm called with the variable, I should be true."  That line of code would probably do something like this:
 
@@ -161,7 +161,7 @@ This is because in Python `True` objects alaways have the same hash value, and t
 
 For the 10% percentage range, you want it to be active for 10% of the inputs.  Therefore, each input must have a unique hash value, exactly the feature the ``Boolean`` variable provides.  Every ``Variable`` has known characteristics against conditions, while your objects may not.
 
-That said, you don't absolutely **have** to use ``Variable`` objects.  For obvious cases, like ``use.age > some_value`` your ``User`` instance will work just fine, but to play it safe you should use ``Variable`` objects.  Using ``Variable`` objects also ensure that if you updatate ``chimera`` any new ``Operator`` types that are added will work correctly with your ``Variable``s.
+That said, you don't absolutely **have** to use ``Variable`` objects.  For obvious cases, like ``use.age > some_value`` your ``User`` instance will work just fine, but to play it safe you should use ``Variable`` objects.  Using ``Variable`` objects also ensure that if you updatate ``gutter`` any new ``Operator`` types that are added will work correctly with your ``Variable``s.
 
 Switches
 ============================================
@@ -172,7 +172,7 @@ Switches are constructed with only one required argument, a ``name``:
 
 .. code:: python
 
-    from chimera.client.models import Switch
+    from gutter.client.models import Switch
 
     switch = Switch('my cool feature')
 
@@ -212,7 +212,7 @@ Concent
 
 By default, each switch makes its "am I active?" decision independent of other switches in the Manager (including its parent), and only consults its own conditions to check if it is enabled for the input.  However, this is not always the case.  Perhaps you have a cool new feature that is only available to a certain class of user.  And of *those* users, you want 10% to be be exposed to a different user interface to see how they behave vs the other 90%.
 
-``chimera`` allows you to set a ``concent`` flag on a switch that instructs it to check its parental switch first, before checking itself.  If it checks its parent and it is not enabled for the same input, the switch immediatly returns ``False``.  If its parent *is* enabled for the input, then the switch will continue and check its own conditions, returning as it would normally.
+``gutter`` allows you to set a ``concent`` flag on a switch that instructs it to check its parental switch first, before checking itself.  If it checks its parent and it is not enabled for the same input, the switch immediatly returns ``False``.  If its parent *is* enabled for the input, then the switch will continue and check its own conditions, returning as it would normally.
 
 For example:
 
@@ -232,9 +232,9 @@ Once your ``Switch`` is constsructed with the right conditions, you need to reti
 
 .. code:: python
 
-    chimera.register(switch)
+    gutter.register(switch)
 
-The Switch is now stored in the Manager's storage and can be checked if active through ``chimera.active(switch)``.
+The Switch is now stored in the Manager's storage and can be checked if active through ``gutter.active(switch)``.
 
 Updating a Switch
 ~~~~~~~~~~~~~~~~~
@@ -250,7 +250,7 @@ If you need to update your Switch, simply make the changes to the ``Switch`` obj
 
     manager.update(switch)  # Switch is now updated in the manager
 
-Since this is a common pattern (retrieve switch from the manager, then update it), chimera provides a shorthand API in which you ask the manager for a switch by name, and then call ``save()`` on the **switch** to update it in the ``Manager`` it was retreived from:
+Since this is a common pattern (retrieve switch from the manager, then update it), gutter provides a shorthand API in which you ask the manager for a switch by name, and then call ``save()`` on the **switch** to update it in the ``Manager`` it was retreived from:
 
 .. code:: python
 
@@ -265,8 +265,8 @@ Existing switches may be removed from the Manager by calling ``unregister()`` wi
 
 .. code:: python
 
-    chimera.unregister('deprecated switch')
-    chimera.unregister(a_switch_instance)
+    gutter.unregister('deprecated switch')
+    gutter.unregister(a_switch_instance)
 
 **Note:** If the switch is part of a heirarchy and has children switches (see the "Heriarchical Switches" section abobve), all decendent switches (children, grandchildren, etc) will also be unregistered and deleted.
 
@@ -282,19 +282,19 @@ Let's say you wanted a ``Condition`` that checks if the user's age is > 65 years
 
 .. code:: python
 
-    from chimera.client.operators.comparable import MoreThan
+    from gutter.client.operators.comparable import MoreThan
 
     condition = Condition(argument=UserArgument, attribute='age', operator=MoreThan(65))
 
 This Condition will be true if any input instance has an ``age`` that is more than ``65``.
 
-Please see the ``chimera.operators`` for a list of available operators.
+Please see the ``gutter.operators`` for a list of available operators.
 
 Conditions can also be constructed with a ``negative`` argument, which negates the condition.  For example:
 
 .. code:: python
 
-    from chimera.client.operators.comparable import MoreThan
+    from gutter.client.operators.comparable import MoreThan
 
     condition = Condition(argument=UserArgument, attribute='age', operator=MoreThan(65), negative=True)
 
@@ -313,16 +313,16 @@ Checking Switches as Active
 
 As stated before, switches are checked against input objects.  To do this, you would call the switch's ``enabled_for()`` method with a ``User`` instance, for instance.  You may call ``enabled_for()`` with any input object, it will ignore inputs for which it knows nothing about. If the ``Switch`` is active for your input, ``enabled_for`` will return ``True``.  Otherwise, it will return ``False``.
 
-``chimera.active()`` API
+``gutter.active()`` API
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A common use case of chimera is to use it during the processing of a web request.  During execution of code, different code paths are taken depending on if certain swtiches are active or not.  Often times there are mutliple switches in existence at any one time and they all need to be checked against multiple arguments.  To handle this use case, Chimera provides a higher-level API.
+A common use case of gutter is to use it during the processing of a web request.  During execution of code, different code paths are taken depending on if certain swtiches are active or not.  Often times there are mutliple switches in existence at any one time and they all need to be checked against multiple arguments.  To handle this use case, Gutter provides a higher-level API.
 
-To check if a ``Switch`` is active, simply call ``chimera.active()`` with the Switch name:
+To check if a ``Switch`` is active, simply call ``gutter.active()`` with the Switch name:
 
 .. code:: python
 
-    chimera.active('my cool feature')
+    gutter.active('my cool feature')
     >>> True
 
 The switch is checked against some number of input objects.  Inputs can be added to the ``active()`` check one of two ways: locally, passed in to the ``active()`` call or globally, configured ahead of time.
@@ -331,24 +331,24 @@ To check agianst local inputs, ``active()`` takes any number of input objects af
 
 .. code:: python
 
-    chimera.active('my cool feature', input1, input2)
+    gutter.active('my cool feature', input1, input2)
     >>> True
 
 If you have global input objects you would like to use for every check, you can set them up by calling the Manager's ``input()`` method:
 
 .. code:: python
 
-    chimera.input(input1, input2)
+    gutter.input(input1, input2)
 
 Now, ``input1`` and ``input2`` are checked against for every ``active`` call.  For example, assuming ``input1`` and ``input2`` are configured as above, this ``active()`` call would check if the Switch was enabled for inputs ``input1``, ``input2`` and ``input3`` in that order::
 
-    chimera.active('my cool feature', input3)
+    gutter.active('my cool feature', input3)
 
 Once you're doing using global inputs, perhaps at the end of a request, you should call the Manager's ``flush()`` method to remove all the inputs:
 
 .. code:: python
 
-    chimera.flush()
+    gutter.flush()
 
 The Manager is now setup and ready for its next set of inputs.
 
@@ -356,15 +356,15 @@ When calling ``active()`` with a local inputs, you can skip checking the ``Switc
 
 .. code:: python
 
-    chimera.input(input1, input2)
-    chimera.active('my cool feature', input3, exclusive=True)
+    gutter.input(input1, input2)
+    gutter.active('my cool feature', input3, exclusive=True)
 
 In the above example, since ``exclusive=True`` is passed, the switch named ``'my cool feature'`` is **only** checked against ``input3``, and not ``input1`` or ``input2``.  The ``exclusive=True`` argument is not persistant, so the next call to ``active()`` without ``exclusive=True`` will again use the globally defined inputs.
 
 Signals
 =======
 
-Chimera provides 4 total signals to connect to: 3 about changes to Switches, and 1 about errors applying Conditions.  They are all avilable from the ``chimera.signals`` module
+Gutter provides 4 total signals to connect to: 3 about changes to Switches, and 1 about errors applying Conditions.  They are all avilable from the ``gutter.signals`` module
 
 Switch Signals
 ~~~~~~~~~~~~~~
@@ -378,7 +378,7 @@ To use a signal, simply call the signal's ``connect()`` method and pass in a cal
 
 .. code:: python
 
-    from chimera.client.signals import switch_updated
+    from gutter.client.signals import switch_updated
 
     def log_switch_update(switch):
         Syslog.log("Switch %s updated" % switch.name)
@@ -392,7 +392,7 @@ The ``switch_updated`` signal can be connected to in order to be notified when a
 
 .. code:: python
 
-    >>> from chimera.client.models import Switch
+    >>> from gutter.client.models import Switch
     >>> switch = Switch('test')
     >>> switch.concent
     True
@@ -412,7 +412,7 @@ When a ``Switch`` checks an input object against its conditions, there is a good
 
 While catching all exceptions is generally bad form and hides error, most of the time you do not want to fail an application request just because there was an error checking a switch condition, *especially* if there was an error during checking a ``Condition`` for which a user would not have applied in the first place.
 
-That said, you would still probably want to know if there was an error checking a Condition.  To acomplish this, ``chimera``-client provides a ``condition_apply_error`` signal which is called when there was an error checking a ``Condition``.  The signal is called with an instance of the condition, the input which caused the error and the instance of the Exception class itself:
+That said, you would still probably want to know if there was an error checking a Condition.  To acomplish this, ``gutter``-client provides a ``condition_apply_error`` signal which is called when there was an error checking a ``Condition``.  The signal is called with an instance of the condition, the input which caused the error and the instance of the Exception class itself:
 
 .. code:: python
 
@@ -423,33 +423,33 @@ In your connected callback, you can do whatever you would like: log the error, r
 Namespaces
 ==========
 
-``chimera`` allows the use of "namespaces" to group switches under a single umbrealla, while both not letting one namespace see the switches of another namespace, but allowing them to share the same storage instance, operators and other configuration.
+``gutter`` allows the use of "namespaces" to group switches under a single umbrealla, while both not letting one namespace see the switches of another namespace, but allowing them to share the same storage instance, operators and other configuration.
 
 Given an existing vanilla ``Manager`` instance, you can create a namespaced manager by calling the ``namespaced()`` method:
 
 .. code:: python
 
-    notifications = chimera.namespaced('notifications')
+    notifications = gutter.namespaced('notifications')
 
-At this point, ``notifications`` is a copy of ``chimera``, inheriting all of its:
+At this point, ``notifications`` is a copy of ``gutter``, inheriting all of its:
 
 * storage
 * ``autocreate`` settting
 * Global inputs
 * Operators
 
-It does **not**, however, share the same switches.  Newly constructed ``Manager`` instances are in the ``default`` namespace.  When ``namespaced()`` is called, ``chimera`` changes the manager's namespace to ``notifications``.  Any switches in the previous ``default`` namespace are not visible in the ``notifications`` namespace, and vice versa.
+It does **not**, however, share the same switches.  Newly constructed ``Manager`` instances are in the ``default`` namespace.  When ``namespaced()`` is called, ``gutter`` changes the manager's namespace to ``notifications``.  Any switches in the previous ``default`` namespace are not visible in the ``notifications`` namespace, and vice versa.
 
 This allows you to have separate namespaced "views" of switches, possibly named the exact same name, and not have them comflict with each other.
 
 Templates
 =========
 
-``chimera`` has a ``ifswitch`` template tag that you can use in your Django templates.  To use it, simply load the ``chimera`` template helpers and pass ``ifswitch`` the switch name.  If the switch is active, the content between ``ifswitch`` and ``endifswitch`` will be rendered.
+``gutter`` has a ``ifswitch`` template tag that you can use in your Django templates.  To use it, simply load the ``gutter`` template helpers and pass ``ifswitch`` the switch name.  If the switch is active, the content between ``ifswitch`` and ``endifswitch`` will be rendered.
 
 .. code::
 
-    {% load chimera %}
+    {% load gutter %}
     {% ifswitch cool_feature %}
     switch active!
     {% endifswitch %}
@@ -458,35 +458,35 @@ You can also use an ``else`` tag to render content if the switch is not active:
 
 .. code::
 
-    {% load chimera %}
+    {% load gutter %}
     {% ifswitch cool_feature %}
     switch active!
     {% else %}
     switch not active!
     {% endifswitch %}
 
-Like ``chimera.active``, ``ifswitch`` takes any number of input objects to check the switch against:
+Like ``gutter.active``, ``ifswitch`` takes any number of input objects to check the switch against:
 
 .. code::
 
-    {% load chimera %}
+    {% load gutter %}
     {% ifswitch cool_feature user project %}
     switch active for user or project!
     {% endifswitch %}
 
-NOTE: By default, the `chimera` instance used in the template tags is the ``chimera.client.chimera`` instance.
+NOTE: By default, the `gutter` instance used in the template tags is the ``gutter.client.gutter`` instance.
 
 Decorators
 ==========
 
-Chimera features a ``@switch_active`` decorator you can use to decorate your Django views.  When decorated, if the switch named as the first argument of the ``@switch_decorated`` decorator is False, a ``Http404`` exception is raised.  However, if you also pass a ``redirect_to=`` kwarg, the decorator will return a ``HttpResponseRedirect`` instance, redirecting to that location.  If the switch is active, then the view runs as normal.
+Gutter features a ``@switch_active`` decorator you can use to decorate your Django views.  When decorated, if the switch named as the first argument of the ``@switch_decorated`` decorator is False, a ``Http404`` exception is raised.  However, if you also pass a ``redirect_to=`` kwarg, the decorator will return a ``HttpResponseRedirect`` instance, redirecting to that location.  If the switch is active, then the view runs as normal.
 
 For example, here is a view decorated with ``@switch_active``:
 
 
 .. code:: python
 
-    from chimera.client.decorators import switch_active
+    from gutter.client.decorators import switch_active
 
     @switch_active('cool_feature')
     def my_view(request):
@@ -505,41 +505,41 @@ Then a ``HttpResponseRedirect`` instance will be returned, redirecting to ``reve
 Testing Utilities
 ===============
 
-If you would like to test code that uses ``chimera`` and have the ``chimera`` manager return predictable results, you can use the ``switches`` object from the ``testutils`` module.
+If you would like to test code that uses ``gutter`` and have the ``gutter`` manager return predictable results, you can use the ``switches`` object from the ``testutils`` module.
 
 The ``swtiches`` object can be used as both a context manager and a decorator.  It is passed ``kwargs`` of switch names and their``active`` return values.
 
-For instance, with this code here, by passing ``cool_feature=True`` to the ``switches`` object as a context manager, any call to ``chimera.active('cool_feature')`` will return ``True``.  Calls to ``active()`` with other switch names will return their actual live switch status:
+For instance, with this code here, by passing ``cool_feature=True`` to the ``switches`` object as a context manager, any call to ``gutter.active('cool_feature')`` will return ``True``.  Calls to ``active()`` with other switch names will return their actual live switch status:
 
 .. code:: python
 
-    from chimera.client.testutils import switches
-    from chimera.client.default import chimera
+    from gutter.client.testutils import switches
+    from gutter.client.default import gutter
 
     with switches(cool_feature=True):
-        chimera.active('cool_feature')  # True
+        gutter.active('cool_feature')  # True
 
 
 And when using ``switches`` as a decorator:
 
 .. code:: python
 
-    from chimera.client.testutils import switches
-    from chimera.client.default import chimera
+    from gutter.client.testutils import switches
+    from gutter.client.default import gutter
 
     @switches(cool_feature=True)
     def run(self):
-        chimera.active('cool_feature')  # True
+        gutter.active('cool_feature')  # True
 
 Additionally, you may pass an alternamte ``Manager`` instance to ``switches`` to use that manager instead of the default one:
 
 .. code:: python
 
-    from chimera.client.testutils import switches
-    from chimera.client.models import Manager
+    from gutter.client.testutils import switches
+    from gutter.client.models import Manager
 
     my_manager = Manager({})
 
     @switches(my_manager, cool_feature=True)
     def run(self):
-        chimera.active('cool_feature')  # True
+        gutter.active('cool_feature')  # True

@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 from django import template
-from chimera.client.singleton import chimera
+from gutter.client.singleton import gutter
 
 
 register = template.Library()
@@ -37,7 +37,7 @@ class SwitchNode(template.Node):
         self.if_false = if_false
 
     def render(self, context):
-        if chimera.active(self.name, *self.resolved_inputs_for(context)):
+        if gutter.active(self.name, *self.resolved_inputs_for(context)):
             return self.if_true.render(context)
         else:
             return self.if_false.render(context)

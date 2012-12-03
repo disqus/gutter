@@ -5,7 +5,7 @@ from mock import patch
 from exam.cases import Exam
 from exam.decorators import patcher
 
-from chimera.client.decorators import switch_active
+from gutter.client.decorators import switch_active
 
 from nose.tools import *
 
@@ -22,21 +22,21 @@ def decorated(*args, **kwargs):
 
 class DecoratorTest(Exam, unittest.TestCase):
 
-    chimera = patcher(
-        'chimera.client.decorators.default_chimera',
+    gutter = patcher(
+        'gutter.client.decorators.default_gutter',
         **{'active.return_value': False}
     )
 
     def test_raises_a_404_error_if_switch_is_inactive(self):
-        self.assertFalse(self.chimera.active('junk'))
+        self.assertFalse(self.gutter.active('junk'))
         self.assertRaises(Http404, decorated(), 'junk')
 
-    @patch('chimera.client.decorators.HttpResponseRedirect')
+    @patch('gutter.client.decorators.HttpResponseRedirect')
     def test_redirects_to_url_if_inactive_and_redirect_to_passed(self, httprr):
-        self.assertFalse(self.chimera.active('junk'))
+        self.assertFalse(self.gutter.active('junk'))
         eq_(decorated(redirect_to='location')('junk'), httprr.return_value)
         httprr.assert_called_once_with('location')
 
     def test_calls_the_function_if_switch_is_active(self):
-        self.chimera.active.return_value = True
+        self.gutter.active.return_value = True
         eq_(decorated()('junk'), 'view called')

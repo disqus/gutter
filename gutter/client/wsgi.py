@@ -1,25 +1,25 @@
-from chimera.client import signals
+from gutter.client import signals
 from werkzeug.local import Local
 
 
 class EnabledSwitchesMiddleware(object):
     """
-    Middleware to add active chimera switches for the HTTP request in a
-    X-Chimera-Switch headers.
+    Middleware to add active gutter switches for the HTTP request in a
+    X-Gutter-Switch headers.
 
     NOTE: This middleware breaks streaming responses.  Since it is impossible
     to determine the active switches used for an HTTP response until the entire
     response body has been read, this middleware buffers the entire reponse body
-    into memory, then adds the X-Chimera-Switch header, before returning.
+    into memory, then adds the X-Gutter-Switch header, before returning.
     """
 
-    def __init__(self, application, chimera=None):
+    def __init__(self, application, gutter=None):
         self.application = application
 
-        if not chimera:
-            from chimera.client.singleton import chimera
+        if not gutter:
+            from gutter.client.singleton import gutter
 
-        self.chimera = chimera
+        self.gutter = gutter
         self.locals = Local()
 
         self.locals.on_switch_active = self.__signal_handler
@@ -31,14 +31,14 @@ class EnabledSwitchesMiddleware(object):
     def __call__(self, environ, start_response):
         self.locals.switches_active = []
         body, status, headers = self.__call_app(environ, start_response)
-        self.__add_chimera_header_to(headers)
+        self.__add_gutter_header_to(headers)
 
         start_response(status, headers)
         return body
 
-    def __add_chimera_header_to(self, headers):
+    def __add_gutter_header_to(self, headers):
         active_switches = ','.join(self.locals.switches_active)
-        headers.append(('X-Chimera-Switch', 'active=%s' % active_switches))
+        headers.append(('X-Gutter-Switch', 'active=%s' % active_switches))
 
     def __call_app(self, environ, start_response):
         status_headers = [None, None]

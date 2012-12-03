@@ -3,7 +3,7 @@ import unittest
 from exam.cases import Exam
 from exam.helpers import mock_import
 
-from chimera.client.autodiscovery import discover
+from gutter.client.autodiscovery import discover
 
 from nose.tools import *
 
@@ -20,9 +20,9 @@ class AutodiscoverTest(Exam, unittest.TestCase):
                 self.import_module = im
                 super(AutodiscoverTest, self).run(*args, **kwargs)
 
-    def test_autodiscover_attempts_to_import_chimera_in_installed_apps(self):
+    def test_autodiscover_attempts_to_import_gutter_in_installed_apps(self):
         discover()
-        self.import_module.assert_called_once_with('foo.bar.chimera')
+        self.import_module.assert_called_once_with('foo.bar.gutter')
 
     def test_fails_silently_if_import_does_not_exist(self):
         self.import_module.side_effect = ImportError

@@ -1,5 +1,5 @@
 """
-chimera
+gutter
 ~~~~~~~~
 
 :copyright: (c) 2010-2012 DISQUS.
@@ -7,8 +7,8 @@ chimera
 """
 
 try:
-    VERSION = __import__('pkg_resources').get_distribution('chimera').version
+    VERSION = __import__('pkg_resources').get_distribution('gutter').version
 except Exception, e:
     VERSION = 'unknown'
 
-from chimera.client.autodiscovery import discover as autodiscover
+from gutter.client.autodiscovery import discover as autodiscover

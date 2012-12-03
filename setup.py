@@ -19,21 +19,21 @@ if 'nosetests' in sys.argv[1:]:
     setup_requires.append('nose')
 
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', __name__)
-    INSTALLED_APPS = ('chimera.client',)
+    INSTALLED_APPS = ('gutter.client',)
 
 
 setup(
-    name='chimera',
+    name='gutter',
     version='0.1.0',
     author='DISQUS',
     author_email='opensource@disqus.com',
-    url='http://github.com/disqus/chimera',
-    description='Client to chimera feature switches backend',
+    url='http://github.com/disqus/gutter',
+    description='Client to gutter feature switches backend',
     packages=find_packages(exclude=["tests"]),
     zip_safe=False,
     install_requires=['modeldict>=0.3.1', 'werkzeug'],
     setup_requires=setup_requires,
-    namespace_packages=['chimera'],
+    namespace_packages=['gutter'],
     license='Apache License 2.0',
     tests_require=tests_require,
     extras_require={'test': tests_require},

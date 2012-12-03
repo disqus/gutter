@@ -6,7 +6,7 @@ from modeldict.redis import RedisDict
 
 from exam.decorators import before, fixture
 
-from chimera.client.models import Manager
+from gutter.client.models import Manager
 
 
 class TestPerformance(TestIntegration, PerformanceTest):
@@ -25,4 +25,4 @@ class TestPerformance(TestIntegration, PerformanceTest):
 
     @fixture
     def manager(self):
-        return Manager(storage=RedisDict('chimera-tests', self.redis))
+        return Manager(storage=RedisDict('gutter-tests', self.redis))

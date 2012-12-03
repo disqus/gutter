@@ -1,5 +1,5 @@
 """
-chimera.testutils
+gutter.testutils
 ~~~~~~~~~~~~~~~~~~
 
 :copyright: (c) 2010-2012 DISQUS.
@@ -7,7 +7,7 @@ chimera.testutils
 """
 
 from functools import wraps
-from chimera.client.singleton import chimera
+from gutter.client.singleton import gutter
 
 
 class SwitchContextManager(object):
@@ -18,22 +18,22 @@ class SwitchContextManager(object):
 
     >>> @switches(my_switch_name=True)
     >>> def foo():
-    >>>     print chimera.active('my_switch_name')
+    >>>     print gutter.active('my_switch_name')
 
     >>> def foo():
     >>>     with switches(my_switch_name=True):
-    >>>         print chimera.active('my_switch_name')
+    >>>         print gutter.active('my_switch_name')
 
     You may also optionally pass an instance of ``SwitchManager``
     as the first argument.
 
     >>> def foo():
-    >>>     with switches(chimera, my_switch_name=True):
-    >>>         print chimera.active('my_switch_name')
+    >>>     with switches(gutter, my_switch_name=True):
+    >>>         print gutter.active('my_switch_name')
     """
-    def __init__(self, chimera=chimera, **keys):
-        self.previous_active_func = chimera.active
-        self.chimera = chimera
+    def __init__(self, gutter=gutter, **keys):
+        self.previous_active_func = gutter.active
+        self.gutter = gutter
         self.keys = keys
 
     def __call__(self, func):
@@ -46,8 +46,8 @@ class SwitchContextManager(object):
 
     def __enter__(self):
 
-        def patched_active(chimera):
-            real_active = chimera.active
+        def patched_active(gutter):
+            real_active = gutter.active
 
             def wrapped(key, *args, **kwargs):
                 if key in self.keys:
@@ -57,9 +57,9 @@ class SwitchContextManager(object):
 
             return wrapped
 
-        self.chimera.active = patched_active(self.chimera)
+        self.gutter.active = patched_active(self.gutter)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.chimera.active = self.previous_active_func
+        self.gutter.active = self.previous_active_func
 
 switches = SwitchContextManager

@@ -1,12 +1,12 @@
 """
-chimera.models
+gutter.models
 ~~~~~~~~~~~~~~~
 
 :copyright: (c) 2010-2012 DISQUS.
 :license: Apache License 2.0, see LICENSE for more details.
 """
 
-from chimera.client import signals
+from gutter.client import signals
 from functools import partial
 import threading
 
@@ -185,8 +185,8 @@ class Condition(object):
     argument, that had an ``ip`` property.  A condition would then be constrcted
     like so:
 
-    from myapp.chimera import RequestArgument
-    from chimera.client.models import Condition
+    from myapp.gutter import RequestArgument
+    from gutter.client.models import Condition
 
         >> condition = Condition(argument=RequestArgument, attribute='ip', operator=some_operator)
 
@@ -277,7 +277,7 @@ class Condition(object):
 
 class Manager(threading.local):
     """
-    The Manager holds all state for Chimera.  It knows what Switches have been
+    The Manager holds all state for Gutter.  It knows what Switches have been
     registered, and also what Input objects are currently being applied.  It
     also offers an ``active`` method to ask it if a given switch name is
     active, given its conditions and current inputs.

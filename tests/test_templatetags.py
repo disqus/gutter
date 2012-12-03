@@ -7,28 +7,28 @@ from mock import Mock, sentinel
 from exam.decorators import fixture, around
 from exam.cases import Exam
 
-from chimera.client.models import Switch
-import chimera.client.singleton
+from gutter.client.models import Switch
+import gutter.client.singleton
 
 
 class TempateTagTest(Exam, unittest.TestCase):
 
     @around
     def maintain_manager_state(self):
-        self.chimera.register(self.switch)
+        self.gutter.register(self.switch)
         yield
-        self.chimera.flush()
+        self.gutter.flush()
 
     @around
     def patch_singleton(self):
-        old_active = self.chimera.active
-        self.chimera.active = Mock(return_value=False)
+        old_active = self.gutter.active
+        self.gutter.active = Mock(return_value=False)
         yield
-        self.chimera.active = old_active
+        self.gutter.active = old_active
 
     @property
-    def chimera(self):
-        return chimera.client.singleton.chimera
+    def gutter(self):
+        return gutter.client.singleton.gutter
 
     @fixture
     def switch(self):
@@ -38,7 +38,7 @@ class TempateTagTest(Exam, unittest.TestCase):
     def ifswitch(self):
         return Template(
             """
-            {% load chimera %}
+            {% load gutter %}
             {% ifswitch test %}
             switch active!
             {% endifswitch %}
@@ -49,7 +49,7 @@ class TempateTagTest(Exam, unittest.TestCase):
     def ifswitch_with_else(self):
         return Template(
             """
-            {% load chimera %}
+            {% load gutter %}
             {% ifswitch test %}
             switch active!
             {% else %}
@@ -62,7 +62,7 @@ class TempateTagTest(Exam, unittest.TestCase):
     def ifswitch_with_input(self):
         return Template(
             """
-            {% load chimera %}
+            {% load gutter %}
             {% ifswitch test input %}
             switch active!
             {% endifswitch %}
@@ -82,7 +82,7 @@ class TempateTagTest(Exam, unittest.TestCase):
 
     def test_renders_content_inside_if_enabled_switch(self):
         self.assertContentNotInTemplate('switch active', self.ifswitch)
-        self.chimera.active.return_value = True
+        self.gutter.active.return_value = True
         self.assertContentInTemplate('switch active', self.ifswitch)
 
     def test_works_with_else_switch(self):
@@ -90,13 +90,13 @@ class TempateTagTest(Exam, unittest.TestCase):
             'switch not active',
             self.ifswitch_with_else
         )
-        self.chimera.active.return_value = True
+        self.gutter.active.return_value = True
         self.assertContentInTemplate(
             'switch active',
             self.ifswitch_with_else
         )
 
-    def test_calls_chimera_active_for_inputs_passed_in(self):
+    def test_calls_gutter_active_for_inputs_passed_in(self):
         self.render(self.ifswitch_with_input)
-        self.chimera.active.assert_called_once_with('test', sentinel.input)
+        self.gutter.active.assert_called_once_with('test', sentinel.input)
 

@@ -3,10 +3,10 @@ import threading
 import itertools
 
 from nose.tools import *
-from chimera.client.arguments import Base as BaseArgument
-from chimera.client.models import Switch, Manager, Condition
+from gutter.client.arguments import Base as BaseArgument
+from gutter.client.models import Switch, Manager, Condition
 from modeldict import MemoryDict
-from chimera.client import signals
+from gutter.client import signals
 import mock
 
 from exam.decorators import fixture, before
@@ -125,19 +125,19 @@ class TestSwitch(unittest.TestCase):
     def test_switch_can_be_constructed_witn_a_manager(self):
         eq_(Switch('foo', manager='manager').manager, 'manager')
 
-    @mock.patch('chimera.client.signals.switch_checked')
+    @mock.patch('gutter.client.signals.switch_checked')
     def test_switch_enabed_for_calls_switch_checked_signal(self, signal):
         switch = Switch('foo', manager='manager')
         switch.enabled_for(True)
         signal.call.assert_called_once_with(switch)
 
-    @mock.patch('chimera.client.signals.switch_active')
+    @mock.patch('gutter.client.signals.switch_active')
     def test_switch_enabed_for_calls_switch_active_signal_when_enabled(self, signal):
         switch = Switch('foo', manager='manager', state=Switch.states.GLOBAL)
         ok_(switch.enabled_for('causing input'))
         signal.call.assert_called_once_with(switch, 'causing input')
 
-    @mock.patch('chimera.client.signals.switch_active')
+    @mock.patch('gutter.client.signals.switch_active')
     def test_switch_enabed_for_skips_switch_active_signal_when_not_enabled(self, signal):
         switch = Switch('foo', manager='manager', state=Switch.states.DISABLED)
         eq_(switch.enabled_for('causing input'), False)
@@ -260,7 +260,7 @@ class TestCondition(unittest.TestCase):
     def test_if_input_is_NONE_it_returns_false(self):
         eq_(self.condition.call(Manager.NONE_INPUT), False)
 
-    @mock.patch('chimera.client.signals.condition_apply_error')
+    @mock.patch('gutter.client.signals.condition_apply_error')
     def test_if_apply_explodes_it_signals_condition_apply_error(self, signal):
         error = Exception('boom!')
         inpt = self.input
@@ -450,7 +450,7 @@ class ManagerTest(unittest.TestCase):
         self.manager.update(self.switch)
         self.manager.register.assert_called_once_with(self.switch, signal=signals.switch_updated)
 
-    @mock.patch('chimera.client.signals.switch_updated')
+    @mock.patch('gutter.client.signals.switch_updated')
     def test_update_calls_the_switch_updateed_signal(self, signal):
         self.manager.update(self.switch)
         signal.call.assert_call_once()
@@ -639,7 +639,7 @@ class ActsLikeManager(object):
         ok_(child2 not in self.manager.switches)
         ok_(great_uncle in self.manager.switches)
 
-    @mock.patch('chimera.client.signals.switch_unregistered')
+    @mock.patch('gutter.client.signals.switch_unregistered')
     def test_register_signals_switch_registered_with_switch(self, signal):
         switch = self.mock_and_register_switch('foo')
         self.manager.unregister(switch.name)

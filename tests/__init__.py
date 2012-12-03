@@ -1,5 +1,5 @@
 """
-chimera.tests
+gutter.tests
 ~~~~~~~~~~~~~~
 
 :copyright: (c) 2010-2012 DISQUS.

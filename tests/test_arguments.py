@@ -2,8 +2,8 @@ import unittest
 from mock import MagicMock, Mock, sentinel
 from nose.tools import *
 
-from chimera.client.arguments.variables import *
-from chimera.client.arguments import Base
+from gutter.client.arguments.variables import *
+from gutter.client.arguments import Base
 
 from exam.decorators import fixture
 
