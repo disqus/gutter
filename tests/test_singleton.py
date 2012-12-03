@@ -15,7 +15,6 @@ class TestChimera(Exam, unittest.TestCase):
     manager_defaults = dict(
         storage=manager.storage_engine,
         autocreate=manager.autocreate,
-        operators=manager.operators,
         inputs=manager.inputs
     )
 
@@ -57,7 +56,6 @@ class TestChimera(Exam, unittest.TestCase):
                     storage=self.other_engine,
                     autocreate=True,
                     inputs=[4],
-                    operators=[5]
                 )
             )
             eq_(init.call_args, expected)

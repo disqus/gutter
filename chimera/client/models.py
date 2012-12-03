@@ -9,7 +9,6 @@ chimera.models
 from chimera.client import signals
 from functools import partial
 import threading
-import inspect
 
 
 class Switch(object):
@@ -293,10 +292,7 @@ class Manager(threading.local):
     NONE_INPUT = object()
 
     def __init__(self, storage, autocreate=False, switch_class=Switch,
-                 operators=None, inputs=None, namespace=None):
-
-        if operators is None:
-            operators = []
+                 inputs=None, namespace=None):
 
         if inputs is None:
             inputs = []
@@ -309,8 +305,6 @@ class Manager(threading.local):
         self.storage = storage
         self.autocreate = autocreate
         self.inputs = inputs
-        self.input_classes = []
-        self.operators = operators
         self.switch_class = switch_class
         self.namespace = namespace
 
@@ -410,7 +404,6 @@ class Manager(threading.local):
             storage=self.storage,
             autocreate=self.autocreate,
             inputs=self.inputs,
-            operators=self.operators,
             switch_class=self.switch_class,
             namespace=new_namespace,
         )

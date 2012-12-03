@@ -468,22 +468,6 @@ class ManagerTest(unittest.TestCase):
         threading.Thread(target=change_autocreate_to_false).start()
         eq_(manager.autocreate, True)
 
-    def test_has_operators_that_can_be_appended(self):
-        eq_(self.manager.operators, [])
-        self.manager.operators.append(1)
-        eq_(self.manager.operators, [1])
-
-    def test_can_be_constructed_with_operators(self):
-        eq_(
-            Manager(storage=self.mockstorage, operators=[2]).operators,
-            [2]
-        )
-
-    def test_has_input_classes_that_can_be_appended(self):
-        eq_(self.manager.input_classes, [])
-        self.manager.input_classes.append(self.__class__)
-        eq_(self.manager.input_classes, [self.__class__])
-
     def test_can_be_constructed_with_inputs(self):
         eq_(
             Manager(storage=self.mockstorage, inputs=[3]).inputs,
@@ -510,8 +494,6 @@ class ManagerTest(unittest.TestCase):
             'storage',
             'autocreate',
             'inputs',
-            'input_classes',
-            'operators',
             'switch_class'
         )
 
