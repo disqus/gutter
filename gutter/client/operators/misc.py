@@ -5,7 +5,7 @@ class PercentRange(Base):
 
     label = 'percent_range'
     group = 'misc'
-    preposition = 'in the percentage range'
+    preposition = 'in the percentage range of'
 
     def __init__(self, lower, upper):
         self.upper = float(upper)
@@ -25,7 +25,7 @@ class Percent(PercentRange):
 
     label = 'percent'
     group = 'misc'
-    preposition = 'within the percentage'
+    preposition = 'within the percentage of'
 
     def __init__(self, percentage):
         self.upper = float(percentage)
