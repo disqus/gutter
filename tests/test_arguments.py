@@ -3,15 +3,16 @@ from mock import MagicMock, Mock
 from nose.tools import *
 
 from gutter.client.arguments.variables import *
-from gutter.client.arguments import Base, argument
+from gutter.client import arguments
+from gutter.client.arguments import Base
 
 from exam.decorators import fixture
 
 
 class MyArguments(Base):
-    variable1 = argument(Value, lambda self: self.input)
-    opposite_variable1 = argument(Value, lambda self: not self.input)
-    str_variable = argument(String, 'prop')
+    variable1 = arguments.Value(lambda self: self.input)
+    opposite_variable1 = arguments.Value(lambda self: not self.input)
+    str_variable = arguments.String('prop')
 
 
 class TestBase(unittest.TestCase):

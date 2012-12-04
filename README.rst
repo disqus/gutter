@@ -96,28 +96,26 @@ To do that, you construct a class which inherits from ``gutter.client.arguments.
 
 .. code:: python
 
-    from gutter.client.arguments import Base, argument
-    from gutter.client.arguments.variables import String, Boolean, Value
+    from gutter.client import arguments
 
     from myapp import User
 
-    class UserArgument(Base):
+    class UserArgument(arguments.Base):
 
         COMPATIBLE_TYPE = User
 
-        name = argument(String, lambda self: self.input.name)
-        is_admin = argument(Boolean, lambda self: self.input.is_admin)
-        age = argument(Value, lambda self: self.input.age)
+        name = arguments.String(lambda self: self.input.name)
+        is_admin = arguments.Boolean(lambda self: self.input.is_admin)
+        age = arguments.Value(lambda self: self.input.age)
 
 There are a few things going on here, so let's break down what they all mean.
 
 1. The ``UserArgument`` class is subclassed from ``Base``.  The subclassing is required since ``Base`` implements some of the required API.
-2. The class has a bunch of class variables that are calls to ``argument()``, where ``argument`` is passed the type of variable this argument is. All variables subclass ``gutter.input.arguments.variables.Base``.  At present there are 3 subclasses: ``Value`` for general values, ``Boolean`` for boolean values and ``String`` for string values.
-3. ``argument()`` is also called with a callable that returns the value.  In the above example, we'll want to make some switches active based on a user's ``name``, ``is_admin`` status and ``age``.
-4. Those ``argument``s return an instance of a ``Variable`` object.
-5. The ``Variable`` objects wrap the actual value, which is derefenced from ``self.input``, which is the input object (in this case a ``User`` instance).  Argum
-6. ``Variable`` objects understand ``Switch`` conditions and operators, and implement the correct API to allow themselves to be appropriatly compared.
-7. ``COMPATIBLE_TYPE`` declares that this argument only works with ``User`` instances.  This works with the default implementation of ``applies`` in the ``Base`` argument that checks if the ``type`` of the input is the same as ``COMPATIBLE_TYPE``.
+2. The class has a bunch of class variables that are calls to ``arguments.TYPE``, where ``TYPE`` is the type of variable this argument is. At present there are 3 types: ``Value`` for general values, ``Boolean`` for boolean values and ``String`` for string values.
+3. ``arguments.TYPE()`` is called with a callable that returns the value.  In the above example, we'll want to make some switches active based on a user's ``name``, ``is_admin`` status and ``age``.
+4. Those ``argument``s return the actual value, which is derefenced from ``self.input``, which is the input object (in this case a ``User`` instance).  Argum
+5. ``Variable`` objects understand ``Switch`` conditions and operators, and implement the correct API to allow themselves to be appropriatly compared.
+6. ``COMPATIBLE_TYPE`` declares that this argument only works with ``User`` instances.  This works with the default implementation of ``applies`` in the ``Base`` argument that checks if the ``type`` of the input is the same as ``COMPATIBLE_TYPE``.
 
 Argument Details
 ^^^^^^^^^^^^^^^^
@@ -126,8 +124,7 @@ Since constructing arguments that simply reference an attribute on ``self.input`
 
 .. code:: python
 
-    from gutter.client.arguments import Base, argument
-    from gutter.client.arguments.variables import String, Boolean, Value
+    from gutter.client import arguments
 
     from myapp import User
 
@@ -135,9 +132,9 @@ Since constructing arguments that simply reference an attribute on ``self.input`
 
         COMPATIBLE_TYPE = User
 
-        name = argument(String, 'name')
-        is_admin = argument(Boolean, 'name')
-        age = argument(Value, 'name')
+        name = arguments.String('name')
+        is_admin = arguments.Boolean('name')
+        age = arguments.Value('name')
 
 
 Rationale for Arguments

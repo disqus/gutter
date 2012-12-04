@@ -5,7 +5,7 @@ from gutter.client.operators.comparable import *
 from gutter.client.operators.identity import *
 from gutter.client.operators.misc import *
 from gutter.client.models import Switch, Condition, Manager
-from gutter.client.arguments import Base, argument
+from gutter.client import arguments
 from gutter.client.arguments.variables import Value, Boolean, String
 from gutter.client import signals
 
@@ -22,14 +22,14 @@ class User(object):
         self.married = married
 
 
-class UserArguments(Base):
+class UserArguments(arguments.Base):
 
     COMPATIBLE_TYPE = User
 
-    name = argument(String, lambda self: self.input.name)
-    age = argument(Value, lambda self: self.input.age)
-    location = argument(String, lambda self: self.input.location)
-    married = argument(Boolean, lambda self: self.input.married)
+    name = arguments.String(lambda self: self.input.name)
+    age = arguments.Value(lambda self: self.input.age)
+    location = arguments.String(lambda self: self.input.location)
+    married = arguments.Boolean(lambda self: self.input.married)
 
 
 class TestIntegration(Exam, unittest.TestCase):

@@ -4,8 +4,7 @@ import itertools
 
 from nose.tools import *
 from gutter.client.arguments import Base as BaseArgument
-from gutter.client.arguments.variables import Value
-from gutter.client.arguments import argument
+from gutter.client import arguments
 from gutter.client.models import Switch, Manager, Condition
 from modeldict import MemoryDict
 from gutter.client import signals
@@ -26,7 +25,7 @@ class Argument(object):
 
 class MOLArgument(BaseArgument):
     applies = True
-    foo = argument(Value, lambda self: 42)
+    foo = arguments.Value(lambda self: 42)
 
 
 class TestSwitch(unittest.TestCase):
