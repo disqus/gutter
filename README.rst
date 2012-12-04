@@ -85,24 +85,18 @@ Note that the ``settings.manager.default`` value must be set **before** importin
 Autodiscovery
 ~~~~~~~~~~~~~
 
-If used with Django, you may call ``gutter.client.autodiscover()`` to have gutter look for, and import, any ``gutter`` modules for every app in ``INSTALLED_APPS``.  These modules should be used to configure your Arguments or custom Condition objects your app requires.  More info on what those objects are and how you use them is in the rest of this README.
+If used with Django, you may call ``gutter.client.autodiscover()`` to have gutter look for, and import, any ``gutter`` modules for every app in ``INSTALLED_APPS``.  These modules should be used to configure your arguments or custom Condition objects your app requires.  More info on what those objects are and how you use them is in the rest of this README.
 
 Arguments
 =========
 
-The first step in your usage of ``gutter`` should be to define your Arguments that you will be checking switches against.  An "Argument" is an object which understands the business logic and object in your system (users, requests, etc) and knows how to validate, transform and extract variables from those business objects for ``Switch`` conditions.
+The first step in your usage of ``gutter`` should be to define your arguments that you will be checking switches against.  An "argument" is an object which understands the business logic and object in your system (users, requests, etc) and knows how to validate, transform and extract variables from those business objects for ``Switch`` conditions.  For instance, your system may have a ``User`` object that has properties like ``is_admin``, ``date_joined``, etc.  To switch against it, you would then create arguments for each of those values.
 
-The only requirements of arguments are:
-
-1. They must be callable (constructable) with one argument, the input they are wrapping.
-2. They support an ``applies`` property, which returns ``True`` or ``False`` if the argument instance applies (can extract data out of) the input object it was given.
-3. Some number of other instance methods which expose variables you want to compare conditions against.
-
-For instance, your system may have a ``User`` object that has properties like ``is_admin``, ``date_joined``, etc.  To switch against it, you would then create a ``UserArgument`` object, which wraps a ``User`` instance, and provides an API of methods that return ``Variable`` objects:
+To do that, you construct a class which inherits from ``gutter.client.arguments.Base`` and takes one argument as its "input," a ``User`` instance. Inside the body of the class, you create as many class variable "arguments" that you need by using the ``gutter.client.arguments`` function.
 
 .. code:: python
 
-    from gutter.client.arguments import Base
+    from gutter.client.arguments import Base, argument
     from gutter.client.arguments.variables import String, Boolean, Value
 
     from myapp import User
@@ -111,25 +105,40 @@ For instance, your system may have a ``User`` object that has properties like ``
 
         COMPATIBLE_TYPE = User
 
-        def __init__(self, user):
-            self._user = user
-
-        def name(self):
-            return String(self._user.name)
-
-        def is_admin(self):
-            return Boolean(self._user.is_admin)
-
-        def age(self):
-            return Value(self._user.age)
-
+        name = argument(String, lambda self: self.input.name)
+        is_admin = argument(Boolean, lambda self: self.input.is_admin)
+        age = argument(Value, lambda self: self.input.age)
 
 There are a few things going on here, so let's break down what they all mean.
 
-1. An ``Argument`` object has some number of instance methods defined, which return the variables you want to check a ``Switch`` conditions against.  In the above example, we'll want to make some switches active based on a user's ``name``, ``is_admin`` status and ``age``.
-2. Those instance methods **must** return an instance of a ``Variable`` object.  All variables must subclass ``gutter.input.arguments.variables.Base``.  At present there are 3 subclasses: ``Value`` for general values, ``Boolean`` for boolean values and ``String`` for string values.
-3. ``Variable`` objects understand ``Switch`` conditions and operators, and implement the correct API to allow themselves to be appropriatly compared.
-4. ``COMPATIBLE_TYPE`` declares that this argument only works with ``User`` instances.  This works with the default implementation of ``applies`` in the ``Base`` argument that checks if the ``type`` of the input is the same as ``COMPATIBLE_TYPE``.
+1. The ``UserArgument`` class is subclassed from ``Base``.  The subclassing is required since ``Base`` implements some of the required API.
+2. The class has a bunch of class variables that are calls to ``argument()``, where ``argument`` is passed the type of variable this argument is. All variables subclass ``gutter.input.arguments.variables.Base``.  At present there are 3 subclasses: ``Value`` for general values, ``Boolean`` for boolean values and ``String`` for string values.
+3. ``argument()`` is also called with a callable that returns the value.  In the above example, we'll want to make some switches active based on a user's ``name``, ``is_admin`` status and ``age``.
+4. Those ``argument``s return an instance of a ``Variable`` object.
+5. The ``Variable`` objects wrap the actual value, which is derefenced from ``self.input``, which is the input object (in this case a ``User`` instance).  Argum
+6. ``Variable`` objects understand ``Switch`` conditions and operators, and implement the correct API to allow themselves to be appropriatly compared.
+7. ``COMPATIBLE_TYPE`` declares that this argument only works with ``User`` instances.  This works with the default implementation of ``applies`` in the ``Base`` argument that checks if the ``type`` of the input is the same as ``COMPATIBLE_TYPE``.
+
+Argument Details
+^^^^^^^^^^^^^^^^
+
+Since constructing arguments that simply reference an attribute on ``self.input`` is so common, if you pass a string as the first argument of ``argument()``, when the argument is accessed, it will simply return that property from ``self.input``.  You must also pass a ``Variable`` to the ``variable=`` kwarg so gutter know what Variable to wrap your value in.
+
+.. code:: python
+
+    from gutter.client.arguments import Base, argument
+    from gutter.client.arguments.variables import String, Boolean, Value
+
+    from myapp import User
+
+    class UserArgument(Base):
+
+        COMPATIBLE_TYPE = User
+
+        name = argument(String, 'name')
+        is_admin = argument(Boolean, 'name')
+        age = argument(Value, 'name')
+
 
 Rationale for Arguments
 ~~~~~~~~~~~~~~~~~~~~~~~

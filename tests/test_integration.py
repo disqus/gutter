@@ -5,7 +5,7 @@ from gutter.client.operators.comparable import *
 from gutter.client.operators.identity import *
 from gutter.client.operators.misc import *
 from gutter.client.models import Switch, Condition, Manager
-from gutter.client.arguments import Base
+from gutter.client.arguments import Base, argument
 from gutter.client.arguments.variables import Value, Boolean, String
 from gutter.client import signals
 
@@ -22,21 +22,14 @@ class User(object):
         self.married = married
 
 
-class UserArgument(Base):
+class UserArguments(Base):
 
     COMPATIBLE_TYPE = User
 
-    def name(self):
-        return String(self._input.name)
-
-    def age(self):
-        return Value(self._input.age)
-
-    def location(self):
-        return String(self._input.location)
-
-    def married(self):
-        return Boolean(self._input.married)
+    name = argument(String, lambda self: self.input.name)
+    age = argument(Value, lambda self: self.input.age)
+    location = argument(String, lambda self: self.input.location)
+    married = argument(Boolean, lambda self: self.input.married)
 
 
 class TestIntegration(Exam, unittest.TestCase):
@@ -98,18 +91,18 @@ class TestIntegration(Exam, unittest.TestCase):
         self.steve = User('timmy', 19)
 
     def setup_conditions(self):
-        self.age_65_and_up = Condition(UserArgument, 'age', MoreThanOrEqualTo(65))
-        self.age_under_18 = Condition(UserArgument, 'age', LessThan(18))
-        self.age_not_under_18 = Condition(UserArgument, 'age', LessThan(18), negative=True)
-        self.age_21_plus = Condition(UserArgument, 'age', MoreThanOrEqualTo(21))
-        self.age_between_13_and_18 = Condition(UserArgument, 'age', Between(13, 18))
+        self.age_65_and_up = Condition(UserArguments, 'age', MoreThanOrEqualTo(65))
+        self.age_under_18 = Condition(UserArguments, 'age', LessThan(18))
+        self.age_not_under_18 = Condition(UserArguments, 'age', LessThan(18), negative=True)
+        self.age_21_plus = Condition(UserArguments, 'age', MoreThanOrEqualTo(21))
+        self.age_between_13_and_18 = Condition(UserArguments, 'age', Between(13, 18))
 
-        self.in_sf = Condition(UserArgument, 'location', Equals('San Francisco'))
-        self.has_location = Condition(UserArgument, 'location', Truthy())
+        self.in_sf = Condition(UserArguments, 'location', Equals('San Francisco'))
+        self.has_location = Condition(UserArguments, 'location', Truthy())
 
-        self.three_quarters_married = Condition(UserArgument, 'married', Percent(75))
-        self.ten_percent = Condition(UserArgument, 'name', Percent(10))
-        self.upper_50_percent = Condition(UserArgument, 'name', PercentRange(50, 100))
+        self.three_quarters_married = Condition(UserArguments, 'married', Percent(75))
+        self.ten_percent = Condition(UserArguments, 'name', Percent(10))
+        self.upper_50_percent = Condition(UserArguments, 'name', PercentRange(50, 100))
 
     def setup_switches(self):
         self.add_switch('can drink', condition=self.age_21_plus)

@@ -1,6 +1,3 @@
-import types
-
-
 class classproperty(object):
 
     def __init__(self, getter):
@@ -10,11 +7,21 @@ class classproperty(object):
         return self.getter(owner)
 
 
-def is_valid_variable(thing):
-    return (
-        isinstance(thing, types.MethodType) and
-        not thing.__name__.startswith('_')
-    )
+class argument(object):
+
+    def __init__(self, variable, getter):
+        if issubclass(type(getter), basestring):
+            self.getter = lambda self: getattr(self.input, getter)
+        else:
+            self.getter = getter
+
+        self.variable = variable
+
+    def __get__(self, instance, owner):
+        if instance:
+            return self.variable(self.getter(instance))
+        else:
+            return self
 
 
 class Base(object):
@@ -28,15 +35,15 @@ class Base(object):
     COMPATIBLE_TYPE = None
 
     def __init__(self, inpt):
-        self._input = inpt
+        self.input = inpt
 
     @classproperty
-    def variables(cls):
+    def arguments(cls):
         return [
             getattr(cls, key) for key, value in vars(cls).items()
-            if callable(value) and is_valid_variable(getattr(cls, key))
+            if type(value) is argument
         ]
 
     @property
     def applies(self):
-        return type(self._input) is self.COMPATIBLE_TYPE
+        return type(self.input) is self.COMPATIBLE_TYPE

@@ -4,6 +4,8 @@ import itertools
 
 from nose.tools import *
 from gutter.client.arguments import Base as BaseArgument
+from gutter.client.arguments.variables import Value
+from gutter.client.arguments import argument
 from gutter.client.models import Switch, Manager, Condition
 from modeldict import MemoryDict
 from gutter.client import signals
@@ -22,12 +24,9 @@ class Argument(object):
         pass
 
 
-class ReflectiveArgument(BaseArgument):
-
+class MOLArgument(BaseArgument):
     applies = True
-
-    def foo(self):
-        return (42, self._input)
+    foo = argument(Value, lambda self: 42)
 
 
 class TestSwitch(unittest.TestCase):
@@ -226,7 +225,7 @@ class TestCondition(unittest.TestCase):
 
     @fixture
     def condition(self):
-        return Condition(ReflectiveArgument, 'foo', self.operator)
+        return Condition(MOLArgument, 'foo', self.operator)
 
     @fixture
     def input(self):
@@ -234,7 +233,7 @@ class TestCondition(unittest.TestCase):
 
     def test_returns_results_from_calling_operator_with_argument_value(self):
         self.condition.call(self.input)
-        self.operator.applies_to.assert_called_once_with((42, self.input))
+        self.operator.applies_to.assert_called_once_with(42)
 
     def test_condition_can_be_negated(self):
         eq_(self.condition.call(self.input), True)
@@ -242,9 +241,9 @@ class TestCondition(unittest.TestCase):
         eq_(self.condition.call(self.input), False)
 
     def test_can_be_negated_via_init_argument(self):
-        condition = Condition(ReflectiveArgument, 'foo', self.operator)
+        condition = Condition(MOLArgument, 'foo', self.operator)
         eq_(condition.call(self.input), True)
-        condition = Condition(ReflectiveArgument, 'foo', self.operator, negative=True)
+        condition = Condition(MOLArgument, 'foo', self.operator, negative=True)
         eq_(condition.call(self.input), False)
 
     def test_if_apply_explodes_it_returns_false(self):
@@ -275,7 +274,7 @@ class TestCondition(unittest.TestCase):
             return 'str of operator'
 
         self.operator.__str__ = local_str
-        eq_(str(self.condition), "ReflectiveArgument.foo str of operator")
+        eq_(str(self.condition), "MOLArgument.foo str of operator")
 
     def test_equals_if_has_the_same_properties(self):
         a = Condition(Argument, 'bar', bool)

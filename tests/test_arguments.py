@@ -1,54 +1,55 @@
 import unittest
-from mock import MagicMock, Mock, sentinel
+from mock import MagicMock, Mock
 from nose.tools import *
 
 from gutter.client.arguments.variables import *
-from gutter.client.arguments import Base
+from gutter.client.arguments import Base, argument
 
 from exam.decorators import fixture
 
 
-class MyArgument(Base):
-
-    class_var = True
-
-    def __init__(self, *args, **kwargs):
-        self.instance_var = True
-        super(MyArgument, self).__init__(*args, **kwargs)
-
-    def instance_method(self):
-        pass
-
-    @staticmethod
-    def static_method(self):
-        pass
-
-    @property
-    def property(self):
-        pass
+class MyArguments(Base):
+    variable1 = argument(Value, lambda self: self.input)
+    opposite_variable1 = argument(Value, lambda self: not self.input)
+    str_variable = argument(String, 'prop')
 
 
 class TestBase(unittest.TestCase):
 
-    argument = fixture(Base, sentinel.input)
+    base_arguments = fixture(Base, True)
+    subclass_arguments = fixture(MyArguments, True)
+    subclass_str_arg = fixture(MyArguments, Mock(prop=45))
 
     def test_applies_is_false_if_compatible_type_is_none(self):
-        eq_(self.argument.COMPATIBLE_TYPE, None)
-        eq_(self.argument.applies, False)
+        eq_(self.base_arguments.COMPATIBLE_TYPE, None)
+        eq_(self.base_arguments.applies, False)
 
     def applies_is_true_if_input_type_is_compatible_type(self):
-        self.argument.COMPATIBLE_TYPE = int
-        ok_(type(self.argument.input) is not int)
+        self.base_arguments.COMPATIBLE_TYPE = int
+        ok_(type(self.base_arguments.input) is not int)
 
-        self.assertFalse(self.argument.applies)
-        self.argument.input = 9
-        self.assertTrue(self.argument.applies)
+        self.assertFalse(self.base_arguments.applies)
+        self.base_arguments.input = 9
+        self.assertTrue(self.base_arguments.applies)
 
-    def test_arguments_defaults_to_nothing(self):
-        eq_(self.argument.variables, [])
+    def test_argument_variables_defaults_to_nothing(self):
+        eq_(self.base_arguments.arguments, [])
 
-    def test_only_returns_valid_instance_methods_for_subclasses(self):
-        eq_(MyArgument.variables, [MyArgument.instance_method])
+    def test_variables_only_returns_argument_objects(self):
+        eq_(
+            MyArguments.arguments,
+            [
+                MyArguments.variable1,
+                MyArguments.opposite_variable1,
+                MyArguments.str_variable
+            ]
+        )
+
+    def test_arguments_work(self):
+        ok_(self.subclass_arguments.variable1)
+
+    def test_can_use_string_as_argument(self):
+        eq_(self.subclass_str_arg.str_variable, 45)
 
 
 class BaseVariableTest(object):
