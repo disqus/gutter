@@ -3,12 +3,12 @@ from gutter.client.operators import Base
 
 class Truthy(Base):
 
-    label = 'truthy'
+    label = 'true'
     group = 'identity'
-    preposition = 'is'
+    preposition = 'true'
 
     def applies_to(self, argument):
         return bool(argument)
 
     def __str__(self):
-        return 'is truthy'
+        return 'true'
