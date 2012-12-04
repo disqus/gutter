@@ -34,16 +34,16 @@ class TestBase(unittest.TestCase):
         self.assertTrue(self.base_arguments.applies)
 
     def test_argument_variables_defaults_to_nothing(self):
-        eq_(self.base_arguments.arguments, [])
+        eq_(self.base_arguments.arguments, {})
 
     def test_variables_only_returns_argument_objects(self):
         eq_(
             MyArguments.arguments,
-            [
-                MyArguments.variable1,
-                MyArguments.opposite_variable1,
-                MyArguments.str_variable
-            ]
+            dict(
+                variable1=MyArguments.variable1,
+                opposite_variable1=MyArguments.opposite_variable1,
+                str_variable=MyArguments.str_variable
+            )
         )
 
     def test_arguments_work(self):

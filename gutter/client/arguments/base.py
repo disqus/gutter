@@ -39,10 +39,10 @@ class Base(object):
 
     @classproperty
     def arguments(cls):
-        return [
-            getattr(cls, key) for key, value in vars(cls).items()
+        return dict(
+            (key, value) for key, value in vars(cls).items()
             if type(value) is argument
-        ]
+        )
 
     @property
     def applies(self):
