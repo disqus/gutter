@@ -31,5 +31,9 @@ class Percent(PercentRange):
         self.upper = float(percentage)
         self.lower = 0.0
 
+    @property
+    def arguments(self):
+        return dict(percentage=self.upper)
+
     def __str__(self):
         return 'in %s%% of values' % self.upper

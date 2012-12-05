@@ -52,7 +52,7 @@ class TestTruthyCondition(BaseOperator, unittest.TestCase):
         eq_(self.str, 'true')
 
     def test_arguments_is_empty_list(self):
-        eq_(self.property_class.arguments, ())
+        eq_(self.operator.arguments, {})
 
 
 class TestEqualsCondition(BaseOperator, unittest.TestCase):
@@ -74,7 +74,7 @@ class TestEqualsCondition(BaseOperator, unittest.TestCase):
         eq_(self.str, 'equal to "Fred"')
 
     def test_arguments_is_just_a_single_value(self):
-        eq_(self.property_class.arguments, ('value',))
+        eq_(self.operator.arguments, dict(value='Fred'))
 
 
 class TestBetweenCondition(BaseOperator, unittest.TestCase):
@@ -103,7 +103,7 @@ class TestBetweenCondition(BaseOperator, unittest.TestCase):
         eq_(self.str, 'between "1" and "100"')
 
     def test_arguments_is_just_a_lower_and_higher(self):
-        eq_(self.property_class.arguments, ('lower', 'higher'))
+        eq_(self.operator.arguments, dict(lower=1, higher=100))
 
 
 class TestLessThanCondition(BaseOperator, unittest.TestCase):
@@ -133,7 +133,7 @@ class TestLessThanCondition(BaseOperator, unittest.TestCase):
         eq_(self.str, 'less than "500"')
 
     def test_arguments_is_upper_limit(self):
-        eq_(self.property_class.arguments, ('upper_limit',))
+        eq_(self.operator.arguments, dict(upper_limit=500))
 
 
 class TestLessThanOrEqualToOperator(BaseOperator):
@@ -165,7 +165,7 @@ class TestLessThanOrEqualToOperator(BaseOperator):
         eq_(self.str, 'less than or equal to "500"')
 
     def test_arguments_is_upper_limit(self):
-        eq_(self.property_class.arguments, ('upper_limit',))
+        eq_(self.operator.arguments, dict(upper_limit=500))
 
 
 class TestMoreThanOperator(BaseOperator, unittest.TestCase):
@@ -194,7 +194,7 @@ class TestMoreThanOperator(BaseOperator, unittest.TestCase):
         eq_(self.str, 'more than "10"')
 
     def test_arguments_is_lower_limit(self):
-        eq_(self.property_class.arguments, ('lower_limit',))
+        eq_(self.operator.arguments, dict(lower_limit=10))
 
 
 class TestMoreThanOrEqualToOperator(BaseOperator, unittest.TestCase):
@@ -225,7 +225,7 @@ class TestMoreThanOrEqualToOperator(BaseOperator, unittest.TestCase):
         eq_(self.str, 'more than or equal to "10"')
 
     def test_arguments_is_lower_limit(self):
-        eq_(self.property_class.arguments, ('lower_limit',))
+        eq_(self.operator.arguments, dict(lower_limit=10))
 
 
 class PercentTest(BaseOperator):
@@ -256,7 +256,7 @@ class PercentageTest(PercentTest, unittest.TestCase):
         eq_(self.str, 'in 50.0% of values')
 
     def test_arguments_is_percentage(self):
-        eq_(self.property_class.arguments, ('percentage',))
+        eq_(self.operator.arguments, dict(percentage=50))
 
 
 class PercentRangeTest(PercentTest, unittest.TestCase):
@@ -283,4 +283,4 @@ class PercentRangeTest(PercentTest, unittest.TestCase):
         eq_(self.str, 'in 10.0 - 20.0% of values')
 
     def test_arguments_is_lower_and_upper(self):
-        eq_(self.property_class.arguments, ('lower', 'upper'))
+        eq_(self.operator.arguments, dict(lower=10, upper=20))

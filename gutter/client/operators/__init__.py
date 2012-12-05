@@ -1,17 +1,11 @@
-import inspect
-
-
-class GetInitArguments(object):
-
-        def __get__(self, obj, obj_type):
-            args = inspect.getargspec(obj_type.__init__).args
-            return tuple(args[1:])
-
-
 class Base(object):
 
     def __init__(self):
         pass  # Needed to make GetInitArguments work on Base
+
+    @property
+    def arguments(self):
+        return vars(self)
 
     def __eq__(self, other):
         for arg in vars(self).keys():
@@ -20,4 +14,3 @@ class Base(object):
 
         return True
 
-    arguments = GetInitArguments()
