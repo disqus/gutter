@@ -3,7 +3,7 @@ from gutter.client.operators import Base
 
 class Truthy(Base):
 
-    label = 'true'
+    name = 'true'
     group = 'identity'
     preposition = 'true'
 

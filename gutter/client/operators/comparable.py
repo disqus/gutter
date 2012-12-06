@@ -3,7 +3,7 @@ from gutter.client.operators import Base
 
 class Equals(Base):
 
-    label = 'equals'
+    name = 'equals'
     group = 'comparable'
     preposition = 'equal to'
 
@@ -19,7 +19,7 @@ class Equals(Base):
 
 class Between(Base):
 
-    label = 'between'
+    name = 'between'
     group = 'comparable'
     preposition = 'between'
 
@@ -36,7 +36,7 @@ class Between(Base):
 
 class LessThan(Base):
 
-    label = 'before'
+    name = 'before'
     group = 'comparable'
     preposition = 'less than'
 
@@ -52,7 +52,7 @@ class LessThan(Base):
 
 class LessThanOrEqualTo(LessThan):
 
-    label = 'less_than_or_equal_to'
+    name = 'less_than_or_equal_to'
     group = 'comparable'
     preposition = 'less than or equal to'
 
@@ -65,7 +65,7 @@ class LessThanOrEqualTo(LessThan):
 
 class MoreThan(Base):
 
-    label = 'more_than'
+    name = 'more_than'
     group = 'comparable'
     preposition = 'more than'
 
@@ -81,7 +81,7 @@ class MoreThan(Base):
 
 class MoreThanOrEqualTo(MoreThan):
 
-    label = 'more_than_or_equal_to'
+    name = 'more_than_or_equal_to'
     group = 'comparable'
     preposition = 'more than or equal to'
 

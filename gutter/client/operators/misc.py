@@ -3,7 +3,7 @@ from gutter.client.operators import Base
 
 class PercentRange(Base):
 
-    label = 'percent_range'
+    name = 'percent_range'
     group = 'misc'
     preposition = 'in the percentage range of'
 
@@ -23,7 +23,7 @@ class PercentRange(Base):
 
 class Percent(PercentRange):
 
-    label = 'percent'
+    name = 'percent'
     group = 'misc'
     preposition = 'within the percentage of'
 

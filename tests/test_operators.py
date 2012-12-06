@@ -9,8 +9,8 @@ from exam.decorators import fixture
 
 class BaseOperator(object):
 
-    def test_has_label(self):
-        ok_(self.operator.label)
+    def test_has_name(self):
+        ok_(self.operator.name)
 
     def test_has_preposition(self):
         ok_(self.operator.preposition)
