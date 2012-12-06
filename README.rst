@@ -92,7 +92,7 @@ Arguments
 
 The first step in your usage of ``gutter`` should be to define your arguments that you will be checking switches against.  An "argument" is an object which understands the business logic and object in your system (users, requests, etc) and knows how to validate, transform and extract variables from those business objects for ``Switch`` conditions.  For instance, your system may have a ``User`` object that has properties like ``is_admin``, ``date_joined``, etc.  To switch against it, you would then create arguments for each of those values.
 
-To do that, you construct a class which inherits from ``gutter.client.arguments.Base`` and takes one argument as its "input," a ``User`` instance. Inside the body of the class, you create as many class variable "arguments" that you need by using the ``gutter.client.arguments`` function.
+To do that, you construct a class which inherits from ``gutter.client.arguments.Container``. Inside the body of the class, you create as many class variable "arguments" that you need by using the ``gutter.client.arguments`` function.
 
 .. code:: python
 
@@ -100,7 +100,7 @@ To do that, you construct a class which inherits from ``gutter.client.arguments.
 
     from myapp import User
 
-    class UserArgument(arguments.Base):
+    class UserArguments(arguments.Container):
 
         COMPATIBLE_TYPE = User
 
@@ -110,12 +110,12 @@ To do that, you construct a class which inherits from ``gutter.client.arguments.
 
 There are a few things going on here, so let's break down what they all mean.
 
-1. The ``UserArgument`` class is subclassed from ``Base``.  The subclassing is required since ``Base`` implements some of the required API.
+1. The ``UserArgument`` class is subclassed from ``Container``.  The subclassing is required since ``Container`` implements some of the required API.
 2. The class has a bunch of class variables that are calls to ``arguments.TYPE``, where ``TYPE`` is the type of variable this argument is. At present there are 3 types: ``Value`` for general values, ``Boolean`` for boolean values and ``String`` for string values.
 3. ``arguments.TYPE()`` is called with a callable that returns the value.  In the above example, we'll want to make some switches active based on a user's ``name``, ``is_admin`` status and ``age``.
 4. Those ``argument``s return the actual value, which is derefenced from ``self.input``, which is the input object (in this case a ``User`` instance).  Argum
 5. ``Variable`` objects understand ``Switch`` conditions and operators, and implement the correct API to allow themselves to be appropriatly compared.
-6. ``COMPATIBLE_TYPE`` declares that this argument only works with ``User`` instances.  This works with the default implementation of ``applies`` in the ``Base`` argument that checks if the ``type`` of the input is the same as ``COMPATIBLE_TYPE``.
+6. ``COMPATIBLE_TYPE`` declares that this argument only works with ``User`` instances.  This works with the default implementation of ``applies`` in the base argument that checks if the ``type`` of the input is the same as ``COMPATIBLE_TYPE``.
 
 Argument Details
 ^^^^^^^^^^^^^^^^
@@ -128,7 +128,7 @@ Since constructing arguments that simply reference an attribute on ``self.input`
 
     from myapp import User
 
-    class UserArgument(Base):
+    class UserArguments(Container):
 
         COMPATIBLE_TYPE = User
 

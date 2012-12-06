@@ -3,7 +3,7 @@ import threading
 import itertools
 
 from nose.tools import *
-from gutter.client.arguments import Base as BaseArgument
+from gutter.client.arguments import Container as BaseArgument
 from gutter.client import arguments
 from gutter.client.models import Switch, Manager, Condition
 from modeldict import MemoryDict

@@ -1,6 +1,6 @@
 from functools import partial
 
-from base import Base, argument
+from base import Container, argument
 import variables
 
 Value = partial(argument, variables.Value)

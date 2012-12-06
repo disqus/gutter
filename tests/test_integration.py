@@ -22,7 +22,7 @@ class User(object):
         self.married = married
 
 
-class UserArguments(arguments.Base):
+class UserArguments(arguments.Container):
 
     COMPATIBLE_TYPE = User
 

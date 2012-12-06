@@ -15,16 +15,26 @@ class argument(object):
         else:
             self.getter = getter
 
+        self.owner = None
         self.variable = variable
 
     def __get__(self, instance, owner):
+        self.owner = owner
+
         if instance:
             return self.variable(self.getter(instance))
         else:
             return self
 
+    def __str__(self):
+        for k, v in vars(self.owner).items():
+            if v is self:
+                return "%s.%s" % (self.owner.__name__, k)
 
-class Base(object):
+        return repr(self)
+
+
+class Container(object):
     """
     Base class for Arguments, which are responsible for understanding inputs
     and returning Argument Variables.  Argument variables are compared against

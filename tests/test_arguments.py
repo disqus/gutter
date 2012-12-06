@@ -4,12 +4,12 @@ from nose.tools import *
 
 from gutter.client.arguments.variables import *
 from gutter.client import arguments
-from gutter.client.arguments import Base
+from gutter.client.arguments import Container
 
 from exam.decorators import fixture
 
 
-class MyArguments(Base):
+class MyArguments(Container):
     variable1 = arguments.Value(lambda self: self.input)
     opposite_variable1 = arguments.Value(lambda self: not self.input)
     str_variable = arguments.String('prop')
@@ -17,24 +17,24 @@ class MyArguments(Base):
 
 class TestBase(unittest.TestCase):
 
-    base_arguments = fixture(Base, True)
+    container = fixture(Container, True)
     subclass_arguments = fixture(MyArguments, True)
     subclass_str_arg = fixture(MyArguments, Mock(prop=45))
 
     def test_applies_is_false_if_compatible_type_is_none(self):
-        eq_(self.base_arguments.COMPATIBLE_TYPE, None)
-        eq_(self.base_arguments.applies, False)
+        eq_(self.container.COMPATIBLE_TYPE, None)
+        eq_(self.container.applies, False)
 
     def applies_is_true_if_input_type_is_compatible_type(self):
-        self.base_arguments.COMPATIBLE_TYPE = int
-        ok_(type(self.base_arguments.input) is not int)
+        self.container.COMPATIBLE_TYPE = int
+        ok_(type(self.container.input) is not int)
 
-        self.assertFalse(self.base_arguments.applies)
-        self.base_arguments.input = 9
-        self.assertTrue(self.base_arguments.applies)
+        self.assertFalse(self.container.applies)
+        self.container.input = 9
+        self.assertTrue(self.container.applies)
 
     def test_argument_variables_defaults_to_nothing(self):
-        eq_(self.base_arguments.arguments, {})
+        eq_(self.container.arguments, {})
 
     def test_variables_only_returns_argument_objects(self):
         eq_(
@@ -51,6 +51,12 @@ class TestBase(unittest.TestCase):
 
     def test_can_use_string_as_argument(self):
         eq_(self.subclass_str_arg.str_variable, 45)
+
+    def test_str_is_argument_container_plus_argument_name(self):
+        eq_(
+            str(MyArguments.variable1),
+            'MyArguments.variable1'
+        )
 
 
 class BaseVariableTest(object):
