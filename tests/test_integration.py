@@ -91,18 +91,18 @@ class TestIntegration(Exam, unittest.TestCase):
         self.steve = User('timmy', 19)
 
     def setup_conditions(self):
-        self.age_65_and_up = Condition(UserArguments, 'age', MoreThanOrEqualTo(65))
-        self.age_under_18 = Condition(UserArguments, 'age', LessThan(18))
-        self.age_not_under_18 = Condition(UserArguments, 'age', LessThan(18), negative=True)
-        self.age_21_plus = Condition(UserArguments, 'age', MoreThanOrEqualTo(21))
-        self.age_between_13_and_18 = Condition(UserArguments, 'age', Between(13, 18))
+        self.age_65_and_up = Condition(UserArguments, 'age', MoreThanOrEqualTo(lower_limit=65))
+        self.age_under_18 = Condition(UserArguments, 'age', LessThan(upper_limit=18))
+        self.age_not_under_18 = Condition(UserArguments, 'age', LessThan(upper_limit=18), negative=True)
+        self.age_21_plus = Condition(UserArguments, 'age', MoreThanOrEqualTo(lower_limit=21))
+        self.age_between_13_and_18 = Condition(UserArguments, 'age', Between(lower=13, higher=18))
 
-        self.in_sf = Condition(UserArguments, 'location', Equals('San Francisco'))
+        self.in_sf = Condition(UserArguments, 'location', Equals(value='San Francisco'))
         self.has_location = Condition(UserArguments, 'location', Truthy())
 
-        self.three_quarters_married = Condition(UserArguments, 'married', Percent(75))
-        self.ten_percent = Condition(UserArguments, 'name', Percent(10))
-        self.upper_50_percent = Condition(UserArguments, 'name', PercentRange(50, 100))
+        self.three_quarters_married = Condition(UserArguments, 'married', Percent(percentage=75))
+        self.ten_percent = Condition(UserArguments, 'name', Percent(percentage=10))
+        self.upper_50_percent = Condition(UserArguments, 'name', PercentRange(lower=50, upper=100))
 
     def setup_switches(self):
         self.add_switch('can drink', condition=self.age_21_plus)

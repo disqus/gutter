@@ -6,9 +6,7 @@ class Equals(Base):
     name = 'equals'
     group = 'comparable'
     preposition = 'equal to'
-
-    def __init__(self, value):
-        self.value = value
+    arguments = ('value',)
 
     def applies_to(self, argument):
         return argument == self.value
@@ -22,10 +20,7 @@ class Between(Base):
     name = 'between'
     group = 'comparable'
     preposition = 'between'
-
-    def __init__(self, lower, higher):
-        self.lower = lower
-        self.higher = higher
+    arguments = ('lower', 'higher')
 
     def applies_to(self, argument):
         return argument > self.lower and argument < self.higher
@@ -39,9 +34,7 @@ class LessThan(Base):
     name = 'before'
     group = 'comparable'
     preposition = 'less than'
-
-    def __init__(self, upper_limit):
-        self.upper_limit = upper_limit
+    arguments = ('upper_limit',)
 
     def applies_to(self, argument):
         return argument < self.upper_limit
@@ -68,9 +61,7 @@ class MoreThan(Base):
     name = 'more_than'
     group = 'comparable'
     preposition = 'more than'
-
-    def __init__(self, lower_limit):
-        self.lower_limit = lower_limit
+    arguments = ('lower_limit',)
 
     def applies_to(self, argument):
         return argument > self.lower_limit

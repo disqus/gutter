@@ -6,6 +6,7 @@ class PercentRange(Base):
     name = 'percent_range'
     group = 'misc'
     preposition = 'in the percentage range of'
+    arguments = ('lower', 'upper')
 
     def __init__(self, lower, upper):
         self.upper = float(upper)
@@ -26,13 +27,14 @@ class Percent(PercentRange):
     name = 'percent'
     group = 'misc'
     preposition = 'within the percentage of'
+    arguments = ('percentage',)
 
     def __init__(self, percentage):
         self.upper = float(percentage)
         self.lower = 0.0
 
     @property
-    def arguments(self):
+    def variables(self):
         return dict(percentage=self.upper)
 
     def __str__(self):

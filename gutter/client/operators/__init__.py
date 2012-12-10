@@ -1,10 +1,13 @@
 class Base(object):
 
-    def __init__(self):
-        pass  # Needed to make GetInitArguments work on Base
+    arguments = ()
+
+    def __init__(self, *args, **kwargs):
+        for argument in self.arguments:
+            setattr(self, argument, kwargs.pop(argument))
 
     @property
-    def arguments(self):
+    def variables(self):
         return vars(self)
 
     def __eq__(self, other):
@@ -13,4 +16,3 @@ class Base(object):
                 return False
 
         return True
-
