@@ -20,13 +20,13 @@ class Between(Base):
     name = 'between'
     group = 'comparable'
     preposition = 'between'
-    arguments = ('lower', 'higher')
+    arguments = ('lower_limit', 'upper_limit')
 
     def applies_to(self, argument):
-        return argument > self.lower and argument < self.higher
+        return argument > self.lower_limit and argument < self.upper_limit
 
     def __str__(self):
-        return 'between "%s" and "%s"' % (self.lower, self.higher)
+        return 'between "%s" and "%s"' % (self.lower_limit, self.upper_limit)
 
 
 class LessThan(Base):

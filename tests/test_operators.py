@@ -89,7 +89,7 @@ class TestEqualsCondition(BaseOperator, unittest.TestCase):
 class TestBetweenCondition(BaseOperator, unittest.TestCase):
 
     def make_operator(self, lower=1, higher=100):
-        return Between(lower=lower, higher=higher)
+        return Between(lower_limit=lower, upper_limit=higher)
 
     def test_applies_to_if_between_lower_and_upper_bound(self):
         ok_(self.operator.applies_to(0) is False)
@@ -100,7 +100,7 @@ class TestBetweenCondition(BaseOperator, unittest.TestCase):
         ok_(self.operator.applies_to('steve') is False)
 
     def test_applies_to_works_with_any_comparable(self):
-        animals = Between(lower='cobra', higher='orangatang')
+        animals = Between(lower_limit='cobra', upper_limit='orangatang')
         ok_(animals.applies_to('dog'))
         ok_(animals.applies_to('elephant'))
         ok_(animals.applies_to('llama'))
@@ -112,7 +112,7 @@ class TestBetweenCondition(BaseOperator, unittest.TestCase):
         eq_(self.str, 'between "1" and "100"')
 
     def test_variables_is_just_a_lower_and_higher(self):
-        eq_(self.operator.variables, dict(lower=1, higher=100))
+        eq_(self.operator.variables, dict(lower_limit=1, upper_limit=100))
 
 
 class TestLessThanCondition(BaseOperator, unittest.TestCase):
@@ -274,7 +274,7 @@ class PercentRangeTest(PercentTest, unittest.TestCase):
         return self.range_of(10, 20)
 
     def range_of(self, lower, upper):
-        return PercentRange(lower=lower, upper=upper)
+        return PercentRange(lower_limit=lower, upper_limit=upper)
 
     def test_can_apply_to_a_certain_percent_range(self):
         self.assertAlmostEqual(self.successful_runs(1000), 100, delta=20)
@@ -292,4 +292,4 @@ class PercentRangeTest(PercentTest, unittest.TestCase):
         eq_(self.str, 'in 10.0 - 20.0% of values')
 
     def test_variables_is_lower_and_upper(self):
-        eq_(self.operator.variables, dict(lower=10, upper=20))
+        eq_(self.operator.variables, dict(lower_limit=10, upper_limit=20))
