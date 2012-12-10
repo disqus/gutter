@@ -1,5 +1,7 @@
 import unittest
 from nose.tools import *
+
+from gutter.client.operators import OperatorInitError
 from gutter.client.operators.comparable import *
 from gutter.client.operators.identity import *
 from gutter.client.operators.misc import *
@@ -72,8 +74,8 @@ class TestEqualsCondition(BaseOperator, unittest.TestCase):
         ok_(self.operator.applies_to('') is False)
         ok_(self.operator.applies_to(True) is False)
 
-    @raises(KeyError)
-    def test_raises_error_if_not_provided_value(self):
+    @raises(OperatorInitError)
+    def test_raises_operator_init_error_if_not_provided_value(self):
         Equals()
 
     def test_str_says_is_equal_to_condition(self):
