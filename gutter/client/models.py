@@ -313,6 +313,9 @@ class Manager(threading.local):
         inner_dict.pop('storage', False)
         return inner_dict
 
+    def __getitem__(self, key):
+        return self.storage[key]
+
     @property
     def switches(self):
         """

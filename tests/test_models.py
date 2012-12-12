@@ -499,6 +499,13 @@ class ManagerTest(unittest.TestCase):
             for prop in properties:
                 eq_(getattr(decendent_manager, prop), getattr(parent, prop))
 
+    def test_getitem_proxies_to_storage_getitem(self):
+        eq_(
+            self.manager['foo'],
+            self.manager.storage.__getitem__.return_value
+        )
+        self.manager.storage.__getitem__.assert_called_once_with('foo')
+
 
 class NamespacedManagertest(ManagerTest):
 
