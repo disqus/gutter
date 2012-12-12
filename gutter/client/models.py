@@ -314,7 +314,7 @@ class Manager(threading.local):
         return inner_dict
 
     def __getitem__(self, key):
-        return self.storage[key]
+        return self.storage[self.__namespaced(key)]
 
     @property
     def switches(self):

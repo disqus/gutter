@@ -504,7 +504,9 @@ class ManagerTest(unittest.TestCase):
             self.manager['foo'],
             self.manager.storage.__getitem__.return_value
         )
-        self.manager.storage.__getitem__.assert_called_once_with('foo')
+        self.manager.storage.__getitem__.assert_called_once_with(
+            self.namespaced('foo')
+        )
 
 
 class NamespacedManagertest(ManagerTest):
