@@ -53,10 +53,14 @@ class TestBase(unittest.TestCase):
         eq_(self.subclass_str_arg.str_variable, 45)
 
     def test_str_is_argument_container_plus_argument_name(self):
-        eq_(
-            str(MyArguments.variable1),
-            'MyArguments.variable1'
-        )
+        eq_(str(MyArguments.variable1), 'MyArguments.variable1')
+
+    def test_owner_is_class_its_in(self):
+        eq_(MyArguments.variable1.owner, MyArguments)
+
+    def test_name_is_name_inside_class(self):
+        eq_(MyArguments.variable1.name, 'variable1')
+        eq_(MyArguments.opposite_variable1.name, 'opposite_variable1')
 
 
 class BaseVariableTest(object):

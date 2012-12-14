@@ -27,11 +27,16 @@ class argument(object):
             return self
 
     def __str__(self):
-        for k, v in vars(self.owner).items():
-            if v is self:
-                return "%s.%s" % (self.owner.__name__, k)
+        if self.name:
+            return "%s.%s" % (self.owner.__name__, self.name)
+        else:
+            return repr(self)
 
-        return repr(self)
+    @property
+    def name(self):
+        for name, attr in vars(self.owner).items():
+            if attr is self:
+                return name
 
 
 class Container(object):
