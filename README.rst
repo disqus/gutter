@@ -443,40 +443,6 @@ It does **not**, however, share the same switches.  Newly constructed ``Manager`
 
 This allows you to have separate namespaced "views" of switches, possibly named the exact same name, and not have them comflict with each other.
 
-Templates
-=========
-
-``gutter`` has a ``ifswitch`` template tag that you can use in your Django templates.  To use it, simply load the ``gutter`` template helpers and pass ``ifswitch`` the switch name.  If the switch is active, the content between ``ifswitch`` and ``endifswitch`` will be rendered.
-
-.. code::
-
-    {% load gutter %}
-    {% ifswitch cool_feature %}
-    switch active!
-    {% endifswitch %}
-
-You can also use an ``else`` tag to render content if the switch is not active:
-
-.. code::
-
-    {% load gutter %}
-    {% ifswitch cool_feature %}
-    switch active!
-    {% else %}
-    switch not active!
-    {% endifswitch %}
-
-Like ``gutter.active``, ``ifswitch`` takes any number of input objects to check the switch against:
-
-.. code::
-
-    {% load gutter %}
-    {% ifswitch cool_feature user project %}
-    switch active for user or project!
-    {% endifswitch %}
-
-NOTE: By default, the `gutter` instance used in the template tags is the ``gutter.client.gutter`` instance.
-
 Decorators
 ==========
 
