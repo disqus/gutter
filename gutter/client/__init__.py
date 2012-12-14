@@ -10,5 +10,3 @@ try:
     VERSION = __import__('pkg_resources').get_distribution('gutter').version
 except Exception, e:
     VERSION = 'unknown'
-
-from gutter.client.autodiscovery import discover as autodiscover

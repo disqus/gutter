@@ -82,11 +82,6 @@ If you would like to construct and use a different default manager, but still ha
 
 Note that the ``settings.manager.default`` value must be set **before** importing the default ``gutter`` instance.
 
-Autodiscovery
-~~~~~~~~~~~~~
-
-If used with Django, you may call ``gutter.client.autodiscover()`` to have gutter look for, and import, any ``gutter`` modules for every app in ``INSTALLED_APPS``.  These modules should be used to configure your arguments or custom Condition objects your app requires.  More info on what those objects are and how you use them is in the rest of this README.
-
 Arguments
 =========
 
