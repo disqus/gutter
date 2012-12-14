@@ -78,6 +78,9 @@ class BaseVariableTest(object):
     def test_implements_comparison_methods(self):
         map(ok_, self.interface_methods)
 
+    def test_implements_to_python(self):
+        ok_(self.argument.to_python('1'))
+
 
 class DelegateToValue(object):
 
@@ -99,6 +102,10 @@ class ValueTest(BaseVariableTest, DelegateToValue, unittest.TestCase):
     klass = Value
     valid_comparison_value = 'marv'
 
+    def test_to_python_returns_same_object(self):
+        variable = 'hello'
+        eq_(Value('thing').to_python(variable), variable)
+
 
 class BooleanTest(BaseVariableTest, DelegateToValue, unittest.TestCase):
 
@@ -118,6 +125,11 @@ class BooleanTest(BaseVariableTest, DelegateToValue, unittest.TestCase):
 
         assert_not_equals(hash(boolean), hash(Boolean(True)))
 
+    def test_to_python_booleans_the_value(self):
+        eq_(Boolean(True).to_python(1), True)
+        eq_(Boolean(True).to_python(0), False)
+        eq_(Boolean(True).to_python('0'), True)
+
 
 class StringTest(BaseVariableTest, DelegateToValue, unittest.TestCase):
 
@@ -134,3 +146,20 @@ class StringTest(BaseVariableTest, DelegateToValue, unittest.TestCase):
         ok_(String('hello').__nonzero__() is True)
         ok_(String('').__nonzero__() is False)
         ok_(String('0').__nonzero__() is True)
+
+    def test_to_python_strs_the_value(self):
+        eq_(String(True).to_python(True), 'True')
+        eq_(String(True).to_python('hello'), 'hello')
+        eq_(String(True).to_python(1), '1')
+
+
+class IntegerTest(BaseVariableTest, DelegateToValue, unittest.TestCase):
+
+    klass = Integer
+    valid_comparison_value = 1
+
+    def test_to_python_ints_the_value(self):
+        eq_(Integer(True).to_python(True), 1)
+        eq_(Integer(True).to_python(1.0), 1)
+        eq_(Integer(True).to_python(1.5), 1)
+        eq_(Integer(True).to_python('1337'), 1337)
