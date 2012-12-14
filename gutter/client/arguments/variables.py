@@ -20,7 +20,8 @@ class Base(object):
     __hash__ = __proxy_to_value_method('__hash__')
     __nonzero__ = __proxy_to_value_method('__nonzero__')
 
-    def to_python(self, value):
+    @staticmethod
+    def to_python(value):
         return value
 
 
@@ -30,7 +31,8 @@ class Value(Base):
 
 class Integer(Base):
 
-    def to_python(self, value):
+    @staticmethod
+    def to_python(value):
         return int(value)
 
 
@@ -43,7 +45,8 @@ class Boolean(Base):
     def __hash__(self, *args, **kwargs):
         return hash(self.hash_value)
 
-    def to_python(self, value):
+    @staticmethod
+    def to_python(value):
         return bool(value)
 
 
@@ -55,5 +58,6 @@ class String(Base):
     def __nonzero__(self, *args, **kwargs):
         return bool(self.value)
 
-    def to_python(self, value):
+    @staticmethod
+    def to_python(value):
         return str(value)
