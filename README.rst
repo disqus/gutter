@@ -28,7 +28,7 @@ Gutter requires a small bit of configuration before usage.
 Choosing Storage
 ~~~~~~~~~~~~~~~~
 
-Switches are persisted in a ``storage`` object, which is a `dict` or any object which provides the ``types.MappingType`` interface (``__setitem__`` and ``__getitem__`` methods).  By default, ``gutter`` uses an instance of `MemoryDict` from the `modeldict library <https://github.com/disqus/modeldict>`_.  This engine **does not persist data once the process ends** so a more persistant data store should be used.
+Switches are persisted in a ``storage`` object, which is a `dict` or any object which provides the ``types.MappingType`` interface (``__setitem__`` and ``__getitem__`` methods).  By default, ``gutter`` uses an instance of `MemoryDict` from the `durabledict library <https://github.com/disqus/durabledict>`_.  This engine **does not persist data once the process ends** so a more persistant data store should be used.
 
 Autocreate
 ~~~~~~~~~~
@@ -45,13 +45,13 @@ To change the ``storage`` and/or ``autocreate`` settings, simply import the sett
 .. code:: python
 
     from gutter.client.settings import manager as manager_settings
-    from modeldict.dict import RedisDict
+    from durabledict.dict import RedisDict
     from redis import RedisClient
 
     manager_settings.storage_engine = RedisDict('gutter', RedisClient()))
     manager_settings.autocreate = True
 
-In this case, we are changing the engine to modeldict's ``RedisDict`` and turning on ``autocreate``.  These settings will then apply to all newly constructed ``Manager`` instances.  More on what a ``Manager`` is and how you use it later in this document.
+In this case, we are changing the engine to durabledict's ``RedisDict`` and turning on ``autocreate``.  These settings will then apply to all newly constructed ``Manager`` instances.  More on what a ``Manager`` is and how you use it later in this document.
 
 Setup
 =====

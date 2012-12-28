@@ -6,7 +6,7 @@ from nose.tools import *
 from gutter.client.arguments import Container as BaseArgument
 from gutter.client import arguments
 from gutter.client.models import Switch, Manager, Condition
-from modeldict import MemoryDict
+from durabledict import MemoryDict
 from gutter.client import signals
 import mock
 

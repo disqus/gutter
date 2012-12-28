@@ -2,7 +2,7 @@ from test_integration import TestIntegration
 from noseperf.testcases import PerformanceTest
 
 from redis import Redis
-from modeldict.redis import RedisDict
+from durabledict.redis import RedisDict
 
 from exam.decorators import before, fixture
 

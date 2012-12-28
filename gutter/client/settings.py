@@ -1,4 +1,4 @@
-from modeldict import MemoryDict
+from durabledict import MemoryDict
 
 
 class manager(object):
