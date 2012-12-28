@@ -1,5 +1,5 @@
 Gutter
---------
+------
 
 **NOTE:** This repo is the client for Gargoyle 2, known as "Gutter".  It does not work with the exsiting `Gargoyle 1 codebase <https://github.com/disqus/gargoyle/>`_.
 
@@ -111,9 +111,6 @@ There are a few things going on here, so let's break down what they all mean.
 4. Those ``argument``s return the actual value, which is derefenced from ``self.input``, which is the input object (in this case a ``User`` instance).  Argum
 5. ``Variable`` objects understand ``Switch`` conditions and operators, and implement the correct API to allow themselves to be appropriatly compared.
 6. ``COMPATIBLE_TYPE`` declares that this argument only works with ``User`` instances.  This works with the default implementation of ``applies`` in the base argument that checks if the ``type`` of the input is the same as ``COMPATIBLE_TYPE``.
-
-Argument Details
-^^^^^^^^^^^^^^^^
 
 Since constructing arguments that simply reference an attribute on ``self.input`` is so common, if you pass a string as the first argument of ``argument()``, when the argument is accessed, it will simply return that property from ``self.input``.  You must also pass a ``Variable`` to the ``variable=`` kwarg so gutter know what Variable to wrap your value in.
 
