@@ -5,6 +5,8 @@ python:
   - "2.7"
   - "pypy"
 
-install: python setup.py develop
+install:
+    - env
+    - python setup.py develop
 
 script:  make test
