@@ -16,6 +16,7 @@ class PercentRange(Base):
         if not argument:
             return False
         else:
+            print argument, 'hash argument', hash(argument)
             return self.lower_limit <= (hash(argument) % 100) < self.upper_limit
 
     def __str__(self):
