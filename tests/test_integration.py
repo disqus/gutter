@@ -138,6 +138,7 @@ class TestIntegration(Exam, unittest2.TestCase):
             ok_(context.active('SF resident') is False)
             ok_(context.active('retired') is True)
             ok_(context.active('10 percent') is False)
+            print context.active('Upper 50 percent')
             ok_(context.active('Upper 50 percent') is True)
 
         with self.inputs(self.manager, self.jeff) as context:
