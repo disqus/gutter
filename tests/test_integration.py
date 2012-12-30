@@ -140,6 +140,7 @@ class TestIntegration(Exam, unittest2.TestCase):
             ok_(context.active('10 percent') is False)
             print context.active('Upper 50 percent')
             ok_(context.active('Upper 50 percent') is True)
+            self.fail()
 
         with self.inputs(self.manager, self.jeff) as context:
             ok_(context.active('can drink') is True)
