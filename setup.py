@@ -31,7 +31,7 @@ setup(
     description='Client to gutter feature switches backend',
     packages=find_packages(exclude=["tests"]),
     zip_safe=False,
-    install_requires=['durabledict>=0.5.0', 'werkzeug'],
+    install_requires=['durabledict>=0.6.1', 'werkzeug'],
     setup_requires=setup_requires,
     namespace_packages=['gutter'],
     license='Apache License 2.0',
