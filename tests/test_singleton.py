@@ -1,4 +1,4 @@
-import unittest
+import unittest2
 from nose.tools import *
 import mock
 
@@ -9,7 +9,7 @@ from exam.decorators import after, around
 from exam.cases import Exam
 
 
-class TestGutter(Exam, unittest.TestCase):
+class TestGutter(Exam, unittest2.TestCase):
 
     other_engine = dict()
     manager_defaults = dict(

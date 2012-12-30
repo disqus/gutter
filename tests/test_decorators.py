@@ -1,4 +1,4 @@
-import unittest
+import unittest2
 
 from mock import patch
 
@@ -20,7 +20,7 @@ def decorated(*args, **kwargs):
     return switch_active('request', *args, **kwargs)(my_view)
 
 
-class DecoratorTest(Exam, unittest.TestCase):
+class DecoratorTest(Exam, unittest2.TestCase):
 
     gutter = patcher(
         'gutter.client.decorators.default_gutter',

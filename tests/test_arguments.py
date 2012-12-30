@@ -1,4 +1,4 @@
-import unittest
+import unittest2
 from mock import MagicMock, Mock
 from nose.tools import *
 
@@ -15,7 +15,7 @@ class MyArguments(Container):
     str_variable = arguments.String('prop')
 
 
-class TestBase(unittest.TestCase):
+class TestBase(unittest2.TestCase):
 
     container = fixture(Container, True)
     subclass_arguments = fixture(MyArguments, True)
@@ -97,7 +97,7 @@ class DelegateToValue(object):
             values_function.assert_called_once_with(self.valid_comparison_value)
 
 
-class ValueTest(BaseVariableTest, DelegateToValue, unittest.TestCase):
+class ValueTest(BaseVariableTest, DelegateToValue, unittest2.TestCase):
 
     klass = Value
     valid_comparison_value = 'marv'
@@ -107,7 +107,7 @@ class ValueTest(BaseVariableTest, DelegateToValue, unittest.TestCase):
         eq_(Value.to_python(variable), variable)
 
 
-class BooleanTest(BaseVariableTest, DelegateToValue, unittest.TestCase):
+class BooleanTest(BaseVariableTest, DelegateToValue, unittest2.TestCase):
 
     klass = Boolean
     valid_comparison_value = True
@@ -131,7 +131,7 @@ class BooleanTest(BaseVariableTest, DelegateToValue, unittest.TestCase):
         eq_(Boolean.to_python('0'), True)
 
 
-class StringTest(BaseVariableTest, DelegateToValue, unittest.TestCase):
+class StringTest(BaseVariableTest, DelegateToValue, unittest2.TestCase):
 
     klass = String
     valid_comparison_value = 'foobazzle'
@@ -153,7 +153,7 @@ class StringTest(BaseVariableTest, DelegateToValue, unittest.TestCase):
         eq_(String.to_python(1), '1')
 
 
-class IntegerTest(BaseVariableTest, DelegateToValue, unittest.TestCase):
+class IntegerTest(BaseVariableTest, DelegateToValue, unittest2.TestCase):
 
     klass = Integer
     valid_comparison_value = 1

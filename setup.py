@@ -11,7 +11,7 @@ except ImportError:
 
 
 tests_require = [
-    'nose', 'exam==0.3.1', 'mock', 'nose-performance', 'django', 'redis'
+    'nose', 'exam==0.3.1', 'mock', 'nose-performance', 'django', 'redis', 'unittest2'
 ]
 
 setup_requires = []

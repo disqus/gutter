@@ -1,4 +1,4 @@
-import unittest
+import unittest2
 from nose.tools import *
 
 from gutter.client.operators import OperatorInitError
@@ -42,7 +42,7 @@ class BaseOperator(object):
         return type(self.operator)
 
 
-class TestTruthyCondition(BaseOperator, unittest.TestCase):
+class TestTruthyCondition(BaseOperator, unittest2.TestCase):
 
     def make_operator(self):
         return Truthy()
@@ -63,7 +63,7 @@ class TestTruthyCondition(BaseOperator, unittest.TestCase):
         eq_(self.operator.arguments, ())
 
 
-class TestEqualsCondition(BaseOperator, unittest.TestCase):
+class TestEqualsCondition(BaseOperator, unittest2.TestCase):
 
     def make_operator(self):
         return Equals(value='Fred')
@@ -88,7 +88,7 @@ class TestEqualsCondition(BaseOperator, unittest.TestCase):
         eq_(self.operator.arguments, ('value',))
 
 
-class TestBetweenCondition(BaseOperator, unittest.TestCase):
+class TestBetweenCondition(BaseOperator, unittest2.TestCase):
 
     def make_operator(self, lower=1, higher=100):
         return Between(lower_limit=lower, upper_limit=higher)
@@ -117,7 +117,7 @@ class TestBetweenCondition(BaseOperator, unittest.TestCase):
         eq_(self.operator.variables, dict(lower_limit=1, upper_limit=100))
 
 
-class TestLessThanCondition(BaseOperator, unittest.TestCase):
+class TestLessThanCondition(BaseOperator, unittest2.TestCase):
 
     def make_operator(self, upper=500):
         return LessThan(upper_limit=upper)
@@ -179,7 +179,7 @@ class TestLessThanOrEqualToOperator(BaseOperator):
         eq_(self.operator.variables, dict(upper_limit=500))
 
 
-class TestMoreThanOperator(BaseOperator, unittest.TestCase):
+class TestMoreThanOperator(BaseOperator, unittest2.TestCase):
 
     def make_operator(self, lower=10):
         return MoreThan(lower_limit=lower)
@@ -208,7 +208,7 @@ class TestMoreThanOperator(BaseOperator, unittest.TestCase):
         eq_(self.operator.variables, dict(lower_limit=10))
 
 
-class TestMoreThanOrEqualToOperator(BaseOperator, unittest.TestCase):
+class TestMoreThanOrEqualToOperator(BaseOperator, unittest2.TestCase):
 
     def make_operator(self, lower=10):
         return MoreThanOrEqualTo(lower_limit=lower)
@@ -255,7 +255,7 @@ class PercentTest(BaseOperator):
         eq_(self.operator.applies_to(self.FalseyObject()), False)
 
 
-class PercentageTest(PercentTest, unittest.TestCase):
+class PercentageTest(PercentTest, unittest2.TestCase):
 
     def make_operator(self):
         return Percent(percentage=50)
@@ -270,7 +270,7 @@ class PercentageTest(PercentTest, unittest.TestCase):
         eq_(self.operator.variables, dict(percentage=50))
 
 
-class PercentRangeTest(PercentTest, unittest.TestCase):
+class PercentRangeTest(PercentTest, unittest2.TestCase):
 
     def make_operator(self):
         return self.range_of(10, 20)

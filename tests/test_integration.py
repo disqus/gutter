@@ -1,4 +1,4 @@
-import unittest
+import unittest2
 from nose.tools import *
 
 from gutter.client.operators.comparable import *
@@ -32,7 +32,7 @@ class UserArguments(arguments.Container):
     married = arguments.Boolean(lambda self: self.input.married)
 
 
-class TestIntegration(Exam, unittest.TestCase):
+class TestIntegration(Exam, unittest2.TestCase):
 
     class Callback(object):
 
