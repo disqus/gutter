@@ -1,3 +1,6 @@
+.. image:: https://api.travis-ci.org/disqus/gutter.png?branch=master
+   :target: http://travis-ci.org/disqus/gutter
+
 Gutter
 ------
 
