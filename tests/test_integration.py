@@ -138,7 +138,6 @@ class TestIntegration(Exam, unittest2.TestCase):
             ok_(context.active('SF resident') is False)
             ok_(context.active('retired') is True)
             ok_(context.active('10 percent') is False)
-            print context.active('Upper 50 percent')
             ok_(context.active('Upper 50 percent') is True)
 
         with self.inputs(self.manager, self.jeff) as context:
@@ -157,8 +156,8 @@ class TestIntegration(Exam, unittest2.TestCase):
             ok_(context.active('can drink in europe') is True)
             ok_(context.active('can vote') is False)
             ok_(context.active('teenager') is False)
-            ok_(context.active('10 percent') is True)
-            ok_(context.active('Upper 50 percent') is False)
+            ok_(context.active('10 percent') is False)
+            ok_(context.active('Upper 50 percent') is True)
 
     def test_can_use_extra_inputs_to_active(self):
         with self.inputs(self.manager, self.frank) as context:
@@ -184,7 +183,7 @@ class TestIntegration(Exam, unittest2.TestCase):
             ok_(context.active('can drink in europe') is True)
             ok_(context.active('SF resident') is True)
             ok_(context.active('teenager') is False)
-            ok_(context.active('10 percent') is True)
+            ok_(context.active('10 percent') is False)
             ok_(context.active('Upper 50 percent') is True)
 
     def test_switches_can_concent_top_parent_switch(self):

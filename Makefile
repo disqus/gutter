@@ -1,7 +1,7 @@
 VERSION = $(shell python setup.py --version)
 
 test:
-	python setup.py nosetests
+	env PYTHONHASHSEED=52753 python setup.py nosetests
 
 release:
 	git tag $(VERSION)
