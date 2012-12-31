@@ -1,6 +1,8 @@
 import unittest2
 from nose.tools import *
 
+import zlib
+
 from gutter.client.operators.comparable import *
 from gutter.client.operators.identity import *
 from gutter.client.operators.misc import *
@@ -11,6 +13,17 @@ from gutter.client import signals
 
 from exam.decorators import fixture, before, after
 from exam.cases import Exam
+
+
+class deterministicstring(str):
+    """
+    Since the percentage-based conditions rely on the hash value from their
+    arguments, we use this special deterministicstring class to return
+    deterministic string values from the crc32 of itself.
+    """
+
+    def __hash__(self):
+        return zlib.crc32(self)
 
 
 class User(object):
@@ -84,11 +97,11 @@ class TestIntegration(Exam, unittest2.TestCase):
         signals.switch_updated.reset()
 
     def setup_inputs(self):
-        self.jeff = User('jeff', 21)
-        self.frank = User('frank', 10, location="Seattle")
-        self.larry = User('bill', 70, location="Yakima", married=True)
-        self.timmy = User('timmy', 12)
-        self.steve = User('timmy', 19)
+        self.jeff = User(deterministicstring('jeff'), 21)
+        self.frank = User(deterministicstring('frank'), 10, location="Seattle")
+        self.larry = User(deterministicstring('bill'), 70, location="Yakima", married=True)
+        self.timmy = User(deterministicstring('timmy'), 12)
+        self.steve = User(deterministicstring('timmy'), 19)
 
     def setup_conditions(self):
         self.age_65_and_up = Condition(UserArguments, 'age', MoreThanOrEqualTo(lower_limit=65))
@@ -100,7 +113,6 @@ class TestIntegration(Exam, unittest2.TestCase):
         self.in_sf = Condition(UserArguments, 'location', Equals(value='San Francisco'))
         self.has_location = Condition(UserArguments, 'location', Truthy())
 
-        self.three_quarters_married = Condition(UserArguments, 'married', Percent(percentage=75))
         self.ten_percent = Condition(UserArguments, 'name', Percent(percentage=10))
         self.upper_50_percent = Condition(UserArguments, 'name', PercentRange(lower_limit=50, upper_limit=100))
 
