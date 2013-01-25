@@ -24,14 +24,14 @@ if 'nosetests' in sys.argv[1:]:
 
 setup(
     name='gutter',
-    version='0.1.1',
+    version='0.1.2',
     author='DISQUS',
     author_email='opensource@disqus.com',
     url='http://github.com/disqus/gutter',
     description='Client to gutter feature switches backend',
     packages=find_packages(exclude=["tests"]),
     zip_safe=False,
-    install_requires=['durabledict>=0.6.1', 'werkzeug'],
+    install_requires=['durabledict>=0.7.0', 'werkzeug'],
     setup_requires=setup_requires,
     namespace_packages=['gutter'],
     license='Apache License 2.0',
