@@ -314,7 +314,7 @@ class Manager(threading.local):
         return inner_dict
 
     def __getitem__(self, key):
-        return self.storage[self.__namespaced(key)]
+        return self.switch(key)
 
     @property
     def switches(self):
@@ -350,11 +350,15 @@ class Manager(threading.local):
         return switch
 
     def register(self, switch, signal=signals.switch_registered):
-        switch.manager = None
+        switch.manager = None  # Prevents having to serialize the manager
         self.__sync_parental_relationships(switch)
-        self.storage[self.__namespaced(switch.name)] = switch
+        self.__persist(switch)
         switch.manager = self
         signal.call(switch)
+
+    def __persist(self, switch):
+        self.storage[self.__namespaced(switch.name)] = switch
+        return switch
 
     def unregister(self, switch_or_name):
         name = getattr(switch_or_name, 'name', switch_or_name)
@@ -393,6 +397,16 @@ class Manager(threading.local):
 
         switch.reset()
 
+        # If this switch has any children, it's likely their instance of this
+        # switch (their ``parent``) is now "stale" since this switch has
+        # been updated. In order for them to pick up their new parent, we need
+        # to re-save them.
+        #
+        # ``register`` is not used here since we do not need/want to sync
+        # parental relationships.
+        for child in getattr(switch, 'children', []):
+            self.__persist(child)
+
     def namespaced(self, namespace):
         new_namespace = []
 
@@ -418,17 +432,24 @@ class Manager(threading.local):
         return switch
 
     def __sync_parental_relationships(self, switch):
-        namespaced_parent = self.__namespaced(self.__parent_key_for(switch))
-        new_parent = self.storage.get(namespaced_parent)
+        parent_key = self.__parent_key_for(switch)
+
+        if parent_key:
+            new_parent = self.switch(parent_key)
+        else:
+            new_parent = None
+
         old_parent = switch.parent
 
         switch.parent = new_parent
 
         if old_parent and old_parent is not new_parent:
             old_parent.children.remove(switch)
+            old_parent.save()
 
         if new_parent:
             new_parent.children.append(switch)
+            new_parent.save()
 
     def __parent_key_for(self, switch):
         # TODO: Make this a method on the switch object
