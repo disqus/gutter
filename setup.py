@@ -20,6 +20,7 @@ if 'nosetests' in sys.argv[1:]:
 
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', __name__)
     INSTALLED_APPS = ('gutter.client',)
+    SECRET_KEY = 'secret!'
 
 
 setup(
