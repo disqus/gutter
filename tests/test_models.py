@@ -106,7 +106,7 @@ class TestSwitch(unittest2.TestCase):
         eq_(Switch('foo').parent, None)
 
     def test_can_be_constructed_with_parent(self):
-        eq_(Switch('foo', parent='dog').parent, 'dog')
+        eq_(Switch('foo', parent='dog').__dict__['parent'], 'dog')
 
     def test_concent_defaults_to_true(self):
         eq_(Switch('foo').concent, True)
@@ -316,6 +316,7 @@ class ConcentTest(Exam, SwitchWithConditions, unittest2.TestCase):
     @before
     def assign_parent(self):
         self.switch.parent = self.parent
+        self.switch.manager = mock.Mock(**{'switch.return_value': self.parent})
 
     @before
     def make_all_conditions_true(self):

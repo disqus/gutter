@@ -45,6 +45,19 @@ class Switch(object):
         self.manager = manager
         self.reset()
 
+    @property
+    def parent(self):
+        value = self.__dict__['parent']
+        if value is None:
+            return value
+        return self.manager.switch(value)
+
+    @parent.setter
+    def parent(self, value):
+        if isinstance(value, Switch):
+            value = value.name
+        self.__dict__['parent'] = value
+
     def __repr__(self):
         kwargs = dict(
             state=self.state,
