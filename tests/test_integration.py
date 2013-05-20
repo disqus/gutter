@@ -3,6 +3,9 @@ from nose.tools import *
 
 import zlib
 
+from redis import Redis
+from durabledict.redis import RedisDict
+
 from gutter.client.operators.comparable import *
 from gutter.client.operators.identity import *
 from gutter.client.operators.misc import *
@@ -210,6 +213,19 @@ class TestIntegration(Exam, unittest2.TestCase):
             ok_(context.active('SF resident') is True)
             ok_(context.active('can drink:wine') is False)
 
+    def test_changing_parent_is_reflected_in_child_switch(self):
+        with self.inputs(self.manager, self.jeff) as context:
+            assert self.manager['can drink'].children
+            ok_(context.active('can drink:wine') is True)
+
+            parent = self.manager['can drink']
+            parent.state = Switch.states.DISABLED
+            parent.save()
+
+            assert self.manager['can drink'].children
+            ok_(context.active('can drink:wine') is False)
+
+
     def test_switches_can_be_deregistered_and_then_autocreated(self):
         with self.inputs(self.manager, self.jeff) as context:
             ok_(context.active('can drink') is True)
@@ -337,3 +353,18 @@ class TestIntegration(Exam, unittest2.TestCase):
             Switch.states.GLOBAL
         )
         self.assertRaises(ValueError, self.manager.switch, 'steve')
+
+
+class TestIntegrationWithRedis(TestIntegration):
+
+    @fixture
+    def redis(self):
+        return Redis()
+
+    @before
+    def flush_redis(self):
+        self.redis.flushdb()
+
+    @fixture
+    def manager(self):
+        return Manager(storage=RedisDict('gutter-tests', self.redis))
