@@ -24,7 +24,7 @@ if 'nosetests' in sys.argv[1:]:
 
 setup(
     name='gutter',
-    version='0.1.2',
+    version='0.1.3',
     author='DISQUS',
     author_email='opensource@disqus.com',
     url='http://github.com/disqus/gutter',
