@@ -432,11 +432,10 @@ class Manager(threading.local):
         return switch
 
     def __sync_parental_relationships(self, switch):
-        parent_key = self.__parent_key_for(switch)
-
-        if parent_key:
+        try:
+            parent_key = self.__parent_key_for(switch)
             new_parent = self.switch(parent_key)
-        else:
+        except ValueError:
             new_parent = None
 
         old_parent = switch.parent
