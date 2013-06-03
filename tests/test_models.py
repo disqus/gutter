@@ -612,6 +612,10 @@ class ActsLikeManager(object):
         ok_(child in foster_parent.children)
         ok_(child.parent is foster_parent)
 
+    def test_register_raises_value_error_for_blank_name(self):
+        with self.assertRaises(ValueError):
+            self.mock_and_register_switch('')
+
     def test_switch_returns_switch_from_manager_with_name(self):
         switch = self.mock_and_register_switch('foo')
         eq_(switch, self.manager.switch('foo'))

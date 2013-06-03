@@ -350,6 +350,9 @@ class Manager(threading.local):
         return switch
 
     def register(self, switch, signal=signals.switch_registered):
+        if not switch.name:
+            raise ValueError('Switch name cannot be blank')
+
         switch.manager = None  # Prevents having to serialize the manager
         self.__sync_parental_relationships(switch)
         self.__persist(switch)
