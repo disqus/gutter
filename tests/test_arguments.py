@@ -1,7 +1,6 @@
-import unittest2
 from mock import MagicMock, Mock
 from nose.tools import *
-
+from tests import GutterTestCase
 from gutter.client.arguments.variables import *
 from gutter.client import arguments
 from gutter.client.arguments import Container
@@ -15,15 +14,15 @@ class MyArguments(Container):
     str_variable = arguments.String('prop')
 
 
-class TestBase(unittest2.TestCase):
+class TestBase(GutterTestCase):
 
     container = fixture(Container, True)
     subclass_arguments = fixture(MyArguments, True)
     subclass_str_arg = fixture(MyArguments, Mock(prop=45))
 
-    def test_applies_is_false_if_compatible_type_is_none(self):
+    def test_applies_is_true_if_compatible_type_is_none(self):
         eq_(self.container.COMPATIBLE_TYPE, None)
-        eq_(self.container.applies, False)
+        eq_(self.container.applies, True)
 
     def applies_is_true_if_input_type_is_compatible_type(self):
         self.container.COMPATIBLE_TYPE = int
@@ -97,7 +96,7 @@ class DelegateToValue(object):
             values_function.assert_called_once_with(self.valid_comparison_value)
 
 
-class ValueTest(BaseVariableTest, DelegateToValue, unittest2.TestCase):
+class ValueTest(BaseVariableTest, DelegateToValue, GutterTestCase):
 
     klass = Value
     valid_comparison_value = 'marv'
@@ -107,7 +106,7 @@ class ValueTest(BaseVariableTest, DelegateToValue, unittest2.TestCase):
         eq_(Value.to_python(variable), variable)
 
 
-class BooleanTest(BaseVariableTest, DelegateToValue, unittest2.TestCase):
+class BooleanTest(BaseVariableTest, DelegateToValue, GutterTestCase):
 
     klass = Boolean
     valid_comparison_value = True
@@ -131,7 +130,7 @@ class BooleanTest(BaseVariableTest, DelegateToValue, unittest2.TestCase):
         eq_(Boolean.to_python('0'), True)
 
 
-class StringTest(BaseVariableTest, DelegateToValue, unittest2.TestCase):
+class StringTest(BaseVariableTest, DelegateToValue, GutterTestCase):
 
     klass = String
     valid_comparison_value = 'foobazzle'
@@ -153,7 +152,7 @@ class StringTest(BaseVariableTest, DelegateToValue, unittest2.TestCase):
         eq_(String.to_python(1), '1')
 
 
-class IntegerTest(BaseVariableTest, DelegateToValue, unittest2.TestCase):
+class IntegerTest(BaseVariableTest, DelegateToValue, GutterTestCase):
 
     klass = Integer
     valid_comparison_value = 1

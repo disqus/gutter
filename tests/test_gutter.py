@@ -1,9 +1,9 @@
-import unittest2
+from tests import GutterTestCase
 
 from nose.tools import *
 
 
-class GutterTest(unittest2.TestCase):
+class GutterTest(GutterTestCase):
 
     def test_root_gutter_is_just_singleton(self):
         from gutter.client.default import gutter as root_gutter

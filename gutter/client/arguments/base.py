@@ -61,4 +61,10 @@ class Container(object):
 
     @property
     def applies(self):
-        return type(self.input) is self.COMPATIBLE_TYPE
+        """
+        if self.COMPATIBLE_TYPE is None then skip the check entirely.
+        """
+        if self.COMPATIBLE_TYPE is not None:
+            return isinstance(self.input, self.COMPATIBLE_TYPE)
+        else:
+            return True
