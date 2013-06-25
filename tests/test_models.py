@@ -106,7 +106,7 @@ class TestSwitch(unittest2.TestCase):
         eq_(Switch('foo').parent, None)
 
     def test_can_be_constructed_with_parent(self):
-        eq_(Switch('foo', parent='dog').parent, 'dog')
+        eq_(Switch('foo', parent='dog').__dict__['parent'], 'dog')
 
     def test_concent_defaults_to_true(self):
         eq_(Switch('foo').concent, True)
@@ -316,6 +316,7 @@ class ConcentTest(Exam, SwitchWithConditions, unittest2.TestCase):
     @before
     def assign_parent(self):
         self.switch.parent = self.parent
+        self.switch.manager = mock.Mock(**{'switch.return_value': self.parent})
 
     @before
     def make_all_conditions_true(self):
@@ -339,6 +340,27 @@ class ConcentTest(Exam, SwitchWithConditions, unittest2.TestCase):
 
         self.make_all_conditions(False)
         eq_(self.switch.enabled_for('input'), False)
+
+    @fixture
+    def manager(self):
+        class PickledDict(MemoryDict):
+            def _encode(self, value):
+                return super(MemoryDict, self)._encode(value)
+
+            def _decode(self, value):
+                return super(MemoryDict, self)._decode(value)
+        return Manager(PickledDict())
+
+    def test_pickled_child(self):
+        parent = Switch('parent', state=Switch.states.DISABLED)
+        child = Switch('parent:child',
+                       state=Switch.states.GLOBAL, concent=True)
+        self.manager.register(parent)
+        self.manager.register(child)
+
+        parent.state=Switch.states.GLOBAL
+        parent.save()
+        eq_(self.manager.active('parent:child'), True)
 
 
 class DefaultConditionsTest(SwitchWithConditions, unittest2.TestCase):
