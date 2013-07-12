@@ -310,6 +310,7 @@ class Manager(threading.local):
 
     def __getstate__(self):
         inner_dict = vars(self).copy()
+        inner_dict.pop('inputs', False)
         inner_dict.pop('storage', False)
         return inner_dict
 
