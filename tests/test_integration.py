@@ -368,3 +368,17 @@ class TestIntegrationWithRedis(TestIntegration):
     @fixture
     def manager(self):
         return Manager(storage=RedisDict('gutter-tests', self.redis))
+
+    def test_parent_switch_pickle_input(self):
+        import pickle
+
+        # Passing in module `pickle` as unpicklable input.
+        evil = User(deterministicstring('evil'), pickle)
+        self.manager.input(evil)
+
+        self.manager.autocreate = True
+
+        try:
+            self.manager.active('new:switch')
+        except pickle.PicklingError, e:
+            self.fail('Encountered pickling error: "%s"' % e)
