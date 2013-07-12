@@ -70,16 +70,13 @@ class Switch(object):
         """
         Checks to see if this switch is enabled for the provided input.
 
-        If necessary, the switch first concents with its parent and return false
-        if the swich is conceting and the parent is not enabled for hte
-        ``inpt``.  If the parent is enabled (or the switch is not concenting)
-        then the switch state is checked to see if it is ``GLOBAL`` or
-        ``DISABLED``.  If it is not, then the switch is ``SELECTIVE`` and each
-        condition is checked.
-
         If ``compounded``, all switch conditions must be ``True`` for the swtich
         to be enabled.  Otherwise, *any* condition needs to be ``True`` for the
         switch to be enabled.
+
+        The switch state is then checked to see if it is ``GLOBAL`` or
+        ``DISABLED``.  If it is not, then the switch is ``SELECTIVE`` and each
+        condition is checked.
 
         Keyword Arguments:
         inpt -- An instance of the ``Input`` class.
@@ -87,9 +84,7 @@ class Switch(object):
         signals.switch_checked.call(self)
         signal_decorated = partial(self.__signal_and_return, inpt)
 
-        if self.concent and self.parent and not self.parent.enabled_for(inpt):
-            return signal_decorated(False)
-        elif self.state is self.states.GLOBAL:
+        if self.state is self.states.GLOBAL:
             return signal_decorated(True)
         elif self.state is self.states.DISABLED:
             return signal_decorated(False)
@@ -388,6 +383,13 @@ class Manager(threading.local):
         # be at least one input checked.
         if not inputs:
             inputs = (self.NONE_INPUT,)
+
+        # If necessary, the switch first concents with its parent and returns
+        # false if the switch is conceting and the parent is not enabled for
+        # ``inputs``.
+        if (switch.concent and switch.parent and
+            not self.active(switch.parent.name, *inputs, **kwargs)):
+            return False
 
         return any(map(switch.enabled_for, inputs))
 
