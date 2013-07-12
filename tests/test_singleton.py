@@ -1,4 +1,4 @@
-from tests import GutterTestCase
+import unittest2
 from nose.tools import *
 import mock
 
@@ -6,9 +6,10 @@ from gutter.client.settings import manager
 import gutter.client.models
 
 from exam.decorators import after, around
+from exam.cases import Exam
 
 
-class TestGutter(GutterTestCase):
+class TestGutter(Exam, unittest2.TestCase):
 
     other_engine = dict()
     manager_defaults = dict(

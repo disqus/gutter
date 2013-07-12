@@ -1,4 +1,4 @@
-from tests import GutterTestCase
+import unittest2
 from nose.tools import *
 from gutter.client.wsgi import EnabledSwitchesMiddleware, signals
 from gutter.client.singleton import gutter as singleton_gutter
@@ -9,9 +9,10 @@ import time
 from werkzeug.test import Client
 
 from exam.decorators import fixture, after
+from exam.cases import Exam
 
 
-class BaseTest(GutterTestCase):
+class BaseTest(Exam, unittest2.TestCase):
 
     SWITCH_HEADER_NAME = 'X-Gutter-Switch'
 

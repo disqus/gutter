@@ -1,5 +1,4 @@
-from tests import GutterTestCase
-
+import unittest2
 from nose.tools import *
 
 import zlib
@@ -16,6 +15,7 @@ from gutter.client.arguments.variables import Value, Boolean, String
 from gutter.client import signals
 
 from exam.decorators import fixture, before, after
+from exam.cases import Exam
 
 
 class deterministicstring(str):
@@ -48,7 +48,7 @@ class UserArguments(arguments.Container):
     married = arguments.Boolean(lambda self: self.input.married)
 
 
-class TestIntegration(GutterTestCase):
+class TestIntegration(Exam, unittest2.TestCase):
 
     class Callback(object):
 
@@ -224,6 +224,7 @@ class TestIntegration(GutterTestCase):
 
             assert self.manager['can drink'].children
             ok_(context.active('can drink:wine') is False)
+
 
     def test_switches_can_be_deregistered_and_then_autocreated(self):
         with self.inputs(self.manager, self.jeff) as context:

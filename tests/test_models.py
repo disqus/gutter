@@ -1,4 +1,4 @@
-from tests import GutterTestCase
+import unittest2
 import threading
 import itertools
 
@@ -28,7 +28,7 @@ class MOLArgument(BaseArgument):
     foo = arguments.Value(lambda self: 42)
 
 
-class TestSwitch(GutterTestCase):
+class TestSwitch(unittest2.TestCase):
 
     possible_properties = [
         ('name', ('foo', 'bar')),
@@ -165,7 +165,7 @@ class TestSwitch(GutterTestCase):
         eq_(a, b)
 
 
-class TestSwitchChanges(GutterTestCase):
+class TestSwitchChanges(unittest2.TestCase):
 
     @fixture
     def switch(self):
@@ -201,7 +201,7 @@ class TestSwitchChanges(GutterTestCase):
         ))
 
 
-class TestCondition(GutterTestCase):
+class TestCondition(unittest2.TestCase):
 
     def argument_dict(name):
         return dict(
@@ -305,7 +305,7 @@ class SwitchWithConditions(object):
         return mck
 
 
-class ConcentTest(SwitchWithConditions, GutterTestCase):
+class ConcentTest(Exam, SwitchWithConditions, unittest2.TestCase):
 
     @fixture
     def parent(self):
@@ -341,7 +341,7 @@ class ConcentTest(SwitchWithConditions, GutterTestCase):
         eq_(self.switch.enabled_for('input'), False)
 
 
-class DefaultConditionsTest(SwitchWithConditions, GutterTestCase):
+class DefaultConditionsTest(SwitchWithConditions, unittest2.TestCase):
 
     def test_enabled_for_is_true_if_any_conditions_are_true(self):
         ok_(self.switch.enabled_for('input') is False)
@@ -360,7 +360,7 @@ class DefaultConditionsTest(SwitchWithConditions, GutterTestCase):
         eq_(self.switch.enabled_for('input'), False)
 
 
-class CompoundedConditionsTest(SwitchWithConditions, GutterTestCase):
+class CompoundedConditionsTest(Exam, SwitchWithConditions, unittest2.TestCase):
 
     @before
     def make_switch_compounded(self):
@@ -374,7 +374,7 @@ class CompoundedConditionsTest(SwitchWithConditions, GutterTestCase):
         ok_(self.switch.enabled_for('input') is True)
 
 
-class ManagerTest(GutterTestCase):
+class ManagerTest(unittest2.TestCase):
 
     storage_with_existing_switches = {
         'default.existing': 'switch',
@@ -668,7 +668,7 @@ class ActsLikeManager(object):
         ok_(self.manager.switch('new name'))
 
 
-class EmptyManagerInstanceTest(ActsLikeManager, GutterTestCase):
+class EmptyManagerInstanceTest(ActsLikeManager, unittest2.TestCase):
 
     def test_input_accepts_variable_input_args(self):
         eq_(self.manager.inputs, [])
@@ -703,7 +703,7 @@ class NamespacedEmptyManagerInstanceTest(EmptyManagerInstanceTest):
         return Manager(storage=MemoryDict(), namespace=['a', 'b'])
 
 
-class ManagerWithInputTest(ActsLikeManager, GutterTestCase):
+class ManagerWithInputTest(Exam, ActsLikeManager, unittest2.TestCase):
 
     def build_and_register_switch(self, name, enabled_for=False):
         switch = Switch(name)

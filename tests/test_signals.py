@@ -1,4 +1,4 @@
-from tests import GutterTestCase
+import unittest2
 from nose.tools import *
 from gutter.client import signals
 import mock
@@ -32,42 +32,42 @@ class ActsLikeSignal(object):
         self.callback.assert_called_once_with(1, 2.0, kw='args')
 
 
-class TestSwitchRegisteredCallback(ActsLikeSignal, GutterTestCase):
+class TestSwitchRegisteredCallback(ActsLikeSignal, unittest2.TestCase):
 
     @fixture
     def signal(self):
         return signals.switch_registered
 
 
-class TestSwitchUnregisteredCallback(ActsLikeSignal, GutterTestCase):
+class TestSwitchUnregisteredCallback(ActsLikeSignal, unittest2.TestCase):
 
     @fixture
     def signal(self):
         return signals.switch_unregistered
 
 
-class TestSwitchUpdatedCallback(ActsLikeSignal, GutterTestCase):
+class TestSwitchUpdatedCallback(ActsLikeSignal, unittest2.TestCase):
 
     @fixture
     def signal(self):
         return signals.switch_updated
 
 
-class TestConditionApplyErrorCallback(ActsLikeSignal, GutterTestCase):
+class TestConditionApplyErrorCallback(ActsLikeSignal, unittest2.TestCase):
 
     @fixture
     def signal(self):
         return signals.switch_updated
 
 
-class TestSwitchChecked(ActsLikeSignal, GutterTestCase):
+class TestSwitchChecked(ActsLikeSignal, unittest2.TestCase):
 
     @fixture
     def signal(self):
         return signals.switch_checked
 
 
-class TestSwitchActive(ActsLikeSignal, GutterTestCase):
+class TestSwitchActive(ActsLikeSignal, unittest2.TestCase):
 
     @fixture
     def signal(self):

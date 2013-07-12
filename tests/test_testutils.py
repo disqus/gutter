@@ -1,4 +1,4 @@
-from tests import GutterTestCase
+import unittest2
 from nose.tools import *
 
 from gutter.client.singleton import gutter
@@ -6,9 +6,10 @@ from gutter.client.testutils import switches
 from gutter.client.models import Switch
 
 from exam.decorators import around
+from exam.cases import Exam
 
 
-class TestDecorator(GutterTestCase):
+class TestDecorator(Exam, unittest2.TestCase):
 
     @around
     def add_and_remove_switch(self):

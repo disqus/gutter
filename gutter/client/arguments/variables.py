@@ -36,13 +36,6 @@ class Integer(Base):
         return int(value)
 
 
-class Float(Base):
-
-    @staticmethod
-    def to_python(value):
-        return float(value)
-
-
 class Boolean(Base):
 
     def __init__(self, value, hash_value=None):
