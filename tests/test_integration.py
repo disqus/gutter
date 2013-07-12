@@ -11,7 +11,6 @@ from gutter.client.operators.identity import *
 from gutter.client.operators.misc import *
 from gutter.client.models import Switch, Condition, Manager
 from gutter.client import arguments
-from gutter.client.arguments.variables import Value, Boolean, String
 from gutter.client import signals
 
 from exam.decorators import fixture, before, after
@@ -46,6 +45,12 @@ class UserArguments(arguments.Container):
     age = arguments.Value(lambda self: self.input.age)
     location = arguments.String(lambda self: self.input.location)
     married = arguments.Boolean(lambda self: self.input.married)
+
+
+class IntegerArguments(arguments.Container):
+    COMPATIBLE_TYPE = int
+
+    value = arguments.Integer(lambda self: self.input)
 
 
 class TestIntegration(Exam, unittest2.TestCase):
@@ -118,10 +123,12 @@ class TestIntegration(Exam, unittest2.TestCase):
 
         self.ten_percent = Condition(UserArguments, 'name', Percent(percentage=10))
         self.upper_50_percent = Condition(UserArguments, 'name', PercentRange(lower_limit=50, upper_limit=100))
+        self.answer_to_life = Condition(IntegerArguments, 'value', Equals(value=42))
 
     def setup_switches(self):
         self.add_switch('can drink', condition=self.age_21_plus)
         self.add_switch('can drink in europe', condition=self.age_21_plus, state=Switch.states.GLOBAL)
+        self.add_switch('can drink:answer to life', condition=self.answer_to_life)
         self.add_switch('can drink:wine', condition=self.in_sf, concent=True)
         self.add_switch('retired', condition=self.age_65_and_up)
         self.add_switch('can vote', condition=self.age_not_under_18)
@@ -353,6 +360,19 @@ class TestIntegration(Exam, unittest2.TestCase):
             Switch.states.GLOBAL
         )
         self.assertRaises(ValueError, self.manager.switch, 'steve')
+
+    def test_concent_with_different_arguments(self):
+        # Test that a parent switch with a different argument type from the
+        # child works.
+        with self.inputs(self.manager, self.jeff, 42) as context:
+            ok_(context.active('can drink:answer to life') is True)
+        with self.inputs(self.manager, self.timmy, 42) as context:
+            ok_(context.active('can drink:answer to life') is False)
+
+        with self.inputs(self.manager, self.jeff, 77) as context:
+            ok_(context.active('can drink:answer to life') is False)
+        with self.inputs(self.manager, self.timmy, 77) as context:
+            ok_(context.active('can drink:answer to life') is False)
 
 
 class TestIntegrationWithRedis(TestIntegration):

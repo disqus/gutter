@@ -293,9 +293,14 @@ class SwitchWithConditions(object):
 
     @fixture
     def switch(self):
-        switch = Switch('with conditions', state=Switch.states.SELECTIVE)
+        switch = Switch('parent:with conditions', state=Switch.states.SELECTIVE)
         switch.conditions.append(self.pessamistic_condition)
         switch.conditions.append(self.pessamistic_condition)
+        return switch
+
+    @fixture
+    def parent_switch(self):
+        switch = Switch('parent', state=Switch.states.DISABLED)
         return switch
 
     @property
@@ -308,29 +313,36 @@ class SwitchWithConditions(object):
 class ConcentTest(Exam, SwitchWithConditions, unittest2.TestCase):
 
     @fixture
+    def manager(self):
+        return Manager(storage=MemoryDict())
+
+    @fixture
     def parent(self):
         p = mock.Mock()
         p.enabled_for.return_value = False
         return p
 
     @before
-    def assign_parent(self):
-        self.switch.parent = self.parent
-
-    @before
     def make_all_conditions_true(self):
         self.make_all_conditions(True)
+
+    @before
+    def register_switches(self):
+        self.manager.register(self.parent_switch)
+        self.manager.register(self.switch)
 
     def make_all_conditions(self, val):
         for cond in self.switch.conditions:
             cond.call.return_value = val
 
     def test_with_concent_only_enabled_if_parent_is_too(self):
-        eq_(self.switch.parent.enabled_for('input'), False)
-        eq_(self.switch.enabled_for('input'), False)
+        self.manager.register(self.switch)
 
-        self.switch.parent.enabled_for.return_value = True
-        eq_(self.switch.enabled_for('input'), True)
+        eq_(self.switch.parent.enabled_for('input'), False)
+        eq_(self.manager.active('parent:with conditions', 'input'), False)
+
+        self.switch.parent.state = Switch.states.GLOBAL
+        eq_(self.manager.active('parent:with conditions', 'input'), True)
 
     def test_without_concent_ignores_parents_enabled_status(self):
         self.switch.concent = False
