@@ -4,9 +4,9 @@
 Gutter
 ------
 
-**NOTE:** This repo is the client for Gargoyle 2, known as "Gutter".  It does not work with the exsiting `Gargoyle 1 codebase <https://github.com/disqus/gargoyle/>`_.
+**NOTE:** This repo is the client for Gargoyle 2, known as "Gutter".  It does not work with the existing `Gargoyle 1 codebase <https://github.com/disqus/gargoyle/>`_.
 
-Gutter is feature swtich management library.  It allows users to create feature swtiches and setup conditions those switches will be enabled for.  Once configured, switches can then be checked against inputs (requests, user objects, etc) to see if the switches are active.
+Gutter is feature switch management library.  It allows users to create feature switches and setup conditions those switches will be enabled for.  Once configured, switches can then be checked against inputs (requests, user objects, etc) to see if the switches are active.
 
 Table of Contents
 =================
@@ -59,7 +59,7 @@ In this case, we are changing the engine to durabledict's ``RedisDict`` and turn
 Setup
 =====
 
-Once the ``Manager``'s storage engine has been condfigured, you can import gutter's default ``Manager`` object, which is your main interface with ``gutter``:
+Once the ``Manager``'s storage engine has been configured, you can import gutter's default ``Manager`` object, which is your main interface with ``gutter``:
 
 .. code:: python
 
