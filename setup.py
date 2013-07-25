@@ -11,7 +11,7 @@ except ImportError:
 
 
 tests_require = [
-    'nose', 'exam==0.3.1', 'mock', 'nose-performance', 'django', 'redis', 'unittest2'
+    'nose', 'exam', 'mock', 'nose-performance', 'django', 'redis', 'unittest2'
 ]
 
 setup_requires = []
@@ -25,7 +25,7 @@ if 'nosetests' in sys.argv[1:]:
 
 setup(
     name='gutter',
-    version='0.2.0',
+    version='0.3.0',
     author='DISQUS',
     author_email='opensource@disqus.com',
     url='http://github.com/disqus/gutter',

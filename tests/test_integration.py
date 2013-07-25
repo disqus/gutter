@@ -13,7 +13,7 @@ from gutter.client.models import Switch, Condition, Manager
 from gutter.client import arguments
 from gutter.client import signals
 
-from exam.decorators import fixture, before, after
+from exam.decorators import fixture, before, after, around
 from exam.cases import Exam
 
 
@@ -232,13 +232,14 @@ class TestIntegration(Exam, unittest2.TestCase):
             assert self.manager['can drink'].children
             ok_(context.active('can drink:wine') is False)
 
-
     def test_switches_can_be_deregistered_and_then_autocreated(self):
         with self.inputs(self.manager, self.jeff) as context:
             ok_(context.active('can drink') is True)
 
             context.manager.unregister('can drink')
-            assert_raises(ValueError, context.manager.active, 'can drink')
+
+            with assert_raises(ValueError):
+                context.manager.active('can drink')
 
             context.manager.autocreate = True
             ok_(context.active('can drink') is False)
@@ -263,23 +264,13 @@ class TestIntegration(Exam, unittest2.TestCase):
         self.manager.register(switch)
         eq_(self.callback.register_calls, [switch, switch])
 
-        switch.name = 'a new name'
         switch.state = Switch.states.GLOBAL
         self.manager.update(switch)
 
         change = self.callback.update_calls[0]
         eq_(change[0], switch)
         changes = change[1]
-        eq_(changes['name'], dict(current='a new name', previous='foo'))
         eq_(changes['state'], dict(current=Switch.states.GLOBAL, previous=Switch.states.DISABLED))
-
-        switch.name = 'from save() call'
-        switch.save()
-
-        change = self.callback.update_calls[1]
-        eq_(change[0], switch)
-        changes = change[1]
-        eq_(changes['name'], dict(current='from save() call', previous='a new name'))
 
     def test_namespaes_keep_switches_isloated(self):
         germany = self.manager.namespaced('germany')
@@ -344,22 +335,15 @@ class TestIntegration(Exam, unittest2.TestCase):
         switch = Switch('foo')
         self.manager.register(switch)
 
-        switch.name = 'steve'
-        switch.save()
+        self.assertEquals(self.manager.switch('foo').name, 'foo')
 
-        self.assertRaises(ValueError, self.manager.switch, 'foo')
-        self.assertEquals(self.manager.switch('steve').name, 'steve')
-
-        switch.name = 'bob'
         switch.state = Switch.states.GLOBAL
         switch.save()
 
-        self.assertEquals(self.manager.switch('bob').name, 'bob')
         self.assertEquals(
-            self.manager.switch('bob').state,
+            self.manager.switch('foo').state,
             Switch.states.GLOBAL
         )
-        self.assertRaises(ValueError, self.manager.switch, 'steve')
 
     def test_concent_with_different_arguments(self):
         # Test that a parent switch with a different argument type from the
@@ -379,9 +363,9 @@ class TestIntegrationWithRedis(TestIntegration):
 
     @fixture
     def redis(self):
-        return Redis()
+        return Redis(db=15)
 
-    @before
+    @after
     def flush_redis(self):
         self.redis.flushdb()
 

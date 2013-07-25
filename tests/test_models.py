@@ -7,11 +7,20 @@ from gutter.client.arguments import Container as BaseArgument
 from gutter.client import arguments
 from gutter.client.models import Switch, Manager, Condition
 from durabledict import MemoryDict
+from durabledict.base import DurableDict
 from gutter.client import signals
 import mock
 
 from exam.decorators import fixture, before
 from exam.cases import Exam
+
+
+
+class EncodingDict(DurableDict):
+    __last_updated = 0
+
+    def last_updated(self):
+        return self.__last_updated
 
 
 def unbound_method():
@@ -31,11 +40,37 @@ class MOLArgument(BaseArgument):
 class TestSwitch(unittest2.TestCase):
 
     possible_properties = [
-        ('name', ('foo', 'bar')),
         ('state', (Switch.states.DISABLED, Switch.states.SELECTIVE)),
         ('compounded', (True, False)),
         ('concent', (True, False))
     ]
+
+    def test_legacy_unpickle(self):
+        d = EncodingDict()
+
+        parent = Switch('a')
+        switch = Switch('a:b')
+
+        children = [
+            Switch('a:b:c'),
+            Switch('a:b:d'),
+        ]
+
+        [setattr(child, 'parent', switch) for child in children]
+
+        switch.children = children
+        switch.parent = parent
+
+        decoded_switch = d._decode(d._encode(switch))
+        self.assertEquals(decoded_switch.name, switch.name)
+        self.assertEquals(decoded_switch.parent, switch.parent.name)
+        self.assertListEqual([child.name for child in children], decoded_switch.children)
+
+
+    def test_switch_name_is_immutable(self):
+        switch = Switch('foo')
+        with self.assertRaises(AttributeError):
+            switch.name = 'bar'
 
     def test_switch_has_state_constants(self):
         self.assertTrue(Switch.states.DISABLED)
@@ -142,8 +177,8 @@ class TestSwitch(unittest2.TestCase):
         eq_(signal.call.called, False)
 
     def test_switches_are_equal_if_they_have_the_same_properties(self):
-        a = Switch('a')
-        b = Switch('b')
+        a = Switch('a') # must init with the same name as name is immutable
+        b = Switch('a')
 
         for prop, (a_value, b_value) in self.possible_properties:
             setattr(a, prop, a_value)
@@ -151,7 +186,7 @@ class TestSwitch(unittest2.TestCase):
             self.assertNotEqual(a, b, "expected %s to not be equals" % prop)
 
             setattr(b, prop, a_value)
-            eq_(a, b, "expected %s to be equals" % prop)
+            eq_(a, b, "expected %s to be equal" % prop)
 
     def test_switches_are_still_equal_with_different_managers(self):
         a = Switch('a')
@@ -179,11 +214,11 @@ class TestSwitchChanges(unittest2.TestCase):
 
     def test_switch_is_changed_if_property_changes(self):
         ok_(self.switch.changed is False)
-        self.switch.name = 'another name'
+        self.switch.state = 'another name'
         ok_(self.switch.changed is True)
 
     def test_switch_reset_causes_switch_to_reset_change_tracking(self):
-        self.switch.name = 'another name'
+        self.switch.state = 'another name'
         ok_(self.switch.changed is True)
         self.switch.reset()
         ok_(self.switch.changed is False)
@@ -191,14 +226,19 @@ class TestSwitchChanges(unittest2.TestCase):
     def test_switch_changes_returns_changes(self):
         eq_(self.switch.changes, {})
 
-        self.switch.name = 'new name'
-        eq_(self.switch.changes, dict(name=self.changes_dict('foo', 'new name')))
+        self.switch.state = 'new name'
+        eq_(
+            self.switch.changes,
+            dict(state=self.changes_dict(1, 'new name'))
+        )
 
         self.switch.concent = False
-        eq_(self.switch.changes, dict(
-            name=self.changes_dict('foo', 'new name'),
-            concent=self.changes_dict(True, False)
-        ))
+        eq_(self.switch.changes,
+            dict(
+                state=self.changes_dict(1, 'new name'),
+                concent=self.changes_dict(True, False)
+            )
+        )
 
 
 class TestCondition(unittest2.TestCase):
@@ -338,15 +378,18 @@ class ConcentTest(Exam, SwitchWithConditions, unittest2.TestCase):
     def test_with_concent_only_enabled_if_parent_is_too(self):
         self.manager.register(self.switch)
 
-        eq_(self.switch.parent.enabled_for('input'), False)
+        parent = self.manager.switch(self.switch.parent)
+        eq_(parent.enabled_for('input'), False)
         eq_(self.manager.active('parent:with conditions', 'input'), False)
 
-        self.switch.parent.state = Switch.states.GLOBAL
+        parent.state = Switch.states.GLOBAL
         eq_(self.manager.active('parent:with conditions', 'input'), True)
 
     def test_without_concent_ignores_parents_enabled_status(self):
         self.switch.concent = False
-        eq_(self.switch.parent.enabled_for('input'), False)
+
+        parent = self.manager.switch(self.switch.parent)
+        eq_(parent.enabled_for('input'), False)
         eq_(self.switch.enabled_for('input'), True)
 
         self.make_all_conditions(False)
@@ -439,14 +482,6 @@ class ManagerTest(unittest2.TestCase):
         ok_(self.switch.manager is not self.manager)
         self.manager.register(self.switch)
         ok_(self.switch.manager is self.manager)
-
-    def test_register_adds_switch_to_storage_before_setting_manager(self):
-        def assert_no_manger(key, switch):
-            ok_(switch.manager is None)
-
-        self.switch.manager = True
-        self.mockstorage.__setitem__.side_effect = assert_no_manger
-        self.manager.register(self.switch)
 
     def test_uses_switches_from_storage_on_itialization(self):
         self.manager.storage = self.storage_with_existing_switches
@@ -596,33 +631,17 @@ class ActsLikeManager(object):
     def test_register_sets_parent_on_switch_if_there_is_one(self):
         parent = self.mock_and_register_switch('movies')
         child = self.mock_and_register_switch('movies:jaws')
-        eq_(child.parent, parent)
+        eq_(child.parent, parent.name)
 
     def test_register_adds_self_to_parents_children(self):
         parent = self.mock_and_register_switch('movies')
         child = self.mock_and_register_switch('movies:jaws')
 
-        eq_(parent.children, [child])
+        eq_(parent.children, [child.name])
 
         sibling = self.mock_and_register_switch('movies:jaws')
 
-        eq_(parent.children, [child, sibling])
-
-    def test_register_removes_switch_from_children_of_old_parent(self):
-        parent = self.mock_and_register_switch('movies')
-        child = self.mock_and_register_switch('movies:jaws')
-        foster_parent = self.mock_and_register_switch('books')
-
-        ok_(child in parent.children)
-        ok_(child not in foster_parent.children)
-        ok_(child.parent is parent)
-
-        child.name = 'books:jaws'
-        self.manager.register(child)
-
-        ok_(child not in parent.children)
-        ok_(child in foster_parent.children)
-        ok_(child.parent is foster_parent)
+        eq_(parent.children, [child.name, sibling.name])
 
     def test_register_raises_value_error_for_blank_name(self):
         with self.assertRaises(ValueError):
@@ -667,17 +686,6 @@ class ActsLikeManager(object):
         switch = self.mock_and_register_switch('foo')
         self.manager.unregister(switch.name)
         signal.call.assert_called_once_with(switch)
-
-    def test_update_does_not_linger_old_switch(self):
-        switch = self.mock_and_register_switch('foo')
-        switch.name = 'new name'
-        switch.changes = dict(name=dict(previous='foo'))
-
-        ok_(self.manager.switch('foo'))
-        assert_raises(ValueError, self.manager.switch, 'new name')
-        self.manager.update(switch)
-        assert_raises(ValueError, self.manager.switch, 'foo')
-        ok_(self.manager.switch('new name'))
 
 
 class EmptyManagerInstanceTest(ActsLikeManager, unittest2.TestCase):

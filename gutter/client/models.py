@@ -33,7 +33,7 @@ class Switch(object):
     def __init__(self, name, state=states.DISABLED, compounded=False,
                  parent=None, concent=True, manager=None, label=None,
                  description=None):
-        self.name = str(name)
+        self._name = str(name)
         self.label = label
         self.description = description
         self.state = state
@@ -44,6 +44,10 @@ class Switch(object):
         self.children = []
         self.manager = manager
         self.reset()
+
+    @property
+    def name(self):
+        return self._name
 
     def __repr__(self):
         kwargs = dict(
@@ -65,6 +69,29 @@ class Switch(object):
                 self.compounded is other.compounded and
                 self.concent is other.concent
             )
+
+    def __getstate__(self):
+        inner_dict = vars(self).copy()
+        inner_dict.pop('manager', False)
+        return inner_dict
+
+    def __setstate__(self, state):
+        ### legacy conversion for 0.2 -> 0.3 ###
+        parent_or_parentname = state.pop('parent', '')
+        parent = getattr(parent_or_parentname, 'name', parent_or_parentname)
+        state['parent'] = parent
+
+        children = state.pop('children', [])
+        children = [getattr(child, 'name', child) for child in children]
+        state['children'] = children
+
+        if 'name' in state:
+            state['_name'] = state.pop('name')
+        ### /legacy conversion for 0.2 -> 0.3 ###
+
+        self.__dict__ = state
+        if not hasattr(self, 'manager'):
+            setattr(self, 'manager', None)
 
     def enabled_for(self, inpt):
         """
@@ -346,24 +373,23 @@ class Manager(threading.local):
         return switch
 
     def register(self, switch, signal=signals.switch_registered):
+        '''
+        Register a switch and persist it to the storage.
+        '''
         if not switch.name:
             raise ValueError('Switch name cannot be blank')
 
-        switch.manager = None  # Prevents having to serialize the manager
-        self.__sync_parental_relationships(switch)
         self.__persist(switch)
+        self.__sync_parental_relationships(switch)
+
         switch.manager = self
         signal.call(switch)
-
-    def __persist(self, switch):
-        self.storage[self.__namespaced(switch.name)] = switch
-        return switch
 
     def unregister(self, switch_or_name):
         name = getattr(switch_or_name, 'name', switch_or_name)
         switch = self.switch(name)
 
-        map(self.unregister, switch.children)
+        [self.unregister(child) for child in switch.children]
 
         del self.storage[self.__namespaced(name)]
         signals.switch_unregistered.call(switch)
@@ -388,19 +414,14 @@ class Manager(threading.local):
         # If necessary, the switch first concents with its parent and returns
         # false if the switch is conceting and the parent is not enabled for
         # ``inputs``.
-        if (switch.concent and switch.parent and
-            not self.active(switch.parent.name, *inputs, **kwargs)):
+        if switch.concent and switch.parent and not self.active(switch.parent, *inputs, **kwargs):
             return False
 
         return any(map(switch.enabled_for, inputs))
 
     def update(self, switch):
+
         self.register(switch, signal=signals.switch_updated)
-
-        if switch.changes.get('name'):
-            old_name = switch.changes['name'].get('previous')
-            del self.storage[self.__namespaced(old_name)]
-
         switch.reset()
 
         # If this switch has any children, it's likely their instance of this
@@ -411,6 +432,8 @@ class Manager(threading.local):
         # ``register`` is not used here since we do not need/want to sync
         # parental relationships.
         for child in getattr(switch, 'children', []):
+            child = self.storage[self.__namespaced(child)]
+            child.parent = switch.name
             self.__persist(child)
 
     def namespaced(self, namespace):
@@ -431,6 +454,10 @@ class Manager(threading.local):
             namespace=new_namespace,
         )
 
+    def __persist(self, switch):
+        self.storage[self.__namespaced(switch.name)] = switch
+        return switch
+
     def __create_and_register_disabled_switch(self, name):
         switch = self.switch_class(name)
         switch.state = self.switch_class.states.DISABLED
@@ -438,23 +465,17 @@ class Manager(threading.local):
         return switch
 
     def __sync_parental_relationships(self, switch):
+        new_parent = None
+
         try:
-            parent_key = self.__parent_key_for(switch)
-            new_parent = self.switch(parent_key)
-        except ValueError:
-            new_parent = None
-
-        old_parent = switch.parent
-
-        switch.parent = new_parent
-
-        if old_parent and old_parent is not new_parent:
-            old_parent.children.remove(switch)
-            old_parent.save()
-
-        if new_parent:
-            new_parent.children.append(switch)
+            new_parent = self.switch(self.__parent_key_for(switch))
+            switch.parent = new_parent.name
+            new_parent.children.append(switch.name)
             new_parent.save()
+        except ValueError:
+            # no parent found or created, so we just pass
+            pass
+
 
     def __parent_key_for(self, switch):
         # TODO: Make this a method on the switch object
