@@ -32,6 +32,9 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li><a href="#">gutter 0.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -47,6 +50,181 @@
 <div class="toctree-wrapper compound">
 <ul class="simple">
 </ul>
+</div>
+<span class="target" id="module-gutter.client.models"></span><div class="section" id="gutter-models">
+<h2>gutter.models<a class="headerlink" href="#gutter-models" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">copyright:</th><td class="field-body"><ol class="first loweralpha simple" start="3">
+<li>2010-2012 DISQUS.</li>
+</ol>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">license:</th><td class="field-body"><p class="first last">Apache License 2.0, see LICENSE for more details.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="gutter.client.models.Condition">
+<em class="property">class </em><tt class="descclassname">gutter.client.models.</tt><tt class="descname">Condition</tt><big>(</big><em>argument</em>, <em>attribute</em>, <em>operator</em>, <em>negative=False</em><big>)</big><a class="reference internal" href="_modules/gutter/client/models.html#Condition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gutter.client.models.Condition" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Condition is the configuration of an argument, its attribute and an
+operator. It tells you if it itself is true or false given an input.</p>
+<p>The <tt class="docutils literal"><span class="pre">argument</span></tt> defines what this condition is checking.  Perhaps it&#8217;s a
+<tt class="docutils literal"><span class="pre">User</span></tt> or <tt class="docutils literal"><span class="pre">Request</span></tt> object. The <tt class="docutils literal"><span class="pre">attribute</span></tt> name is then extracted out
+of an instance of the argument to produce a variable. That variable is then
+compared to the operator to determine if the condition applies to the input
+or not.</p>
+<p>For example, for the request IP address, you would define a <tt class="docutils literal"><span class="pre">Request</span></tt>
+argument, that had an <tt class="docutils literal"><span class="pre">ip</span></tt> property.  A condition would then be constrcted
+like so:</p>
+<p>from myapp.gutter import RequestArgument
+from gutter.client.models import Condition</p>
+<blockquote>
+<div>&gt;&gt; condition = Condition(argument=RequestArgument, attribute=&#8217;ip&#8217;, operator=some_operator)</div></blockquote>
+<p>When the Condition is called, it is passed the input. The argument is then
+called (constructed) with input object to produce an instance.  The
+attribute is then extracted from that instance to produce the variable.
+The extacted variable is then checked against the operator.</p>
+<p>To put it another way, say you wanted a condition to only allow your switch
+to people between 15 and 30 years old.  To make the condition:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>You would create a <tt class="docutils literal"><span class="pre">UserArgument</span></tt> class that takes a user object in
+its constructor.  The class also has an <tt class="docutils literal"><span class="pre">age</span></tt> method which returns
+the user object&#8217;s age.</li>
+<li>You would then create a new Condition via:
+<tt class="docutils literal"><span class="pre">Condition(argument=UserInput,</span> <span class="pre">attriibute='age',</span> <span class="pre">operator=Between(15,</span> <span class="pre">30))</span></tt>.</li>
+<li>You then call that condition with a <tt class="docutils literal"><span class="pre">User</span></tt>, and it would return
+<tt class="docutils literal"><span class="pre">True</span></tt> if the age of the user the <tt class="docutils literal"><span class="pre">UserArgument</span></tt> instance wraps
+is between 15 and 30.</li>
+</ol>
+</div></blockquote>
+<dl class="method">
+<dt id="gutter.client.models.Condition.call">
+<tt class="descname">call</tt><big>(</big><em>inpt</em><big>)</big><a class="reference internal" href="_modules/gutter/client/models.html#Condition.call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gutter.client.models.Condition.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns if the condition applies to the <tt class="docutils literal"><span class="pre">inpt</span></tt>.</p>
+<p>If the class <tt class="docutils literal"><span class="pre">inpt</span></tt> is an instance of is not the same class as the
+condition&#8217;s own <tt class="docutils literal"><span class="pre">argument</span></tt>, then <tt class="docutils literal"><span class="pre">False</span></tt> is returned.  This also
+applies to the <tt class="docutils literal"><span class="pre">NONE</span></tt> input.</p>
+<p>Otherwise, <tt class="docutils literal"><span class="pre">argument</span></tt> is called, with <tt class="docutils literal"><span class="pre">inpt</span></tt> as the instance and
+the value is compared to the <tt class="docutils literal"><span class="pre">operator</span></tt> and the Value is returned.  If
+the condition is <tt class="docutils literal"><span class="pre">negative</span></tt>, then then <tt class="docutils literal"><span class="pre">not</span></tt> the value is returned.</p>
+<p>Keyword Arguments:
+inpt &#8211; An instance of the <tt class="docutils literal"><span class="pre">Input</span></tt> class.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gutter.client.models.Manager">
+<em class="property">class </em><tt class="descclassname">gutter.client.models.</tt><tt class="descname">Manager</tt><big>(</big><em>storage</em>, <em>autocreate=False</em>, <em>switch_class=&lt;class 'gutter.client.models.Switch'&gt;</em>, <em>inputs=None</em>, <em>namespace=None</em><big>)</big><a class="reference internal" href="_modules/gutter/client/models.html#Manager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gutter.client.models.Manager" title="Permalink to this definition">¶</a></dt>
+<dd><p>The Manager holds all state for Gutter.  It knows what Switches have been
+registered, and also what Input objects are currently being applied.  It
+also offers an <tt class="docutils literal"><span class="pre">active</span></tt> method to ask it if a given switch name is
+active, given its conditions and current inputs.</p>
+<dl class="attribute">
+<dt id="gutter.client.models.Manager.NONE_INPUT">
+<tt class="descname">NONE_INPUT</tt><em class="property"> = &lt;object object at 0x10d323800&gt;</em><a class="headerlink" href="#gutter.client.models.Manager.NONE_INPUT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Special singleton used to represent a &#8220;no input&#8221; which arguments can look
+for and ignore</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gutter.client.models.Manager.register">
+<tt class="descname">register</tt><big>(</big><em>switch</em>, <em>signal=&lt;gutter.client.signals.Signal object at 0x10d7340d0&gt;</em><big>)</big><a class="reference internal" href="_modules/gutter/client/models.html#Manager.register"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gutter.client.models.Manager.register" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a switch and persist it to the storage.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gutter.client.models.Manager.switch">
+<tt class="descname">switch</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/gutter/client/models.html#Manager.switch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gutter.client.models.Manager.switch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the switch with the provided <tt class="docutils literal"><span class="pre">name</span></tt>.</p>
+<p>If <tt class="docutils literal"><span class="pre">autocreate</span></tt> is set to <tt class="docutils literal"><span class="pre">True</span></tt> and no switch with that name
+exists, a <tt class="docutils literal"><span class="pre">DISABLED</span></tt> switch will be with that name.</p>
+<p>Keyword Arguments:
+name &#8211; A name of a switch.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="gutter.client.models.Manager.switches">
+<tt class="descname">switches</tt><em class="property"> None</em><a class="reference internal" href="_modules/gutter/client/models.html#Manager.switches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gutter.client.models.Manager.switches" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of all switches currently registered.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gutter.client.models.Switch">
+<em class="property">class </em><tt class="descclassname">gutter.client.models.</tt><tt class="descname">Switch</tt><big>(</big><em>name</em>, <em>state=1</em>, <em>compounded=False</em>, <em>parent=None</em>, <em>concent=True</em>, <em>manager=None</em>, <em>label=None</em>, <em>description=None</em><big>)</big><a class="reference internal" href="_modules/gutter/client/models.html#Switch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gutter.client.models.Switch" title="Permalink to this definition">¶</a></dt>
+<dd><p>A switch encapsulates the concept of an item that is either &#8216;on&#8217; or &#8216;off&#8217;
+depending on the input.  The swich determines this by checking each of its
+conditions and seeing if it applies to a certain input.  All the switch does
+is ask each of its Conditions if it applies to the provided input.  Normally
+any condition can be true for the Switch to be enabled for a particular
+input, but of <tt class="docutils literal"><span class="pre">switch.componded</span></tt> is set to True, then <strong>all</strong> of the
+switches conditions need to be true in order to be enabled.</p>
+<p>See the Condition class for more information on what a Condition is and how
+it checks to see if it&#8217;s satisfied by an input.</p>
+<dl class="attribute">
+<dt id="gutter.client.models.Switch.changed">
+<tt class="descname">changed</tt><em class="property"> None</em><a class="reference internal" href="_modules/gutter/client/models.html#Switch.changed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gutter.client.models.Switch.changed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean of if the switch has changed since last saved.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="gutter.client.models.Switch.changes">
+<tt class="descname">changes</tt><em class="property"> None</em><a class="reference internal" href="_modules/gutter/client/models.html#Switch.changes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gutter.client.models.Switch.changes" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dicitonary of changes to the switch since last saved.</p>
+<p>Switch changes are a dict in the following format:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s">&#39;property_name&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;previous&#39;</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span> <span class="s">&#39;current&#39;</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>For example, if the switch name change from <tt class="docutils literal"><span class="pre">foo</span></tt> to <tt class="docutils literal"><span class="pre">bar</span></tt>, the
+changes dict will be in the following structure:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;previous&#39;</span><span class="p">:</span> <span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="s">&#39;current&#39;</span><span class="p">:</span> <span class="s">&#39;bar&#39;</span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="gutter.client.models.Switch.enabled_for">
+<tt class="descname">enabled_for</tt><big>(</big><em>inpt</em><big>)</big><a class="reference internal" href="_modules/gutter/client/models.html#Switch.enabled_for"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gutter.client.models.Switch.enabled_for" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks to see if this switch is enabled for the provided input.</p>
+<p>If <tt class="docutils literal"><span class="pre">compounded</span></tt>, all switch conditions must be <tt class="docutils literal"><span class="pre">True</span></tt> for the swtich
+to be enabled.  Otherwise, <em>any</em> condition needs to be <tt class="docutils literal"><span class="pre">True</span></tt> for the
+switch to be enabled.</p>
+<p>The switch state is then checked to see if it is <tt class="docutils literal"><span class="pre">GLOBAL</span></tt> or
+<tt class="docutils literal"><span class="pre">DISABLED</span></tt>.  If it is not, then the switch is <tt class="docutils literal"><span class="pre">SELECTIVE</span></tt> and each
+condition is checked.</p>
+<p>Keyword Arguments:
+inpt &#8211; An instance of the <tt class="docutils literal"><span class="pre">Input</span></tt> class.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gutter.client.models.Switch.reset">
+<tt class="descname">reset</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/gutter/client/models.html#Switch.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gutter.client.models.Switch.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resets switch change tracking.</p>
+<p>No switch properties are alterted, only the tracking of what has changed
+is reset.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gutter.client.models.Switch.save">
+<tt class="descname">save</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/gutter/client/models.html#Switch.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gutter.client.models.Switch.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves this switch in its manager (if present).</p>
+<p>Equivilant to <tt class="docutils literal"><span class="pre">self.manager.update(self)</span></tt>.  If no <tt class="docutils literal"><span class="pre">manager</span></tt> is set
+for the switch, this method is a no-op.</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 </div>
 <div class="section" id="indices-and-tables">
@@ -67,6 +245,7 @@
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Welcome to gutter&#8217;s documentation!</a><ul>
+<li><a class="reference internal" href="#gutter-models">gutter.models</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
@@ -100,11 +279,14 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li><a href="#">gutter 0.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2013, Jeff Pollard, Disqus.
+        &copy; Copyright 2013, Jeff Pollard.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b2.
     </div>
   </body>
