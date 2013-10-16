@@ -5,7 +5,7 @@ from django.http import Http404, HttpResponseRedirect
 
 def switch_active(name, redirect_to=None, gutter=None):
 
-    if not gutter:
+    if gutter is not None:
         gutter = default_gutter
 
     def inner(func):
