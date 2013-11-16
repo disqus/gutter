@@ -31,7 +31,7 @@ Gutter requires a small bit of configuration before usage.
 Choosing Storage
 ~~~~~~~~~~~~~~~~
 
-Switches are persisted in a ``storage`` object, which is a `dict` or any object which provides the ``types.MappingType`` interface (``__setitem__`` and ``__getitem__`` methods).  By default, ``gutter`` uses an instance of `MemoryDict` from the `durabledict library <https://github.com/disqus/durabledict>`_.  This engine **does not persist data once the process ends** so a more persistant data store should be used.
+Switches are persisted in a ``storage`` object, which is a `dict` or any object which provides the ``types.MappingType`` interface (``__setitem__`` and ``__getitem__`` methods).  By default, ``gutter`` uses an instance of `MemoryDict` from the `durabledict library <https://github.com/disqus/durabledict>`_.  This engine **does not persist data once the process ends** so a more persistent data store should be used.
 
 Autocreate
 ~~~~~~~~~~
@@ -77,7 +77,7 @@ If you would like to construct and use a different default manager, but still ha
     from gutter.client.settings import manager as manager_settings
     from gutter.client.models import Manager
 
-    manager_settings.default = Manager({})   # Must be done before importing the defualt manager
+    manager_settings.default = Manager({})   # Must be done before importing the default manager
 
     from gutter.client.default import gutter
 
@@ -111,8 +111,8 @@ There are a few things going on here, so let's break down what they all mean.
 1. The ``UserArgument`` class is subclassed from ``Container``.  The subclassing is required since ``Container`` implements some of the required API.
 2. The class has a bunch of class variables that are calls to ``arguments.TYPE``, where ``TYPE`` is the type of variable this argument is. At present there are 3 types: ``Value`` for general values, ``Boolean`` for boolean values and ``String`` for string values.
 3. ``arguments.TYPE()`` is called with a callable that returns the value.  In the above example, we'll want to make some switches active based on a user's ``name``, ``is_admin`` status and ``age``.
-4. Those ``argument``s return the actual value, which is derefenced from ``self.input``, which is the input object (in this case a ``User`` instance).  Argum
-5. ``Variable`` objects understand ``Switch`` conditions and operators, and implement the correct API to allow themselves to be appropriatly compared.
+4. Those ``argument``s return the actual value, which is derefenced from ``self.input``, which is the input object (in this case a ``User`` instance).
+5. ``Variable`` objects understand ``Switch`` conditions and operators, and implement the correct API to allow themselves to be appropriately compared.
 6. ``COMPATIBLE_TYPE`` declares that this argument only works with ``User`` instances.  This works with the default implementation of ``applies`` in the base argument that checks if the ``type`` of the input is the same as ``COMPATIBLE_TYPE``.
 
 Since constructing arguments that simply reference an attribute on ``self.input`` is so common, if you pass a string as the first argument of ``argument()``, when the argument is accessed, it will simply return that property from ``self.input``.  You must also pass a ``Variable`` to the ``variable=`` kwarg so gutter know what Variable to wrap your value in.
@@ -139,9 +139,9 @@ You might be asking, why have these ``Argument`` objects at all?  They seem to j
 
 The short answer is that ``Argument`` objects provide a translation layer to translate your business objects into objects that ``gutter`` understands.  This is important for a couple reasons.
 
-First, it means you don't clutter your business logic/objects with code to support ``gutter``.  You declare all the arguments you wish to provide to switches in one location (an Argument) whose single responsibilty it to interface with ``gutter``.  You can also contruct more savvy Argument objects that may be the combination of multiple business objects, consult 3rd party services, etc.  All still not cluttering your main application code or business objects.
+First, it means you don't clutter your business logic/objects with code to support ``gutter``.  You declare all the arguments you wish to provide to switches in one location (an Argument) whose single responsibility it to interface with ``gutter``.  You can also construct more savvy Argument objects that may be the combination of multiple business objects, consult 3rd party services, etc.  All still not cluttering your main application code or business objects.
 
-Secondly, and most importantly, Arguments return ``Variable`` objects, whih ensure ``gutter`` conditions work correctly.  This is mostly relevant to the percentage-based operators, and is best illustrated with an example.
+Secondly, and most importantly, Arguments return ``Variable`` objects, which ensure ``gutter`` conditions work correctly.  This is mostly relevant to the percentage-based operators, and is best illustrated with an example.
 
 Imagine you have a ``User`` class with an ``is_vip`` boolean field.  Let's say you wanted to turn on a feature for only 10% of your VIP customers.  To do that, you would write a condition that says, "10% of the time when I'm called with the variable, I should be true."  That line of code would probably do something like this:
 
@@ -158,11 +158,11 @@ The issue is that if ``variable = True``, then ``hash(variable) % 100`` will alw
     >>> hash(True) % 100
     1
 
-This is because in Python `True` objects alaways have the same hash value, and thus the percentage check doesn't work.  This is not the behavior you want.
+This is because in Python `True` objects always have the same hash value, and thus the percentage check doesn't work.  This is not the behavior you want.
 
 For the 10% percentage range, you want it to be active for 10% of the inputs.  Therefore, each input must have a unique hash value, exactly the feature the ``Boolean`` variable provides.  Every ``Variable`` has known characteristics against conditions, while your objects may not.
 
-That said, you don't absolutely **have** to use ``Variable`` objects.  For obvious cases, like ``use.age > some_value`` your ``User`` instance will work just fine, but to play it safe you should use ``Variable`` objects.  Using ``Variable`` objects also ensure that if you updatate ``gutter`` any new ``Operator`` types that are added will work correctly with your ``Variable``s.
+That said, you don't absolutely **have** to use ``Variable`` objects.  For obvious cases, like ``use.age > some_value`` your ``User`` instance will work just fine, but to play it safe you should use ``Variable`` objects.  Using ``Variable`` objects also ensure that if you update ``gutter`` any new ``Operator`` types that are added will work correctly with your ``Variable``s.
 
 Switches
 ============================================
@@ -179,7 +179,7 @@ Switches are constructed with only one required argument, a ``name``:
 
 Switches can be in 3 core states: ``GLOBAL``, ``DISABLED`` and ``SELECTIVE``.  In the ``GLOBAL`` state, the Switch is enabled for every input no matter what.  ``DISABLED`` Switches are not **disabled** for any input, no matter what.  ``SELECTIVE`` Switches enabled based on their conditions.
 
-Swiches can be constructed in a certain state or the property can be changed later:
+Switches can be constructed in a certain state or the property can be changed later:
 
 .. code:: python
 
@@ -197,7 +197,7 @@ When in the ``SELECTIVE`` state, normally only one condition needs be true for t
 Heriarchical Switches
 ~~~~~~~~~~~~~~~~~~~~~
 
-You can create switches using a specific heirarchical naming scheme.  Switch namespaces are divided by the colon character (":"), and heirarchies of switches can be constructed in this fashion:
+You can create switches using a specific hierarchical naming scheme.  Switch namespaces are divided by the colon character (":"), and hierarchies of switches can be constructed in this fashion:
 
 .. code:: python
 
@@ -213,7 +213,7 @@ Concent
 
 By default, each switch makes its "am I active?" decision independent of other switches in the Manager (including its parent), and only consults its own conditions to check if it is enabled for the input.  However, this is not always the case.  Perhaps you have a cool new feature that is only available to a certain class of user.  And of *those* users, you want 10% to be be exposed to a different user interface to see how they behave vs the other 90%.
 
-``gutter`` allows you to set a ``concent`` flag on a switch that instructs it to check its parental switch first, before checking itself.  If it checks its parent and it is not enabled for the same input, the switch immediatly returns ``False``.  If its parent *is* enabled for the input, then the switch will continue and check its own conditions, returning as it would normally.
+``gutter`` allows you to set a ``concent`` flag on a switch that instructs it to check its parental switch first, before checking itself.  If it checks its parent and it is not enabled for the same input, the switch immediately returns ``False``.  If its parent *is* enabled for the input, then the switch will continue and check its own conditions, returning as it would normally.
 
 For example:
 
@@ -222,14 +222,14 @@ For example:
     parent = Switch('cool_new_feature')
     child = Switch('cool_new_feature:new_ui', concent=True)
 
-For example, because ``child`` was constructed with ``concent=True``, even if ``child`` is enabled for an input, it will only return ``True`` if ``parent`` is **also** enbaled for that same input.
+For example, because ``child`` was constructed with ``concent=True``, even if ``child`` is enabled for an input, it will only return ``True`` if ``parent`` is **also** enabled for that same input.
 
-**Note:** Even switches in a ``GLOBAL`` or ``DISABLED`` state (see "Switch" section above) still concent their parent before checking themselves.  That means that even if a particular switch is ``GLOBAL``, if it has ``concent`` set to ``True`` and its parent is **not** enabled for the input, the switch itself will return ``False``.
+**Note:** Even switches in a ``GLOBAL`` or ``DISABLED`` state (see "Switch" section above) still consent their parent before checking themselves.  That means that even if a particular switch is ``GLOBAL``, if it has ``concent`` set to ``True`` and its parent is **not** enabled for the input, the switch itself will return ``False``.
 
 Registering a Switch
 ~~~~~~~~~~~~~~~~~~~~
 
-Once your ``Switch`` is constsructed with the right conditions, you need to retister it with a ``Manager`` instance to preserve it for future use.  Otherwise it will only exist in memory for the current process.  Register a switch via the ``register`` method on a ``Manager`` instance:
+Once your ``Switch`` is constructed with the right conditions, you need to register it with a ``Manager`` instance to preserve it for future use.  Otherwise it will only exist in memory for the current process.  Register a switch via the ``register`` method on a ``Manager`` instance:
 
 .. code:: python
 
@@ -269,15 +269,15 @@ Existing switches may be removed from the Manager by calling ``unregister()`` wi
     gutter.unregister('deprecated switch')
     gutter.unregister(a_switch_instance)
 
-**Note:** If the switch is part of a heirarchy and has children switches (see the "Heriarchical Switches" section abobve), all decendent switches (children, grandchildren, etc) will also be unregistered and deleted.
+**Note:** If the switch is part of a hierarchy and has children switches (see the "Hierarchical Switches" section above), all descendent switches (children, grandchildren, etc) will also be unregistered and deleted.
 
 
 Conditions
 ==========
 
-Each Swtich can have 0+ conditions, which decribe the conditions under which that swtich is active.  ``Condition`` objects are constructed with three values: a ``argument``, ``attribute`` and ``operator``.
+Each Switch can have 0+ conditions, which describe the conditions under which that switch is active.  ``Condition`` objects are constructed with three values: a ``argument``, ``attribute`` and ``operator``.
 
-An ``argument`` is any ``Argument`` class, like the one you defined earlier.  From the previous example, ``UserArgument`` is an argument object.  ``attribute`` is the attribute on a argument instance that you want this condution to check.  ``operator`` is some sort of check applied against that attribute.  For instance, is the ``UserArgument.age`` greater than some value?  Equal to some value?  Within a range of values?  Etc.
+An ``argument`` is any ``Argument`` class, like the one you defined earlier.  From the previous example, ``UserArgument`` is an argument object.  ``attribute`` is the attribute on a argument instance that you want this condition to check.  ``operator`` is some sort of check applied against that attribute.  For instance, is the ``UserArgument.age`` greater than some value?  Equal to some value?  Within a range of values?  Etc.
 
 Let's say you wanted a ``Condition`` that checks if the user's age is > 65 years old?  You would construct a Condition that way:
 
@@ -301,13 +301,13 @@ Conditions can also be constructed with a ``negative`` argument, which negates t
 
 This Condition is now ``True`` if the condition evaluates to ``False``.  In this case if the user's ``age`` is **not** more than ``65``.
 
-Conditions then need to be appended to a swtich instance like so:
+Conditions then need to be appended to a switch instance like so:
 
 .. code:: python
 
     switch.conditions.append(condition)
 
-You can append as many conditions as you would like to a swtich, there is no limit.
+You can append as many conditions as you would like to a switch, there is no limit.
 
 Checking Switches as Active
 ===========================
@@ -317,7 +317,7 @@ As stated before, switches are checked against input objects.  To do this, you w
 ``gutter.active()`` API
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A common use case of gutter is to use it during the processing of a web request.  During execution of code, different code paths are taken depending on if certain swtiches are active or not.  Often times there are mutliple switches in existence at any one time and they all need to be checked against multiple arguments.  To handle this use case, Gutter provides a higher-level API.
+A common use case of gutter is to use it during the processing of a web request.  During execution of code, different code paths are taken depending on if certain switches are active or not.  Often times there are multiple switches in existence at any one time and they all need to be checked against multiple arguments.  To handle this use case, Gutter provides a higher-level API.
 
 To check if a ``Switch`` is active, simply call ``gutter.active()`` with the Switch name:
 
@@ -328,7 +328,7 @@ To check if a ``Switch`` is active, simply call ``gutter.active()`` with the Swi
 
 The switch is checked against some number of input objects.  Inputs can be added to the ``active()`` check one of two ways: locally, passed in to the ``active()`` call or globally, configured ahead of time.
 
-To check agianst local inputs, ``active()`` takes any number of input objects after the switch name to check the switch against.  In this example, the switch named ``'my cool feature'`` is checked against input objects ``input1`` and ``input2``:
+To check against local inputs, ``active()`` takes any number of input objects after the switch name to check the switch against.  In this example, the switch named ``'my cool feature'`` is checked against input objects ``input1`` and ``input2``:
 
 .. code:: python
 
@@ -353,19 +353,19 @@ Once you're doing using global inputs, perhaps at the end of a request, you shou
 
 The Manager is now setup and ready for its next set of inputs.
 
-When calling ``active()`` with a local inputs, you can skip checking the ``Switch`` against the global inputs and **only** check against your locally passed in inputss by passing ``exclusive=True`` as a keyword argument to ``active()``:
+When calling ``active()`` with a local inputs, you can skip checking the ``Switch`` against the global inputs and **only** check against your locally passed in inputs by passing ``exclusive=True`` as a keyword argument to ``active()``:
 
 .. code:: python
 
     gutter.input(input1, input2)
     gutter.active('my cool feature', input3, exclusive=True)
 
-In the above example, since ``exclusive=True`` is passed, the switch named ``'my cool feature'`` is **only** checked against ``input3``, and not ``input1`` or ``input2``.  The ``exclusive=True`` argument is not persistant, so the next call to ``active()`` without ``exclusive=True`` will again use the globally defined inputs.
+In the above example, since ``exclusive=True`` is passed, the switch named ``'my cool feature'`` is **only** checked against ``input3``, and not ``input1`` or ``input2``.  The ``exclusive=True`` argument is not persistent, so the next call to ``active()`` without ``exclusive=True`` will again use the globally defined inputs.
 
 Signals
 =======
 
-Gutter provides 4 total signals to connect to: 3 about changes to Switches, and 1 about errors applying Conditions.  They are all avilable from the ``gutter.signals`` module
+Gutter provides 4 total signals to connect to: 3 about changes to Switches, and 1 about errors applying Conditions.  They are all available from the ``gutter.signals`` module
 
 Switch Signals
 ~~~~~~~~~~~~~~
@@ -413,18 +413,18 @@ When a ``Switch`` checks an input object against its conditions, there is a good
 
 While catching all exceptions is generally bad form and hides error, most of the time you do not want to fail an application request just because there was an error checking a switch condition, *especially* if there was an error during checking a ``Condition`` for which a user would not have applied in the first place.
 
-That said, you would still probably want to know if there was an error checking a Condition.  To acomplish this, ``gutter``-client provides a ``condition_apply_error`` signal which is called when there was an error checking a ``Condition``.  The signal is called with an instance of the condition, the input which caused the error and the instance of the Exception class itself:
+That said, you would still probably want to know if there was an error checking a Condition.  To accomplish this, ``gutter``-client provides a ``condition_apply_error`` signal which is called when there was an error checking a ``Condition``.  The signal is called with an instance of the condition, the input which caused the error and the instance of the Exception class itself:
 
 .. code:: python
 
     signals.condition_apply_error.call(condition, inpt, error)
 
-In your connected callback, you can do whatever you would like: log the error, report the exeception, etc.
+In your connected callback, you can do whatever you would like: log the error, report the exception, etc.
 
 Namespaces
 ==========
 
-``gutter`` allows the use of "namespaces" to group switches under a single umbrealla, while both not letting one namespace see the switches of another namespace, but allowing them to share the same storage instance, operators and other configuration.
+``gutter`` allows the use of "namespaces" to group switches under a single umbrella, while both not letting one namespace see the switches of another namespace, but allowing them to share the same storage instance, operators and other configuration.
 
 Given an existing vanilla ``Manager`` instance, you can create a namespaced manager by calling the ``namespaced()`` method:
 
@@ -435,13 +435,13 @@ Given an existing vanilla ``Manager`` instance, you can create a namespaced mana
 At this point, ``notifications`` is a copy of ``gutter``, inheriting all of its:
 
 * storage
-* ``autocreate`` settting
+* ``autocreate`` setting
 * Global inputs
 * Operators
 
 It does **not**, however, share the same switches.  Newly constructed ``Manager`` instances are in the ``default`` namespace.  When ``namespaced()`` is called, ``gutter`` changes the manager's namespace to ``notifications``.  Any switches in the previous ``default`` namespace are not visible in the ``notifications`` namespace, and vice versa.
 
-This allows you to have separate namespaced "views" of switches, possibly named the exact same name, and not have them comflict with each other.
+This allows you to have separate namespaced "views" of switches, possibly named the exact same name, and not have them conflict with each other.
 
 Decorators
 ==========
@@ -498,7 +498,7 @@ And when using ``switches`` as a decorator:
     def run(self):
         gutter.active('cool_feature')  # True
 
-Additionally, you may pass an alternamte ``Manager`` instance to ``switches`` to use that manager instead of the default one:
+Additionally, you may pass an alternate ``Manager`` instance to ``switches`` to use that manager instead of the default one:
 
 .. code:: python
 

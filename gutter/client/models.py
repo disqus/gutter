@@ -14,11 +14,11 @@ import threading
 class Switch(object):
     """
     A switch encapsulates the concept of an item that is either 'on' or 'off'
-    depending on the input.  The swich determines this by checking each of its
+    depending on the input.  The switch determines this by checking each of its
     conditions and seeing if it applies to a certain input.  All the switch does
     is ask each of its Conditions if it applies to the provided input.  Normally
     any condition can be true for the Switch to be enabled for a particular
-    input, but of ``switch.componded`` is set to True, then **all** of the
+    input, but of ``switch.compounded`` is set to True, then **all** of the
     switches conditions need to be true in order to be enabled.
 
     See the Condition class for more information on what a Condition is and how
@@ -97,7 +97,7 @@ class Switch(object):
         """
         Checks to see if this switch is enabled for the provided input.
 
-        If ``compounded``, all switch conditions must be ``True`` for the swtich
+        If ``compounded``, all switch conditions must be ``True`` for the switch
         to be enabled.  Otherwise, *any* condition needs to be ``True`` for the
         switch to be enabled.
 
@@ -123,7 +123,7 @@ class Switch(object):
         """
         Saves this switch in its manager (if present).
 
-        Equivilant to ``self.manager.update(self)``.  If no ``manager`` is set
+        Equivalent to ``self.manager.update(self)``.  If no ``manager`` is set
         for the switch, this method is a no-op.
         """
         if self.manager:
@@ -132,7 +132,7 @@ class Switch(object):
     @property
     def changes(self):
         """
-        A dicitonary of changes to the switch since last saved.
+        A dictionary of changes to the switch since last saved.
 
         Switch changes are a dict in the following format::
 
@@ -160,7 +160,7 @@ class Switch(object):
         """
         Resets switch change tracking.
 
-        No switch properties are alterted, only the tracking of what has changed
+        No switch properties are altered, only the tracking of what has changed
         is reset.
         """
         self.__init_vars = vars(self).copy()
@@ -204,7 +204,7 @@ class Condition(object):
     or not.
 
     For example, for the request IP address, you would define a ``Request``
-    argument, that had an ``ip`` property.  A condition would then be constrcted
+    argument, that had an ``ip`` property.  A condition would then be constructed
     like so:
 
     from myapp.gutter import RequestArgument
@@ -215,7 +215,7 @@ class Condition(object):
     When the Condition is called, it is passed the input. The argument is then
     called (constructed) with input object to produce an instance.  The
     attribute is then extracted from that instance to produce the variable.
-    The extacted variable is then checked against the operator.
+    The extracted variable is then checked against the operator.
 
     To put it another way, say you wanted a condition to only allow your switch
     to people between 15 and 30 years old.  To make the condition:
@@ -224,7 +224,7 @@ class Condition(object):
            its constructor.  The class also has an ``age`` method which returns
            the user object's age.
         2. You would then create a new Condition via:
-           ``Condition(argument=UserInput, attriibute='age', operator=Between(15, 30))``.
+           ``Condition(argument=UserInput, attribute='age', operator=Between(15, 30))``.
         3. You then call that condition with a ``User``, and it would return
            ``True`` if the age of the user the ``UserArgument`` instance wraps
            is between 15 and 30.
@@ -411,8 +411,8 @@ class Manager(threading.local):
         if not inputs:
             inputs = (self.NONE_INPUT,)
 
-        # If necessary, the switch first concents with its parent and returns
-        # false if the switch is conceting and the parent is not enabled for
+        # If necessary, the switch first consents with its parent and returns
+        # false if the switch is consenting and the parent is not enabled for
         # ``inputs``.
         if switch.concent and switch.parent and not self.active(switch.parent, *inputs, **kwargs):
             return False
