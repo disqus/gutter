@@ -208,23 +208,23 @@ You can create switches using a specific hierarchical naming scheme.  Switch nam
 
 In the above example, the ``child1`` switch is a child of the ``"movies"`` switch because it has ``movies:`` as a prefix to the switch name.  Both ``child1`` and ``child2`` are "children of the parent ``parent`` switch.  And ``grandchild`` is a child of the ``child1`` switch, but *not* the ``child2`` switch.
 
-Concent
+Consent
 ~~~~~~~
 
 By default, each switch makes its "am I active?" decision independent of other switches in the Manager (including its parent), and only consults its own conditions to check if it is enabled for the input.  However, this is not always the case.  Perhaps you have a cool new feature that is only available to a certain class of user.  And of *those* users, you want 10% to be be exposed to a different user interface to see how they behave vs the other 90%.
 
-``gutter`` allows you to set a ``concent`` flag on a switch that instructs it to check its parental switch first, before checking itself.  If it checks its parent and it is not enabled for the same input, the switch immediately returns ``False``.  If its parent *is* enabled for the input, then the switch will continue and check its own conditions, returning as it would normally.
+``gutter`` allows you to set a ``consent`` flag on a switch that instructs it to check its parental switch first, before checking itself.  If it checks its parent and it is not enabled for the same input, the switch immediately returns ``False``.  If its parent *is* enabled for the input, then the switch will continue and check its own conditions, returning as it would normally.
 
 For example:
 
 .. code:: python
 
     parent = Switch('cool_new_feature')
-    child = Switch('cool_new_feature:new_ui', concent=True)
+    child = Switch('cool_new_feature:new_ui', consent=True)
 
-For example, because ``child`` was constructed with ``concent=True``, even if ``child`` is enabled for an input, it will only return ``True`` if ``parent`` is **also** enabled for that same input.
+For example, because ``child`` was constructed with ``consent=True``, even if ``child`` is enabled for an input, it will only return ``True`` if ``parent`` is **also** enabled for that same input.
 
-**Note:** Even switches in a ``GLOBAL`` or ``DISABLED`` state (see "Switch" section above) still consent their parent before checking themselves.  That means that even if a particular switch is ``GLOBAL``, if it has ``concent`` set to ``True`` and its parent is **not** enabled for the input, the switch itself will return ``False``.
+**Note:** Even switches in a ``GLOBAL`` or ``DISABLED`` state (see "Switch" section above) still consent their parent before checking themselves.  That means that even if a particular switch is ``GLOBAL``, if it has ``consent`` set to ``True`` and its parent is **not** enabled for the input, the switch itself will return ``False``.
 
 Registering a Switch
 ~~~~~~~~~~~~~~~~~~~~
@@ -395,14 +395,14 @@ The ``switch_updated`` signal can be connected to in order to be notified when a
 
     >>> from gutter.client.models import Switch
     >>> switch = Switch('test')
-    >>> switch.concent
+    >>> switch.consent
     True
-    >>> switch.concent = False
+    >>> switch.consent = False
     >>> switch.name = 'new name'
     >>> switch.changes
-    {'concent': {'current': False, 'previous': True}, 'name': {'current': 'new name', 'previous': 'test'}}
+    {'consent': {'current': False, 'previous': True}, 'name': {'current': 'new name', 'previous': 'test'}}
 
-As you can see, when we changed the Switch's ``concent`` setting and ``name``, ``switch.changes`` reflects that in a dictionary of changed properties.  You can also simply ask the switch if anything has changed with the ``changed`` property.  It returns ``True`` or ``False`` if the switch has any changes as all.
+As you can see, when we changed the Switch's ``consent`` setting and ``name``, ``switch.changes`` reflects that in a dictionary of changed properties.  You can also simply ask the switch if anything has changed with the ``changed`` property.  It returns ``True`` or ``False`` if the switch has any changes as all.
 
 You can use these values inside your signal callback to make decisions based on what changed.  I.e., email out a diff only if the changes include changed conditions.
 
