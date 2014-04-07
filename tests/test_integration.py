@@ -238,8 +238,7 @@ class TestIntegration(Exam, unittest2.TestCase):
 
             context.manager.unregister('can drink')
 
-            with assert_raises(ValueError):
-                context.manager.active('can drink')
+            assert_raises(ValueError, context.manager.active, 'can drink')
 
             context.manager.autocreate = True
             ok_(context.active('can drink') is False)
