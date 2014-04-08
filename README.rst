@@ -81,7 +81,7 @@ If you would like to construct and use a different default manager, but still ha
 
     from gutter.client.default import gutter
 
-    assert manager_settings.defaultis gutter
+    assert manager_settings.default is gutter
 
 Note that the ``settings.manager.default`` value must be set **before** importing the default ``gutter`` instance.
 
