@@ -8,6 +8,8 @@ Gutter
 
 Gutter is feature switch management library.  It allows users to create feature switches and setup conditions those switches will be enabled for.  Once configured, switches can then be checked against inputs (requests, user objects, etc) to see if the switches are active.
 
+For a UI to configure Gutter with see the `gutter-django project <https://github.com/disqus/gutter-django>`_
+
 Table of Contents
 =================
 
