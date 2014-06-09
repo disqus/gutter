@@ -1,2 +1,2 @@
 #: Default manager instance
-from gutter.client.singleton import gutter
+from gutter.client.singleton import gutter  # noqa

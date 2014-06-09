@@ -81,6 +81,9 @@ class BaseVariableTest(object):
     def test_implements_to_python(self):
         ok_(self.klass.to_python('1'))
 
+    def test_hash(self):
+        self.assertEquals(hash(self.argument.value), hash(self.argument))
+
 
 class DelegateToValue(object):
 
@@ -124,6 +127,10 @@ class BooleanTest(BaseVariableTest, DelegateToValue, unittest2.TestCase):
         assert_not_equals(hash(None), hash(boolean))
 
         assert_not_equals(hash(boolean), hash(Boolean(True)))
+
+    def test_hash(self):
+        # skip this test for boolean
+        pass
 
     def test_to_python_booleans_the_value(self):
         eq_(Boolean.to_python(1), True)

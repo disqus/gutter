@@ -23,9 +23,14 @@ if 'nosetests' in sys.argv[1:]:
     SECRET_KEY = 'secret!'
 
 
+if 'flake8' in sys.argv[1:]:
+    setup_requires.append('flake8')
+    setup_requires.append('dont-fudge-up')
+
+
 setup(
     name='gutter',
-    version='0.3.0',
+    version='0.4.0',
     author='DISQUS',
     author_email='opensource@disqus.com',
     url='http://github.com/disqus/gutter',

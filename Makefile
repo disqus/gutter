@@ -1,6 +1,7 @@
 VERSION = $(shell python setup.py --version)
 
 test:
+	python setup.py flake8
 	python setup.py nosetests
 
 release:

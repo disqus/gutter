@@ -250,10 +250,6 @@ class PercentTest(BaseOperator):
         runs = map(self.operator.applies_to, range(1000))
         return len(filter(bool, runs))
 
-    def test_returns_false_if_argument_is_falsey(self):
-        eq_(self.operator.applies_to(False), False)
-        eq_(self.operator.applies_to(self.FalseyObject()), False)
-
 
 class PercentageTest(PercentTest, unittest2.TestCase):
 
@@ -277,6 +273,28 @@ class PercentRangeTest(PercentTest, unittest2.TestCase):
 
     def range_of(self, lower, upper):
         return PercentRange(lower_limit=lower, upper_limit=upper)
+
+    def test_falsy_value_is_in_range(self):
+        self.operator = self.range_of(-1, 1)
+        self.assertTrue(self.operator.applies_to(0))
+
+    def test_range_of_less_than_one(self):
+        self.operator = self.range_of(0, 1)
+        self.assertTrue(self.operator.applies_to(0.5))
+
+        self.operator = self.range_of(0.1, 0.9)
+        self.assertTrue(self.operator.applies_to(0.5))
+
+        self.operator = self.range_of(0, 0.99)
+        self.assertFalse(self.operator.applies_to(0.999))
+        self.assertFalse(self.operator.applies_to(0.99))
+        self.assertTrue(self.operator.applies_to(0.9))
+        self.assertTrue(self.operator.applies_to(0.1))
+
+        # ensure that the value 1.1 (float is 1.99999...) is correctly compared
+        # against the value Decimal('1.1')
+        self.operator = self.range_of(1.1, 2)
+        self.assertTrue(self.operator.applies_to(1.1))
 
     def test_can_apply_to_a_certain_percent_range(self):
         self.assertAlmostEqual(self.successful_runs(1000), 100, delta=20)
