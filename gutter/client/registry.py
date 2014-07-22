@@ -4,7 +4,8 @@ from gutter.client.arguments.base import Container
 
 class Registry(object):
 
-    def __init__(self, cls):
+    def __init__(self, check, cls):
+        self.__check = check
         self.__items = {}
         self.__cls = cls
 
@@ -18,7 +19,7 @@ class Registry(object):
 
     def register(self, key, obj):
         try:
-            if not issubclass(obj, self.__cls):
+            if not self.__check(obj, self.__cls):
                 raise ValueError("%s is not a %s" % (obj, self.__cls))
         except TypeError:
             raise ValueError("%s is not a %s" % (obj, self.__cls))
@@ -39,8 +40,8 @@ def extract_key_from_name(func):
     return helpful_register
 
 
-arguments = Registry(Container)
-operators = Registry(Base)
+arguments = Registry(issubclass, Container)
+operators = Registry(isinstance, Base)
 
 
 operators.register = extract_key_from_name(operators.register)

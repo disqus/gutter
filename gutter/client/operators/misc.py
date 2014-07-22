@@ -1,7 +1,6 @@
 from decimal import Context as decimal_Context, Decimal, DecimalException
 
 from gutter.client.operators import Base
-from gutter.client.registry import operators
 
 
 class PercentRange(Base):
@@ -61,7 +60,3 @@ class Percent(PercentRange):
 
     def __str__(self):
         return 'in %s%% of values' % self.upper_limit
-
-
-operators.register(PercentRange)
-operators.register(Percent)

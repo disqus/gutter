@@ -1,5 +1,4 @@
 from gutter.client.operators import Base
-from gutter.client.registry import operators
 
 
 class Equals(Base):
@@ -82,11 +81,3 @@ class MoreThanOrEqualTo(MoreThan):
 
     def __str__(self):
         return 'more than or equal to "%s"' % self.lower_limit
-
-
-operators.register(Equals)
-operators.register(Between)
-operators.register(LessThan)
-operators.register(LessThanOrEqualTo)
-operators.register(MoreThan)
-operators.register(MoreThanOrEqualTo)

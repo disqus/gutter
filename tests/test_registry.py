@@ -3,7 +3,10 @@ import unittest2
 from copy import copy
 
 from exam.cases import Exam
-from exam.decorators import around
+from exam.decorators import (
+    around,
+    fixture,
+)
 
 from gutter.client.operators import (
     Base,
@@ -38,6 +41,8 @@ class TestArgument(Container):
 
 class TestOperatorRegistry(Exam, unittest2.TestCase):
 
+    operator = fixture(TestOperator)
+
     @around
     def preserve_registry(self):
         original = registry.operators
@@ -45,17 +50,13 @@ class TestOperatorRegistry(Exam, unittest2.TestCase):
         yield
         registry.operators = original
 
-    def test_has_default_operators_registered_by_default(self):
-        for operator in ALL_OPERATORS:
-            self.assertEqual(operator, registry.operators[operator.name])
-
     def test_stores_registered_operator_via_provided_name(self):
-        registry.operators.register('hello', TestOperator)
-        self.assertEqual(registry.operators['hello'], TestOperator)
+        registry.operators.register('hello', self.operator)
+        self.assertEqual(registry.operators['hello'], self.operator)
 
     def test_uses_operator_name_if_not_provided_one(self):
-        registry.operators.register(TestOperator)
-        self.assertEqual(registry.operators['test_name'], TestOperator)
+        registry.operators.register(self.operator)
+        self.assertEqual(registry.operators['test_name'], self.operator)
 
     def test_raises_exception_if_object_is_not_an_operator(self):
         self.assertRaises(

@@ -1,5 +1,4 @@
 from gutter.client.operators import Base
-from gutter.client.registry import operators
 
 
 class Truthy(Base):
@@ -13,6 +12,3 @@ class Truthy(Base):
 
     def __str__(self):
         return 'true'
-
-
-operators.register(Truthy)
