@@ -1,0 +1,23 @@
+package gutter;
+
+message Condition {
+    required string argument = 1;
+    required string attribute = 2;
+    required string operator = 3;
+    required bool negative = 4;
+}
+
+enum State {
+    DISABLED = 1;
+    SELECTIVE = 2;
+    GLOBAL = 3;
+}
+
+message Switch {
+    required string name = 1;
+    required string label = 2;
+    required State state = 3;
+    repeated Condition conditions = 4;
+    required bool compounded = 5;
+    required bool concent = 6;
+}

@@ -1,4 +1,5 @@
 VERSION = $(shell python setup.py --version)
+PROTOBUF_PYTHON_PATH=gutter/client/interfaces
 
 TEST_RESULTS_DIR=test_results
 XUNIT_DIR=${TEST_RESULTS_DIR}/xunit
@@ -23,4 +24,7 @@ release:
 watch:
 	bundle exec guard
 
-.PHONY: test test-xunit release watch
+interfaces:
+	protoc --python_out=${PROTOBUF_PYTHON_PATH} interfaces.proto
+
+.PHONY: test test-xunit release watch interfaces
