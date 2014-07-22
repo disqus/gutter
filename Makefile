@@ -1,5 +1,6 @@
 VERSION = $(shell python setup.py --version)
 BUILD_DIR = docs/_build/html
+PROTOBUF_PYTHON_PATH=gutter/client/interfaces
 
 test:
 	python setup.py flake8
@@ -13,6 +14,9 @@ release:
 
 watch:
 	bundle exec guard
+
+interfaces:
+	protoc --python_out=${PROTOBUF_PYTHON_PATH} interfaces.proto
 
 docs:
 	cd docs && make html
