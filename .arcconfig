@@ -1,0 +1,14 @@
+
+{
+  "project_id": "gutter",
+  "copyright_holder": "Disqus, Inc.",
+  "phutil_libraries": {"disqus": "/usr/local/include/php/libdisqus/src"},
+  "arcanist_configuration": "DisqusConfiguration",
+  "conduit_uri": "http://phabricator.local.disqus.net/",
+  "base": "git:merge-base(origin/master), arc:upstream, git:HEAD^",
+  "differential.field-selector": "DisqusDifferentialFieldSelector",
+  "history.immutable": false,
+  "unit.engine": "GenericXUnitTestEngine",
+  "unit.genericxunit.script": "make test-xunit XUNIT_FILE=arcanist.xml",
+  "unit.genericxunit.result_path": "test_results/xunit"
+}

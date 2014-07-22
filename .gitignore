@@ -5,7 +5,6 @@ dist/
 docs/
 build/
 *.egg
-.arcconfig
 *.sublime-workspace
 .coverage
 test_results/

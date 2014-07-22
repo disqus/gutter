@@ -1,8 +1,18 @@
 VERSION = $(shell python setup.py --version)
 
+TEST_RESULTS_DIR=test_results
+XUNIT_DIR=${TEST_RESULTS_DIR}/xunit
+XUNIT_FILE=nosetests.xml
+XUNIT_FILENAME=${XUNIT_DIR}/${XUNIT_FILE}
+
 test:
-	python setup.py flake8
 	python setup.py nosetests
+
+test-xunit: ${XUNIT_DIR}
+	python setup.py nosetests --verbosity=2 --with-xunit --xunit-file=${XUNIT_FILENAME}
+
+${XUNIT_DIR}:
+	mkdir -p ${XUNIT_DIR}
 
 release:
 	git tag $(VERSION)
@@ -13,4 +23,4 @@ release:
 watch:
 	bundle exec guard
 
-.PHONY: test release watch
+.PHONY: test test-xunit release watch
