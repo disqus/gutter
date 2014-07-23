@@ -44,10 +44,6 @@ class TestOperatorRegistry(Exam, unittest2.TestCase):
         self.registry.operators.register('hello', self.operator)
         self.assertEqual(self.registry.operators['hello'], self.operator)
 
-    def test_uses_operator_name_if_not_provided_one(self):
-        self.registry.operators.register(self.operator)
-        self.assertEqual(self.registry.operators['test_name'], self.operator)
-
     def test_raises_exception_if_object_is_not_an_operator(self):
         self.assertRaises(
             ValueError,

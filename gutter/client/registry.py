@@ -27,22 +27,8 @@ class Records(object):
         self.__items[key] = obj
 
 
-def extract_key_from_name(func):
-    def helpful_register(key_or_operator=None, operator=None):
-        if not operator:
-            operator = key_or_operator
-            key = operator.name
-        else:
-            key = key_or_operator
-
-        return func(key, operator)
-
-    return helpful_register
-
-
 class Registry(object):
 
     def __init__(self):
         self.arguments = Records(issubclass, Container)
         self.operators = Records(isinstance, Base)
-        self.operators.register = extract_key_from_name(self.operators.register)
