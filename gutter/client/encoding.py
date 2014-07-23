@@ -2,10 +2,7 @@ from gutter.client.models import (
     Condition,
     Switch,
 )
-from gutter.client.registry import (
-    arguments,
-    operators,
-)
+from gutter.client.registry import Registry
 from gutter.client.interfaces.interfaces_pb2 import (
     ConditionList as PBConditionList,
     Switch as PBSwitch,
@@ -14,8 +11,10 @@ from gutter.client.interfaces.interfaces_pb2 import (
 
 class SwitchProtobufEncoding(object):
 
-    @staticmethod
-    def encode(switch):
+    def __init__(self):
+        self.registry = Registry()
+
+    def encode(self, switch):
         pbswitch = PBSwitch()
 
         pbswitch.name = switch.name
@@ -41,8 +40,7 @@ class SwitchProtobufEncoding(object):
 
         return pbswitch.SerializeToString()
 
-    @staticmethod
-    def decode(data):
+    def decode(self, data):
         pbswitch = PBSwitch()
 
         pbswitch.ParseFromString(data)
@@ -59,9 +57,9 @@ class SwitchProtobufEncoding(object):
 
         for pbcondition in pbswitch.conditions.conditions:
             condition = Condition(
-                argument=arguments[pbcondition.argument],
+                argument=self.registry.arguments[pbcondition.argument],
                 attribute=pbcondition.attribute,
-                operator=operators[pbcondition.operator],
+                operator=self.registry.operators[pbcondition.operator],
                 negative=pbcondition.negative,
             )
             switch.conditions.append(condition)

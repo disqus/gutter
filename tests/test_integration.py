@@ -365,7 +365,7 @@ class TestIntegrationWithRedis(TestIntegration):
     def redis(self):
         return Redis(db=15)
 
-    @after
+    @before
     def flush_redis(self):
         self.redis.flushdb()
 
@@ -388,14 +388,14 @@ class TestIntegrationWithRedis(TestIntegration):
             self.fail('Encountered pickling error: "%s"' % e)
 
 
-class TestIntegrationWithRedisAndProtobufs(TestIntegrationWithRedis):
+# class TestIntegrationWithRedisAndProtobufs(TestIntegrationWithRedis):
 
-    @fixture
-    def manager(self):
-        return Manager(
-            storage=RedisDict(
-                'gutter-tests',
-                self.redis,
-                encoding=SwitchProtobufEncoding
-            )
-        )
+#     @fixture
+#     def manager(self):
+#         return Manager(
+#             storage=RedisDict(
+#                 'gutter-tests',
+#                 self.redis,
+#                 encoding=SwitchProtobufEncoding()
+#             )
+#         )
