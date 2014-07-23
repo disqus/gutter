@@ -51,20 +51,9 @@ class TestSwitch(unittest2.TestCase):
         parent = Switch('a')
         switch = Switch('a:b')
 
-        children = [
-            Switch('a:b:c'),
-            Switch('a:b:d'),
-        ]
-
-        [setattr(child, 'parent', switch) for child in children]
-
-        switch.children = children
-        switch.parent = parent
-
         decoded_switch = d._decode(d._encode(switch))
         self.assertEquals(decoded_switch.name, switch.name)
         self.assertEquals(decoded_switch.parent, switch.parent.name)
-        self.assertListEqual([child.name for child in children], decoded_switch.children)
 
 
     def test_switch_name_is_immutable(self):
@@ -137,20 +126,11 @@ class TestSwitch(unittest2.TestCase):
         switch.conditions.remove(condition)
         ok_(condition not in switch.conditions)
 
-    def test_parent_property_defaults_to_none(self):
-        eq_(Switch('foo').parent, None)
-
-    def test_can_be_constructed_with_parent(self):
-        eq_(Switch('foo', parent='dog').parent, 'dog')
-
     def test_concent_defaults_to_true(self):
         eq_(Switch('foo').concent, True)
 
     def test_can_be_constructed_with_concent(self):
         eq_(Switch('foo', concent=False).concent, False)
-
-    def test_children_defaults_to_an_empty_list(self):
-        eq_(Switch('foo').children, [])
 
     def test_switch_manager_defaults_to_none(self):
         eq_(Switch('foo').manager, None)
@@ -593,12 +573,11 @@ class ActsLikeManager(object):
     def new_switch(self, name, parent=None):
         switch = mock.Mock(name=name)
         switch.name = name
-        switch.parent = parent
-        switch.children = []
         return switch
 
-    def mock_and_register_switch(self, name, parent=None):
-        switch = self.new_switch(name, parent)
+    def mock_and_register_switch(self, name):
+        switch = self.new_switch(name)
+        switch.parent = None
         self.manager.register(switch)
         return switch
 
@@ -624,25 +603,6 @@ class ActsLikeManager(object):
         self.manager.unregister(switch)
         ok_(switch not in self.manager.switches)
 
-    def test_register_does_not_set_parent_by_default(self):
-        switch = self.mock_and_register_switch('foo')
-        eq_(switch.parent, None)
-
-    def test_register_sets_parent_on_switch_if_there_is_one(self):
-        parent = self.mock_and_register_switch('movies')
-        child = self.mock_and_register_switch('movies:jaws')
-        eq_(child.parent, parent.name)
-
-    def test_register_adds_self_to_parents_children(self):
-        parent = self.mock_and_register_switch('movies')
-        child = self.mock_and_register_switch('movies:jaws')
-
-        eq_(parent.children, [child.name])
-
-        sibling = self.mock_and_register_switch('movies:jaws')
-
-        eq_(parent.children, [child.name, sibling.name])
-
     def test_register_raises_value_error_for_blank_name(self):
         with self.assertRaises(ValueError):
             self.mock_and_register_switch('')
@@ -659,27 +619,6 @@ class ActsLikeManager(object):
 
     def test_swich_raises_valueerror_if_no_switch_by_name(self):
         assert_raises(ValueError, self.manager.switch, 'junk')
-
-    def test_unregister_removes_all_child_switches_too(self):
-        grandparent = self.mock_and_register_switch('movies')
-        parent = self.mock_and_register_switch('movies:star_wars')
-        child1 = self.mock_and_register_switch('movies:star_wars:a_new_hope')
-        child2 = self.mock_and_register_switch('movies:star_wars:return_of_the_jedi')
-        great_uncle = self.mock_and_register_switch('books')
-
-        ok_(grandparent in self.manager.switches)
-        ok_(parent in self.manager.switches)
-        ok_(child1 in self.manager.switches)
-        ok_(child2 in self.manager.switches)
-        ok_(great_uncle in self.manager.switches)
-
-        self.manager.unregister(grandparent.name)
-
-        ok_(grandparent not in self.manager.switches)
-        ok_(parent not in self.manager.switches)
-        ok_(child1 not in self.manager.switches)
-        ok_(child2 not in self.manager.switches)
-        ok_(great_uncle in self.manager.switches)
 
     @mock.patch('gutter.client.signals.switch_unregistered')
     def test_register_signals_switch_registered_with_switch(self, signal):

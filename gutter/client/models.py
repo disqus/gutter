@@ -32,23 +32,24 @@ class Switch(object):
         GLOBAL = 3
 
     def __init__(self, name, state=states.DISABLED, compounded=False,
-                 parent=None, concent=True, manager=None, label=None,
-                 description=None):
+                 concent=True, manager=None, label=None, description=None):
         self._name = str(name)
         self.label = label
         self.description = description
         self.state = state
         self.conditions = list()
         self.compounded = compounded
-        self.parent = parent
         self.concent = concent
-        self.children = []
         self.manager = manager
         self.reset()
 
     @property
     def name(self):
         return self._name
+
+    @property
+    def parent(self):
+        return getattr(self.manager.parent(self), 'name', None)
 
     def __repr__(self):
         kwargs = dict(
@@ -382,7 +383,6 @@ class Manager(threading.local):
             raise ValueError('Switch name cannot be blank')
 
         self.__persist(switch)
-        self.__sync_parental_relationships(switch)
 
         switch.manager = self
         signal.call(switch)
@@ -390,9 +390,6 @@ class Manager(threading.local):
     def unregister(self, switch_or_name):
         name = getattr(switch_or_name, 'name', switch_or_name)
         switch = self.switch(name)
-
-        [self.unregister(child) for child in switch.children]
-
         del self.storage[self.__namespaced(name)]
         signals.switch_unregistered.call(switch)
 
@@ -456,6 +453,14 @@ class Manager(threading.local):
             namespace=new_namespace,
         )
 
+    def parent(self, switch):
+        key = self.__parent_key_for(switch)
+
+        if not key:
+            return
+        else:
+            return self.switch(key)
+
     def __persist(self, switch):
         self.storage[self.__namespaced(switch.name)] = switch
         return switch
@@ -465,19 +470,6 @@ class Manager(threading.local):
         switch.state = self.switch_class.states.DISABLED
         self.register(switch)
         return switch
-
-    def __sync_parental_relationships(self, switch):
-        new_parent = None
-
-        try:
-            new_parent = self.switch(self.__parent_key_for(switch))
-            switch.parent = new_parent.name
-            new_parent.children.append(switch.name)
-            new_parent.save()
-        except ValueError:
-            # no parent found or created, so we just pass
-            pass
-
 
     def __parent_key_for(self, switch):
         # TODO: Make this a method on the switch object
