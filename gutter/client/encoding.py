@@ -11,8 +11,6 @@ from gutter.client.interfaces.interfaces_pb2 import (
     Switch as PBSwitch,
 )
 
-# XXX: Groos
-STATES = vars(Switch.states)
 
 class SwitchProtobufEncoding(object):
 
