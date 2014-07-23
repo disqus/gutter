@@ -33,9 +33,9 @@ class SwitchProtobufEncoding(object):
         for condition in switch.conditions:
             pbcondition = pbswitch.conditions.conditions.add()
             # XXX: TODO FIX ME v
-            pbcondition.argument = condition.argument.__name__
+            pbcondition.argument = self.registry.arguments.get_key(condition.argument)
             pbcondition.attribute = condition.attribute
-            pbcondition.operator = condition.operator.name
+            pbcondition.operator = self.registry.operators.get_key(condition.operator)
             pbcondition.negative = condition.negative
 
         return pbswitch.SerializeToString()
@@ -52,7 +52,7 @@ class SwitchProtobufEncoding(object):
             #      this change?
             state=pbswitch.state,
             concent=pbswitch.concent,
-            compounded=pbswitch.compounded,
+            compounded=pbswitch.conditions.quantifier == PBConditionList.ALL,
         )
 
         for pbcondition in pbswitch.conditions.conditions:
