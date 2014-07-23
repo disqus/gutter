@@ -7,7 +7,7 @@ from gutter.client.registry import (
     operators,
 )
 from gutter.client.interfaces.interfaces_pb2 import (
-    Condition as PBCondition,
+    ConditionList as PBConditionList,
     Switch as PBSwitch,
 )
 
@@ -28,19 +28,18 @@ class SwitchProtobufEncoding(object):
         pbswitch.concent = switch.concent
         pbswitch.state = switch.state
 
-        # if switch.compounded:
-        #     switch.conditions.quantifier = PBConditionList.ALL
-        # else:
-        #     switch.conditions.quantifier = PBConditionList.ANY
+        if switch.compounded:
+            pbswitch.conditions.quantifier = PBConditionList.ALL
+        else:
+            pbswitch.conditions.quantifier = PBConditionList.ANY
 
         for condition in switch.conditions:
-            pbcondition = PBCondition()
-            # pbcondition.argument =
+            pbcondition = pbswitch.conditions.conditions.add()
+            # XXX: TODO FIX ME v
+            pbcondition.argument = condition.argument.__name__
             pbcondition.attribute = condition.attribute
-            pbcondition.operator = condition.operator
+            pbcondition.operator = condition.operator.name
             pbcondition.negative = condition.negative
-
-            switch.conditions.conditions.add(condition)
 
         return pbswitch.SerializeToString()
 
