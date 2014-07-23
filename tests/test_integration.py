@@ -54,6 +54,15 @@ class IntegerArguments(arguments.Container):
     value = arguments.Integer(lambda self: self.input)
 
 
+more_than_65 = MoreThanOrEqualTo(lower_limit=65)
+less_than_18 = LessThan(upper_limit=18)
+more_than_21 = MoreThanOrEqualTo(lower_limit=21)
+between_13_and_18 = Between(lower_limit=13, upper_limit=18)
+ten_percent = Percent(percentage=10)
+fifty_to_100_percent = PercentRange(lower_limit=50, upper_limit=100)
+is_42 = Equals(value=42)
+true = Truthy()
+
 class TestIntegration(Exam, unittest2.TestCase):
 
     class Callback(object):
@@ -113,18 +122,18 @@ class TestIntegration(Exam, unittest2.TestCase):
         self.steve = User(deterministicstring('timmy'), 19)
 
     def setup_conditions(self):
-        self.age_65_and_up = Condition(UserArguments, 'age', MoreThanOrEqualTo(lower_limit=65))
-        self.age_under_18 = Condition(UserArguments, 'age', LessThan(upper_limit=18))
-        self.age_not_under_18 = Condition(UserArguments, 'age', LessThan(upper_limit=18), negative=True)
-        self.age_21_plus = Condition(UserArguments, 'age', MoreThanOrEqualTo(lower_limit=21))
-        self.age_between_13_and_18 = Condition(UserArguments, 'age', Between(lower_limit=13, upper_limit=18))
+        self.age_65_and_up = Condition(UserArguments, 'age', more_than_65)
+        self.age_under_18 = Condition(UserArguments, 'age', less_than_18)
+        self.age_not_under_18 = Condition(UserArguments, 'age', less_than_18, negative=True)
+        self.age_21_plus = Condition(UserArguments, 'age', more_than_21)
+        self.age_between_13_and_18 = Condition(UserArguments, 'age', between_13_and_18)
 
         self.in_sf = Condition(UserArguments, 'location', Equals(value='San Francisco'))
-        self.has_location = Condition(UserArguments, 'location', Truthy())
+        self.has_location = Condition(UserArguments, 'location', true)
 
-        self.ten_percent = Condition(UserArguments, 'name', Percent(percentage=10))
-        self.upper_50_percent = Condition(UserArguments, 'name', PercentRange(lower_limit=50, upper_limit=100))
-        self.answer_to_life = Condition(IntegerArguments, 'value', Equals(value=42))
+        self.ten_percent = Condition(UserArguments, 'name', ten_percent)
+        self.upper_50_percent = Condition(UserArguments, 'name', fifty_to_100_percent)
+        self.answer_to_life = Condition(IntegerArguments, 'value', is_42)
 
     def setup_switches(self):
         self.add_switch('can drink', condition=self.age_21_plus)
@@ -388,14 +397,29 @@ class TestIntegrationWithRedis(TestIntegration):
             self.fail('Encountered pickling error: "%s"' % e)
 
 
-# class TestIntegrationWithRedisAndProtobufs(TestIntegrationWithRedis):
+class TestIntegrationWithRedisAndProtobufs(TestIntegrationWithRedis):
 
-#     @fixture
-#     def manager(self):
-#         return Manager(
-#             storage=RedisDict(
-#                 'gutter-tests',
-#                 self.redis,
-#                 encoding=SwitchProtobufEncoding()
-#             )
-#         )
+    encoding = fixture(SwitchProtobufEncoding)
+
+    @before
+    def register_everything(self):
+        self.encoding.registry.arguments.register('UserArguments', UserArguments)
+        self.encoding.registry.arguments.register('IntegerArguments', IntegerArguments)
+        self.encoding.registry.operators.register('more_than_or_equal_to', more_than_65)
+        self.encoding.registry.operators.register('before', less_than_18)
+        self.encoding.registry.operators.register('more_than', more_than_21)
+        self.encoding.registry.operators.register('between', between_13_and_18)
+        self.encoding.registry.operators.register('percent', ten_percent)
+        self.encoding.registry.operators.register('percent_range', fifty_to_100_percent)
+        self.encoding.registry.operators.register('equals', is_42)
+        self.encoding.registry.operators.register('true', true)
+
+    @fixture
+    def manager(self):
+        return Manager(
+            storage=RedisDict(
+                'gutter-tests',
+                self.redis,
+                encoding=self.encoding
+            )
+        )
