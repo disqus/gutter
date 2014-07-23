@@ -404,8 +404,8 @@ class TestIntegrationWithRedisAndProtobufs(TestIntegrationWithRedis):
 
     @before
     def register_everything(self):
-        self.encoding.registry.arguments.register('UserArguments', UserArguments)
-        self.encoding.registry.arguments.register('IntegerArguments', IntegerArguments)
+        self.encoding.registry.arguments.register('user', UserArguments)
+        self.encoding.registry.arguments.register('integer', IntegerArguments)
         self.encoding.registry.operators.register('more_than_65', more_than_65)
         self.encoding.registry.operators.register('less_than_18', less_than_18)
         self.encoding.registry.operators.register('more_than_21', more_than_21)
