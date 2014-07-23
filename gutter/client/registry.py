@@ -2,7 +2,7 @@ from gutter.client.operators import Base
 from gutter.client.arguments.base import Container
 
 
-class Registry(object):
+class Records(object):
 
     def __init__(self, check, cls):
         self.__check = check
@@ -40,8 +40,9 @@ def extract_key_from_name(func):
     return helpful_register
 
 
-arguments = Registry(issubclass, Container)
-operators = Registry(isinstance, Base)
+class Registry(object):
 
-
-operators.register = extract_key_from_name(operators.register)
+    def __init__(self):
+        self.arguments = Records(issubclass, Container)
+        self.operators = Records(isinstance, Base)
+        self.operators.register = extract_key_from_name(self.operators.register)

@@ -1,12 +1,8 @@
 import itertools
 import unittest2
-from copy import copy
 
 from exam.cases import Exam
-from exam.decorators import (
-    around,
-    fixture,
-)
+from exam.decorators import fixture
 
 from gutter.client.operators import (
     Base,
@@ -15,7 +11,7 @@ from gutter.client.operators import (
     misc,
 )
 from gutter.client.arguments.base import Container
-from gutter.client import registry
+from gutter.client.registry import Registry
 
 def all_operators_in(module):
     for _, obj in vars(module).iteritems():
@@ -42,26 +38,20 @@ class TestArgument(Container):
 class TestOperatorRegistry(Exam, unittest2.TestCase):
 
     operator = fixture(TestOperator)
-
-    @around
-    def preserve_registry(self):
-        original = registry.operators
-        registry.operators = copy(registry.operators)
-        yield
-        registry.operators = original
+    registry = fixture(Registry)
 
     def test_stores_registered_operator_via_provided_name(self):
-        registry.operators.register('hello', self.operator)
-        self.assertEqual(registry.operators['hello'], self.operator)
+        self.registry.operators.register('hello', self.operator)
+        self.assertEqual(self.registry.operators['hello'], self.operator)
 
     def test_uses_operator_name_if_not_provided_one(self):
-        registry.operators.register(self.operator)
-        self.assertEqual(registry.operators['test_name'], self.operator)
+        self.registry.operators.register(self.operator)
+        self.assertEqual(self.registry.operators['test_name'], self.operator)
 
     def test_raises_exception_if_object_is_not_an_operator(self):
         self.assertRaises(
             ValueError,
-            registry.operators.register,
+            self.registry.operators.register,
             'junk',
             'thing'
         )
@@ -69,21 +59,16 @@ class TestOperatorRegistry(Exam, unittest2.TestCase):
 
 class TestArgumentRegistry(Exam, unittest2.TestCase):
 
-    @around
-    def preserve_registry(self):
-        original = registry.arguments
-        registry.arguments = copy(registry.arguments)
-        yield
-        registry.arguments = original
+    registry = fixture(Registry)
 
     def test_stores_registered_argument_via_provided_name(self):
-        registry.arguments.register('test', TestArgument)
-        self.assertEqual(registry.arguments['test'], TestArgument)
+        self.registry.arguments.register('test', TestArgument)
+        self.assertEqual(self.registry.arguments['test'], TestArgument)
 
     def test_raises_exception_if_object_is_not_an_argument(self):
         self.assertRaises(
             ValueError,
-            registry.arguments.register,
+            self.registry.arguments.register,
             'junk',
             'thing'
         )
