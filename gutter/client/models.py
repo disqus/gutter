@@ -47,10 +47,6 @@ class Switch(object):
     def name(self):
         return self._name
 
-    @property
-    def parent(self):
-        return getattr(self.manager.parent(self), 'name', None)
-
     def __repr__(self):
         kwargs = dict(
             state=self.state,
@@ -413,7 +409,11 @@ class Manager(threading.local):
         # If necessary, the switch first consents with its parent and returns
         # false if the switch is consenting and the parent is not enabled for
         # ``inputs``.
-        if switch.concent and switch.parent and not self.active(switch.parent, *inputs, **kwargs):
+        if (
+            switch.concent and
+            self.__has_parent(switch) and not
+            self.active(self.__parent_key_for(switch), *inputs, **kwargs)
+        ):
             return False
 
         return any(map(switch.enabled_for, inputs))
@@ -422,18 +422,6 @@ class Manager(threading.local):
 
         self.register(switch, signal=signals.switch_updated)
         switch.reset()
-
-        # If this switch has any children, it's likely their instance of this
-        # switch (their ``parent``) is now "stale" since this switch has
-        # been updated. In order for them to pick up their new parent, we need
-        # to re-save them.
-        #
-        # ``register`` is not used here since we do not need/want to sync
-        # parental relationships.
-        for child in getattr(switch, 'children', []):
-            child = self.storage[self.__namespaced(child)]
-            child.parent = switch.name
-            self.__persist(child)
 
     def namespaced(self, namespace):
         new_namespace = []
@@ -453,13 +441,8 @@ class Manager(threading.local):
             namespace=new_namespace,
         )
 
-    def parent(self, switch):
-        key = self.__parent_key_for(switch)
-
-        if not key:
-            return
-        else:
-            return self.switch(key)
+    def __has_parent(self, switch):
+        return bool(self.__parent_key_for(switch))
 
     def __persist(self, switch):
         self.storage[self.__namespaced(switch.name)] = switch

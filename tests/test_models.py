@@ -45,17 +45,6 @@ class TestSwitch(unittest2.TestCase):
         ('concent', (True, False))
     ]
 
-    def test_legacy_unpickle(self):
-        d = EncodingDict()
-
-        parent = Switch('a')
-        switch = Switch('a:b')
-
-        decoded_switch = d._decode(d._encode(switch))
-        self.assertEquals(decoded_switch.name, switch.name)
-        self.assertEquals(decoded_switch.parent, switch.parent.name)
-
-
     def test_switch_name_is_immutable(self):
         switch = Switch('foo')
         with self.assertRaises(AttributeError):
@@ -336,12 +325,6 @@ class ConcentTest(Exam, SwitchWithConditions, unittest2.TestCase):
     def manager(self):
         return Manager(storage=MemoryDict())
 
-    @fixture
-    def parent(self):
-        p = mock.Mock()
-        p.enabled_for.return_value = False
-        return p
-
     @before
     def make_all_conditions_true(self):
         self.make_all_conditions(True)
@@ -358,18 +341,16 @@ class ConcentTest(Exam, SwitchWithConditions, unittest2.TestCase):
     def test_with_concent_only_enabled_if_parent_is_too(self):
         self.manager.register(self.switch)
 
-        parent = self.manager.switch(self.switch.parent)
-        eq_(parent.enabled_for('input'), False)
+        eq_(self.parent_switch.enabled_for('input'), False)
         eq_(self.manager.active('parent:with conditions', 'input'), False)
 
-        parent.state = Switch.states.GLOBAL
+        self.parent_switch.state = Switch.states.GLOBAL
         eq_(self.manager.active('parent:with conditions', 'input'), True)
 
     def test_without_concent_ignores_parents_enabled_status(self):
         self.switch.concent = False
 
-        parent = self.manager.switch(self.switch.parent)
-        eq_(parent.enabled_for('input'), False)
+        eq_(self.parent_switch.enabled_for('input'), False)
         eq_(self.switch.enabled_for('input'), True)
 
         self.make_all_conditions(False)
@@ -430,7 +411,6 @@ class ManagerTest(unittest2.TestCase):
     def switch(self):
         switch = mock.Mock(spec=Switch)
         switch.changes = {}
-        switch.parent = None
         switch.name = 'foo'
         switch.manager = None
         return switch
@@ -577,7 +557,6 @@ class ActsLikeManager(object):
 
     def mock_and_register_switch(self, name):
         switch = self.new_switch(name)
-        switch.parent = None
         self.manager.register(switch)
         return switch
 
