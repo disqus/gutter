@@ -62,6 +62,7 @@ ten_percent = Percent(percentage=10)
 fifty_to_100_percent = PercentRange(lower_limit=50, upper_limit=100)
 is_42 = Equals(value=42)
 true = Truthy()
+equals_sf = Equals(value='San Francisco')
 
 class TestIntegration(Exam, unittest2.TestCase):
 
@@ -128,7 +129,7 @@ class TestIntegration(Exam, unittest2.TestCase):
         self.age_21_plus = Condition(UserArguments, 'age', more_than_21)
         self.age_between_13_and_18 = Condition(UserArguments, 'age', between_13_and_18)
 
-        self.in_sf = Condition(UserArguments, 'location', Equals(value='San Francisco'))
+        self.in_sf = Condition(UserArguments, 'location', equals_sf)
         self.has_location = Condition(UserArguments, 'location', true)
 
         self.ten_percent = Condition(UserArguments, 'name', ten_percent)
@@ -405,14 +406,15 @@ class TestIntegrationWithRedisAndProtobufs(TestIntegrationWithRedis):
     def register_everything(self):
         self.encoding.registry.arguments.register('UserArguments', UserArguments)
         self.encoding.registry.arguments.register('IntegerArguments', IntegerArguments)
-        self.encoding.registry.operators.register('more_than_or_equal_to', more_than_65)
-        self.encoding.registry.operators.register('before', less_than_18)
-        self.encoding.registry.operators.register('more_than', more_than_21)
-        self.encoding.registry.operators.register('between', between_13_and_18)
-        self.encoding.registry.operators.register('percent', ten_percent)
-        self.encoding.registry.operators.register('percent_range', fifty_to_100_percent)
-        self.encoding.registry.operators.register('equals', is_42)
+        self.encoding.registry.operators.register('more_than_65', more_than_65)
+        self.encoding.registry.operators.register('less_than_18', less_than_18)
+        self.encoding.registry.operators.register('more_than_21', more_than_21)
+        self.encoding.registry.operators.register('between_13_and_18', between_13_and_18)
+        self.encoding.registry.operators.register('ten_percent', ten_percent)
+        self.encoding.registry.operators.register('fifty_to_100_percent', fifty_to_100_percent)
+        self.encoding.registry.operators.register('is_42', is_42)
         self.encoding.registry.operators.register('true', true)
+        self.encoding.registry.operators.register('equals_sf', equals_sf)
 
     @fixture
     def manager(self):
