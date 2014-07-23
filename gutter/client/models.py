@@ -7,6 +7,7 @@ gutter.models
 """
 
 from gutter.client import signals
+from gutter.client.registry import Registry
 from functools import partial
 import threading
 
@@ -329,6 +330,7 @@ class Manager(threading.local):
         self.inputs = inputs
         self.switch_class = switch_class
         self.namespace = namespace
+        self.registry = Registry()
 
     def __getstate__(self):
         inner_dict = vars(self).copy()

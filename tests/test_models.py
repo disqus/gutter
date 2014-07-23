@@ -555,6 +555,10 @@ class ManagerTest(unittest2.TestCase):
             self.namespaced('foo')
         )
 
+    def test_registry_is_empty_on_creation(self):
+        eq_(len(self.manager.registry.operators.items), 0)
+        eq_(len(self.manager.registry.arguments.items), 0)
+
 
 class NamespacedManagertest(ManagerTest):
 
