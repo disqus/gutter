@@ -15,6 +15,12 @@ from exam.decorators import fixture, before
 from exam.cases import Exam
 
 
+class ManagerMixin(Exam):
+
+    @fixture
+    def manager(self):
+        return Manager(MemoryDict())
+
 
 class EncodingDict(DurableDict):
     __last_updated = 0
@@ -28,6 +34,7 @@ def unbound_method():
 
 
 class Argument(object):
+
     def bar(self):
         pass
 
@@ -37,7 +44,7 @@ class MOLArgument(BaseArgument):
     foo = arguments.Value(lambda self: 42)
 
 
-class TestSwitch(unittest2.TestCase):
+class TestSwitch(ManagerMixin, unittest2.TestCase):
 
     possible_properties = [
         ('state', (Switch.states.DISABLED, Switch.states.SELECTIVE)),
@@ -65,7 +72,6 @@ class TestSwitch(unittest2.TestCase):
         self.assertEquals(decoded_switch.name, switch.name)
         self.assertEquals(decoded_switch.parent, switch.parent.name)
         self.assertListEqual([child.name for child in children], decoded_switch.children)
-
 
     def test_switch_name_is_immutable(self):
         switch = Switch('foo')
@@ -156,28 +162,28 @@ class TestSwitch(unittest2.TestCase):
         eq_(Switch('foo').manager, None)
 
     def test_switch_can_be_constructed_witn_a_manager(self):
-        eq_(Switch('foo', manager='manager').manager, 'manager')
+        eq_(Switch('foo', manager=self.manager).manager, self.manager)
 
     @mock.patch('gutter.client.signals.switch_checked')
     def test_switch_enabed_for_calls_switch_checked_signal(self, signal):
-        switch = Switch('foo', manager='manager')
+        switch = Switch('foo')
         switch.enabled_for(True)
         signal.call.assert_called_once_with(switch)
 
     @mock.patch('gutter.client.signals.switch_active')
     def test_switch_enabed_for_calls_switch_active_signal_when_enabled(self, signal):
-        switch = Switch('foo', manager='manager', state=Switch.states.GLOBAL)
+        switch = Switch('foo', state=Switch.states.GLOBAL)
         ok_(switch.enabled_for('causing input'))
         signal.call.assert_called_once_with(switch, 'causing input')
 
     @mock.patch('gutter.client.signals.switch_active')
     def test_switch_enabed_for_skips_switch_active_signal_when_not_enabled(self, signal):
-        switch = Switch('foo', manager='manager', state=Switch.states.DISABLED)
+        switch = Switch('foo', state=Switch.states.DISABLED)
         eq_(switch.enabled_for('causing input'), False)
         eq_(signal.call.called, False)
 
     def test_switches_are_equal_if_they_have_the_same_properties(self):
-        a = Switch('a') # must init with the same name as name is immutable
+        a = Switch('a')  # must init with the same name as name is immutable
         b = Switch('a')
 
         for prop, (a_value, b_value) in self.possible_properties:
@@ -200,7 +206,7 @@ class TestSwitch(unittest2.TestCase):
         eq_(a, b)
 
 
-class TestSwitchChanges(unittest2.TestCase):
+class TestSwitchChanges(ManagerMixin, unittest2.TestCase):
 
     @fixture
     def switch(self):
@@ -238,7 +244,7 @@ class TestSwitchChanges(unittest2.TestCase):
                 state=self.changes_dict(1, 'new name'),
                 concent=self.changes_dict(True, False)
             )
-        )
+            )
 
 
 class TestCondition(unittest2.TestCase):
@@ -591,14 +597,20 @@ class ActsLikeManager(object):
         return self.new_switch('test')
 
     def new_switch(self, name, parent=None):
-        switch = mock.Mock(name=name)
-        switch.name = name
-        switch.parent = parent
-        switch.children = []
+        return Switch(name=name, parent=parent)
+
+    def make_and_register_switch(self, name, parent=None):
+        switch = self.new_switch(name, parent)
+        self.manager.register(switch)
         return switch
 
-    def mock_and_register_switch(self, name, parent=None):
-        switch = self.new_switch(name, parent)
+    def mock_and_register_switch(self, name):
+        switch = mock.Mock(name=name)
+        switch.name = name
+        switch.parent = None
+        switch.get_parent.return_value = None
+        switch.children = []
+
         self.manager.register(switch)
         return switch
 
@@ -611,44 +623,44 @@ class ActsLikeManager(object):
         assert_raises(ValueError, self.manager.active, 'junk')
 
     def test_unregister_removes_a_switch_from_storage_with_name(self):
-        switch = self.mock_and_register_switch('foo')
+        switch = self.make_and_register_switch('foo')
         ok_(switch in self.manager.switches)
 
         self.manager.unregister(switch.name)
         ok_(switch not in self.manager.switches)
 
     def test_unregister_can_remove_if_given_switch_instance(self):
-        switch = self.mock_and_register_switch('foo')
+        switch = self.make_and_register_switch('foo')
         ok_(switch in self.manager.switches)
 
         self.manager.unregister(switch)
         ok_(switch not in self.manager.switches)
 
     def test_register_does_not_set_parent_by_default(self):
-        switch = self.mock_and_register_switch('foo')
+        switch = self.make_and_register_switch('foo')
         eq_(switch.parent, None)
 
     def test_register_sets_parent_on_switch_if_there_is_one(self):
-        parent = self.mock_and_register_switch('movies')
-        child = self.mock_and_register_switch('movies:jaws')
+        parent = self.make_and_register_switch('movies')
+        child = self.make_and_register_switch('movies:jaws')
         eq_(child.parent, parent.name)
 
     def test_register_adds_self_to_parents_children(self):
-        parent = self.mock_and_register_switch('movies')
-        child = self.mock_and_register_switch('movies:jaws')
+        parent = self.make_and_register_switch('movies')
+        child = self.make_and_register_switch('movies:jaws')
 
         eq_(parent.children, [child.name])
 
-        sibling = self.mock_and_register_switch('movies:jaws')
+        sibling = self.make_and_register_switch('movies:jaws')
 
         eq_(parent.children, [child.name, sibling.name])
 
     def test_register_raises_value_error_for_blank_name(self):
         with self.assertRaises(ValueError):
-            self.mock_and_register_switch('')
+            self.make_and_register_switch('')
 
     def test_switch_returns_switch_from_manager_with_name(self):
-        switch = self.mock_and_register_switch('foo')
+        switch = self.make_and_register_switch('foo')
         eq_(switch, self.manager.switch('foo'))
 
     def test_switch_returns_switch_with_manager_assigned(self):
@@ -661,11 +673,11 @@ class ActsLikeManager(object):
         assert_raises(ValueError, self.manager.switch, 'junk')
 
     def test_unregister_removes_all_child_switches_too(self):
-        grandparent = self.mock_and_register_switch('movies')
-        parent = self.mock_and_register_switch('movies:star_wars')
-        child1 = self.mock_and_register_switch('movies:star_wars:a_new_hope')
-        child2 = self.mock_and_register_switch('movies:star_wars:return_of_the_jedi')
-        great_uncle = self.mock_and_register_switch('books')
+        grandparent = self.make_and_register_switch('movies')
+        parent = self.make_and_register_switch('movies:star_wars')
+        child1 = self.make_and_register_switch('movies:star_wars:a_new_hope')
+        child2 = self.make_and_register_switch('movies:star_wars:return_of_the_jedi')
+        great_uncle = self.make_and_register_switch('books')
 
         ok_(grandparent in self.manager.switches)
         ok_(parent in self.manager.switches)
@@ -683,7 +695,7 @@ class ActsLikeManager(object):
 
     @mock.patch('gutter.client.signals.switch_unregistered')
     def test_register_signals_switch_registered_with_switch(self, signal):
-        switch = self.mock_and_register_switch('foo')
+        switch = self.make_and_register_switch('foo')
         self.manager.unregister(switch.name)
         signal.call.assert_called_once_with(switch)
 

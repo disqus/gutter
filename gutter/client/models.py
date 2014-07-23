@@ -12,6 +12,7 @@ import threading
 
 
 class Switch(object):
+
     """
     A switch encapsulates the concept of an item that is either 'on' or 'off'
     depending on the input.  The switch determines this by checking each of its
@@ -49,6 +50,12 @@ class Switch(object):
     def name(self):
         return self._name
 
+    def get_parent(self):
+        return self.manager.switch(self.parent) if self.parent else None
+
+    def get_children(self):
+        return map(self.manager.switch, self.children)
+
     def __repr__(self):
         kwargs = dict(
             state=self.state,
@@ -63,12 +70,12 @@ class Switch(object):
         )
 
     def __eq__(self, other):
-            return (
-                self.name == other.name and
-                self.state is other.state and
-                self.compounded is other.compounded and
-                self.concent is other.concent
-            )
+        return (
+            self.name == other.name and
+            self.state is other.state and
+            self.compounded is other.compounded and
+            self.concent is other.concent
+        )
 
     def __getstate__(self):
         inner_dict = vars(self).copy()
@@ -193,6 +200,7 @@ class Switch(object):
 
 
 class Condition(object):
+
     """
     A Condition is the configuration of an argument, its attribute and an
     operator. It tells you if it itself is true or false given an input.
@@ -298,6 +306,7 @@ class Condition(object):
 
 
 class Manager(threading.local):
+
     """
     The Manager holds all state for Gutter.  It knows what Switches have been
     registered, and also what Input objects are currently being applied.  It
@@ -339,6 +348,9 @@ class Manager(threading.local):
     def __getitem__(self, key):
         return self.switch(key)
 
+    def __contains__(self, key):
+        return self.__namespaced(key) in self.storage
+
     @property
     def switches(self):
         """
@@ -365,7 +377,7 @@ class Manager(threading.local):
             switch = self.storage[self.__namespaced(name)]
         except KeyError:
             if not self.autocreate:
-                raise ValueError("No switch named '%s' registered" % name)
+                raise ValueError("No switch named '%s' registered in '%s'" % (name, self.namespace))
 
             switch = self.__create_and_register_disabled_switch(name)
 
@@ -387,12 +399,13 @@ class Manager(threading.local):
 
     def unregister(self, switch_or_name):
         name = getattr(switch_or_name, 'name', switch_or_name)
-        switch = self.switch(name)
+        if name in self:
+            switch = self.switch(name)
 
-        [self.unregister(child) for child in switch.children]
+            [self.unregister(child) for child in switch.children]
 
-        del self.storage[self.__namespaced(name)]
-        signals.switch_unregistered.call(switch)
+            del self.storage[self.__namespaced(name)]
+            signals.switch_unregistered.call(switch)
 
     def input(self, *inputs):
         self.inputs = list(inputs)
@@ -414,7 +427,7 @@ class Manager(threading.local):
         # If necessary, the switch first consents with its parent and returns
         # false if the switch is consenting and the parent is not enabled for
         # ``inputs``.
-        if switch.concent and switch.parent and not self.active(switch.parent, *inputs, **kwargs):
+        if switch.concent and switch.get_parent() and not self.active(switch.parent, *inputs, **kwargs):
             return False
 
         return any(map(switch.enabled_for, inputs))
@@ -475,7 +488,6 @@ class Manager(threading.local):
         except ValueError:
             # no parent found or created, so we just pass
             pass
-
 
     def __parent_key_for(self, switch):
         # TODO: Make this a method on the switch object
