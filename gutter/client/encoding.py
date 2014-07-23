@@ -1,10 +1,13 @@
-from gargoyle.client.models import (
+from gutter.client.models import (
     Condition,
     Switch,
 )
-from gargoyle.client.iterfaces.interfaces_pb2 import (
+from gutter.client.regisry import (
+    arguments,
+    operators,
+)
+from gutter.client.iterfaces.interfaces_pb2 import (
     PBCondition,
-    PBState,
     PBSwitch,
 )
 
@@ -22,7 +25,7 @@ class SwitchProtobufEncoding(object):
         pbswitch.compounded = switch.compounded
         pbswitch.concent = switch.concent
 
-        pbswitch.state = PBState.DESCRIPTOR.values_by_number[switch.state]
+        pbswitch.state = PBSwitch.State.DESCRIPTOR.values_by_number[switch.state]
 
         for condition in switch.conditions:
             pbcondition = PBCondition()
@@ -50,9 +53,9 @@ class SwitchProtobufEncoding(object):
 
         for pbcondition in pbswitch.conditions:
             condition = Condition(
-                argument=regisry.argument[pbcondition.argument],
+                argument=arguments[pbcondition.argument],
                 attribute=pbcondition.attribute,
-                operator=regisry.operator[pbcondition.operator],
+                operator=operators[pbcondition.operator],
                 negative=pbcondition.negative,
             )
             switch.conditions.append(condition)
