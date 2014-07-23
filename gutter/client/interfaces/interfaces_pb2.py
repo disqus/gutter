@@ -13,7 +13,7 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='interfaces.proto',
   package='gutter',
-  serialized_pb='\n\x10interfaces.proto\x12\x06gutter\"T\n\tCondition\x12\x10\n\x08\x61rgument\x18\x01 \x02(\t\x12\x11\n\tattribute\x18\x02 \x02(\t\x12\x10\n\x08operator\x18\x03 \x02(\t\x12\x10\n\x08negative\x18\x04 \x02(\x08\"\x8c\x01\n\rConditionList\x12\x34\n\nquantifier\x18\x01 \x02(\x0e\x32 .gutter.ConditionList.Quantifier\x12%\n\nconditions\x18\x02 \x03(\x0b\x32\x11.gutter.Condition\"\x1e\n\nQuantifier\x12\x07\n\x03\x41NY\x10\x01\x12\x07\n\x03\x41LL\x10\x02\"\xcc\x01\n\x06Switch\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\r\n\x05label\x18\x02 \x02(\t\x12#\n\x05state\x18\x03 \x02(\x0e\x32\x14.gutter.Switch.State\x12)\n\nconditions\x18\x04 \x02(\x0b\x32\x15.gutter.ConditionList\x12\x12\n\ncompounded\x18\x05 \x02(\x08\x12\x0f\n\x07\x63oncent\x18\x06 \x02(\x08\"0\n\x05State\x12\x0c\n\x08\x44ISABLED\x10\x01\x12\r\n\tSELECTIVE\x10\x02\x12\n\n\x06GLOBAL\x10\x03')
+  serialized_pb='\n\x10interfaces.proto\x12\x06gutter\"T\n\tCondition\x12\x10\n\x08\x61rgument\x18\x01 \x02(\t\x12\x11\n\tattribute\x18\x02 \x02(\t\x12\x10\n\x08operator\x18\x03 \x02(\t\x12\x10\n\x08negative\x18\x04 \x02(\x08\"\x8c\x01\n\rConditionList\x12\x34\n\nquantifier\x18\x01 \x02(\x0e\x32 .gutter.ConditionList.Quantifier\x12%\n\nconditions\x18\x02 \x03(\x0b\x32\x11.gutter.Condition\"\x1e\n\nQuantifier\x12\x07\n\x03\x41NY\x10\x01\x12\x07\n\x03\x41LL\x10\x02\"\xcc\x01\n\x06Switch\x12\x0c\n\x04name\x18\x01 \x02(\t\x12#\n\x05state\x18\x02 \x02(\x0e\x32\x14.gutter.Switch.State\x12)\n\nconditions\x18\x03 \x01(\x0b\x32\x15.gutter.ConditionList\x12\r\n\x05label\x18\x04 \x01(\t\x12\x12\n\ncompounded\x18\x05 \x01(\x08\x12\x0f\n\x07\x63oncent\x18\x06 \x01(\x08\"0\n\x05State\x12\x0c\n\x08\x44ISABLED\x10\x01\x12\r\n\tSELECTIVE\x10\x02\x12\n\n\x06GLOBAL\x10\x03')
 
 
 
@@ -164,36 +164,36 @@ _SWITCH = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='label', full_name='gutter.Switch.label', index=1,
-      number=2, type=9, cpp_type=9, label=2,
-      has_default_value=False, default_value=unicode("", "utf-8"),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='state', full_name='gutter.Switch.state', index=2,
-      number=3, type=14, cpp_type=8, label=2,
+      name='state', full_name='gutter.Switch.state', index=1,
+      number=2, type=14, cpp_type=8, label=2,
       has_default_value=False, default_value=1,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='conditions', full_name='gutter.Switch.conditions', index=3,
-      number=4, type=11, cpp_type=10, label=2,
+      name='conditions', full_name='gutter.Switch.conditions', index=2,
+      number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
+      name='label', full_name='gutter.Switch.label', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
       name='compounded', full_name='gutter.Switch.compounded', index=4,
-      number=5, type=8, cpp_type=7, label=2,
+      number=5, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='concent', full_name='gutter.Switch.concent', index=5,
-      number=6, type=8, cpp_type=7, label=2,
+      number=6, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,

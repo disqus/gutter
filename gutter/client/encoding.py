@@ -2,13 +2,13 @@ from gutter.client.models import (
     Condition,
     Switch,
 )
-from gutter.client.regisry import (
+from gutter.client.registry import (
     arguments,
     operators,
 )
-from gutter.client.iterfaces.interfaces_pb2 import (
-    PBCondition,
-    PBSwitch,
+from gutter.client.interfaces.interfaces_pb2 import (
+    Condition as PBCondition,
+    Switch as PBSwitch,
 )
 
 # XXX: Groos
@@ -21,11 +21,17 @@ class SwitchProtobufEncoding(object):
         pbswitch = PBSwitch()
 
         pbswitch.name = switch.name
-        pbswitch.label = switch.label
-        pbswitch.compounded = switch.compounded
-        pbswitch.concent = switch.concent
 
-        pbswitch.state = PBSwitch.State.DESCRIPTOR.values_by_number[switch.state]
+        if switch.label:
+            pbswitch.label = switch.label
+
+        pbswitch.concent = switch.concent
+        pbswitch.state = switch.state
+
+        # if switch.compounded:
+        #     switch.conditions.quantifier = PBConditionList.ALL
+        # else:
+        #     switch.conditions.quantifier = PBConditionList.ANY
 
         for condition in switch.conditions:
             pbcondition = PBCondition()
@@ -34,13 +40,16 @@ class SwitchProtobufEncoding(object):
             pbcondition.operator = condition.operator
             pbcondition.negative = condition.negative
 
-            pbswitch.conditions.add(condition)
+            switch.conditions.conditions.add(condition)
 
         return pbswitch.SerializeToString()
 
     @staticmethod
     def decode(data):
-        pbswitch = PBSwitch.ParseFromString(data)
+        pbswitch = PBSwitch()
+
+        pbswitch.ParseFromString(data)
+
         switch = Switch(
             name=pbswitch.name,
             label=pbswitch.label,
@@ -51,7 +60,7 @@ class SwitchProtobufEncoding(object):
             compounded=pbswitch.compounded,
         )
 
-        for pbcondition in pbswitch.conditions:
+        for pbcondition in pbswitch.conditions.conditions:
             condition = Condition(
                 argument=arguments[pbcondition.argument],
                 attribute=pbcondition.attribute,

@@ -27,9 +27,11 @@ message Switch {
     }
 
     required string name = 1;
-    required string label = 2;
-    required State state = 3;
-    required ConditionList conditions = 4;
-    required bool compounded = 5;
-    required bool concent = 6;
+    required State state = 2;
+
+    optional ConditionList conditions = 3;
+
+    optional string label = 4;
+    optional bool compounded = 5;
+    optional bool concent = 6;
 }

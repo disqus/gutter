@@ -15,7 +15,9 @@ class ProtobufEncodingTest(Exam, unittest2.TestCase):
     switch = fixture(Switch, 'test')
 
     def cycle(self, thing):
-        SwitchProtobufEncoding.decode(SwitchProtobufEncoding.encode(thing))
+        return SwitchProtobufEncoding.decode(
+            SwitchProtobufEncoding.encode(thing)
+        )
 
-    def test_it_cycles_correctly(self):
+    def test_it_encodes_and_decodes_correctly(self):
         self.assertEqual(self.switch, self.cycle(self.switch))
