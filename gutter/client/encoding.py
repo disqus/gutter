@@ -1,3 +1,5 @@
+import json
+
 from gutter.client.models import (
     Condition,
     Switch,
@@ -61,6 +63,61 @@ class SwitchProtobufEncoding(object):
                 attribute=pbcondition.attribute,
                 operator=self.registry.operators[pbcondition.operator],
                 negative=pbcondition.negative,
+            )
+            switch.conditions.append(condition)
+
+        return switch
+
+
+class SwitchJSONEncoding(object):
+
+    def __init__(self):
+        self.registry = Registry()
+
+    def encode(self, switch):
+        basicswitch = {
+            'name': switch.name,
+            'concent': switch.concent,
+            'state': switch.state,
+            'conditions': {'conditions': []}
+        }
+
+        if switch.label:
+            basicswitch['label'] = switch.label
+
+        if switch.compounded:
+            basicswitch['conditions']['quantifier'] = 'all'
+        else:
+            basicswitch['conditions']['quantifier'] = 'any'
+
+        for condition in switch.conditions:
+            basiccondition = {
+                'argument': self.registry.arguments.get_key(condition.argument),
+                'attribute': condition.attribute,
+                'operator': self.registry.operators.get_key(condition.operator),
+                'negative': condition.negative
+            }
+            basicswitch['conditions']['conditions'].append(basiccondition)
+
+        return json.dumps(basicswitch)
+
+    def decode(self, json_string):
+        data = json.loads(json_string)
+
+        switch = Switch(
+            name=data['name'],
+            label=data.get('label'),
+            state=data['state'],
+            concent=data['concent'],
+            compounded=data['conditions']['quantifier'] == 'all'
+        )
+
+        for dataconditon in data['conditions']['conditions']:
+            condition = Condition(
+                argument=self.registry.arguments[dataconditon['argument']],
+                attribute=dataconditon['attribute'],
+                operator=self.registry.operators[dataconditon['operator']],
+                negative=dataconditon['negative'],
             )
             switch.conditions.append(condition)
 
