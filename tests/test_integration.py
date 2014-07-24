@@ -400,57 +400,35 @@ class TestIntegrationWithRedis(TestIntegration):
             self.fail('Encountered pickling error: "%s"' % e)
 
 
-class TestIntegrationWithProtobufs(TestIntegration):
+class EncodingTest(object):
 
+    @before
+    def register_everything(self):
+        self.encoding.registry.arguments.register('user', UserArguments)
+        self.encoding.registry.arguments.register('integer', IntegerArguments)
+        self.encoding.registry.operators.register('more_than_65', more_than_65)
+        self.encoding.registry.operators.register('less_than_18', less_than_18)
+        self.encoding.registry.operators.register('more_than_21', more_than_21)
+        self.encoding.registry.operators.register('between_13_and_18', between_13_and_18)
+        self.encoding.registry.operators.register('ten_percent', ten_percent)
+        self.encoding.registry.operators.register('fifty_to_100_percent', fifty_to_100_percent)
+        self.encoding.registry.operators.register('is_42', is_42)
+        self.encoding.registry.operators.register('true', true)
+        self.encoding.registry.operators.register('equals_sf', equals_sf)
+
+    @fixture
+    def manager(self):
+        return Manager(
+            storage=MemoryDict(
+                'gutter-tests',
+                encoding=self.encoding
+            )
+        )
+
+
+class TestIntegrationWithProtobufs(EncodingTest, TestIntegration):
     encoding = fixture(SwitchProtobufEncoding)
 
-    @before
-    def register_everything(self):
-        self.encoding.registry.arguments.register('user', UserArguments)
-        self.encoding.registry.arguments.register('integer', IntegerArguments)
-        self.encoding.registry.operators.register('more_than_65', more_than_65)
-        self.encoding.registry.operators.register('less_than_18', less_than_18)
-        self.encoding.registry.operators.register('more_than_21', more_than_21)
-        self.encoding.registry.operators.register('between_13_and_18', between_13_and_18)
-        self.encoding.registry.operators.register('ten_percent', ten_percent)
-        self.encoding.registry.operators.register('fifty_to_100_percent', fifty_to_100_percent)
-        self.encoding.registry.operators.register('is_42', is_42)
-        self.encoding.registry.operators.register('true', true)
-        self.encoding.registry.operators.register('equals_sf', equals_sf)
 
-    @fixture
-    def manager(self):
-        return Manager(
-            storage=MemoryDict(
-                'gutter-tests',
-                encoding=self.encoding
-            )
-        )
-
-
-class TestIntgratioWithJSON(TestIntegration):
-
+class TestIntgratioWithJSON(EncodingTest, TestIntegration):
     encoding = fixture(SwitchJSONEncoding)
-
-    @before
-    def register_everything(self):
-        self.encoding.registry.arguments.register('user', UserArguments)
-        self.encoding.registry.arguments.register('integer', IntegerArguments)
-        self.encoding.registry.operators.register('more_than_65', more_than_65)
-        self.encoding.registry.operators.register('less_than_18', less_than_18)
-        self.encoding.registry.operators.register('more_than_21', more_than_21)
-        self.encoding.registry.operators.register('between_13_and_18', between_13_and_18)
-        self.encoding.registry.operators.register('ten_percent', ten_percent)
-        self.encoding.registry.operators.register('fifty_to_100_percent', fifty_to_100_percent)
-        self.encoding.registry.operators.register('is_42', is_42)
-        self.encoding.registry.operators.register('true', true)
-        self.encoding.registry.operators.register('equals_sf', equals_sf)
-
-    @fixture
-    def manager(self):
-        return Manager(
-            storage=MemoryDict(
-                'gutter-tests',
-                encoding=self.encoding
-            )
-        )
