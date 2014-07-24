@@ -5,6 +5,7 @@ import zlib
 
 from redis import Redis
 from durabledict.redis import RedisDict
+from durabledict.memory import MemoryDict
 
 from gutter.client.encoding import SwitchProtobufEncoding
 from gutter.client.operators.comparable import *
@@ -396,7 +397,7 @@ class TestIntegrationWithRedis(TestIntegration):
             self.fail('Encountered pickling error: "%s"' % e)
 
 
-class TestIntegrationWithRedisAndProtobufs(TestIntegrationWithRedis):
+class TestIntegrationWithProtobufs(TestIntegrationWithRedis):
 
     encoding = fixture(SwitchProtobufEncoding)
 
@@ -417,9 +418,8 @@ class TestIntegrationWithRedisAndProtobufs(TestIntegrationWithRedis):
     @fixture
     def manager(self):
         return Manager(
-            storage=RedisDict(
+            storage=MemoryDict(
                 'gutter-tests',
-                self.redis,
                 encoding=self.encoding
             )
         )
