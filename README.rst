@@ -33,7 +33,14 @@ Gutter requires a small bit of configuration before usage.
 Choosing Storage
 ~~~~~~~~~~~~~~~~
 
-Switches are persisted in a ``storage`` object, which is a `dict` or any object which provides the ``types.MappingType`` interface (``__setitem__`` and ``__getitem__`` methods).  By default, ``gutter`` uses an instance of `MemoryDict` from the `durabledict library <https://github.com/disqus/durabledict>`_.  This engine **does not persist data once the process ends** so a more persistent data store should be used.
+Switches are persisted in a ``storage`` object, which is a `dict` or any object which provides the ``types.MappingType`` interface (``__setitem__`` and ``__getitem__`` methods).  The dictionary is expected to provide an interface where ``dict['key_name']`` can be used to read and write rich python ``Switch`` objects.
+
+By default, ``gutter`` uses an instance of `MemoryDict` with the default ``PickleEncoding`` encoding, from the `durabledict library <https://github.com/disqus/durabledict>`_.  This engine **does not persist data once the process ends** so a more persistent data store should be used.
+
+Encoding and Storage
+--------------------
+
+At the raw strorage level, gutter expects switches to be serialized into the data store in a siple, language-agnostic format.  The format is defined by a protobuf message specification and the actual data contained in the data
 
 Autocreate
 ~~~~~~~~~~
