@@ -1,5 +1,6 @@
 VERSION = $(shell python setup.py --version)
 PROTOBUF_PYTHON_PATH=gutter/client/interfaces
+PROTOBUF_JAVA_PATH=scala/src/main/java
 
 TEST_RESULTS_DIR=test_results
 XUNIT_DIR=${TEST_RESULTS_DIR}/xunit
@@ -25,6 +26,6 @@ watch:
 	bundle exec guard
 
 interfaces:
-	protoc --python_out=${PROTOBUF_PYTHON_PATH} interfaces.proto
+	protoc --python_out=${PROTOBUF_PYTHON_PATH} --java_out=${PROTOBUF_JAVA_PATH} interfaces.proto
 
 .PHONY: test test-xunit release watch interfaces
