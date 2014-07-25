@@ -85,7 +85,11 @@ If you would like to construct and use a different default manager, but still ha
 
     assert manager_settings.default is gutter
 
-Note that the ``settings.manager.default`` value must be set **before** importing the default ``gutter`` instance.
+.. WARNING::
+
+   :warning::warning:
+   Note that the ``settings.manager.default`` value must be set **before** importing the default ``gutter`` instance.
+   :warning::warning:
 
 Arguments
 =========
