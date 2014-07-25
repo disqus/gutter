@@ -44,11 +44,13 @@ object Client {
     val switches = ZooKeeperMap.create(client, "/hackweek", deserializer)
 
     var last: List[String] = null
+    val random = scala.util.Random
+    var age = random.nextInt(99) + 1
 
     def main(args: Array[String]): Unit = {
         while (true) {
             handleNode(switches.get("default.doge"))
-            Thread.sleep(3000)
+            Thread.sleep(1000)
         }
     }
 
@@ -57,17 +59,18 @@ object Client {
         val operator = conditions.get(0).getOperator.split(":")
 
         val matches = operator(0) match {
-            case "equals" if operator(1).toInt == 42 => true
-            case "between" if operator(1).toInt < 42 && operator(2).toInt >42 => true
-            case "more_than" if operator(1).toInt < 42 => true
+            case "equals" if operator(1).toInt == age => true
+            case "between" if operator(1).toInt < age && operator(2).toInt >age => true
+            case "more_than" if operator(1).toInt < age => true
             // LOL TYPO
-            case "before" if operator(1).toInt > 42 => true
+            case "before" if operator(1).toInt > age => true
             case _ => false
         }
 
         if (last != null && operator(0) == "equals" && matches == true && last != operator.toList) {
             println(DOGE)
-            println("YOU WIN!")
+            println("YOU WIN! SUCH " + age.toString + " AGE. WOW.")
+            age = random.nextInt(99) + 1
         } else if (last != null && matches == true && last != operator.toList) {
             println("Yes: " + conditions.get(0).getOperator)
         } else if (last != null && matches == false && last != operator.toList) {
