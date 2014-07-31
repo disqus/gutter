@@ -61,7 +61,7 @@ class TestSwitch(unittest2.TestCase):
         switch.children = children
         switch.parent = parent
 
-        decoded_switch = d._decode(d._encode(switch))
+        decoded_switch = d.encoding.decode(d.encoding.encode(switch))
         self.assertEquals(decoded_switch.name, switch.name)
         self.assertEquals(decoded_switch.parent, switch.parent.name)
         self.assertListEqual([child.name for child in children], decoded_switch.children)

@@ -11,7 +11,7 @@ class PercentRange(Base):
     preposition = 'in the percentage range of'
     arguments = ('lower_limit', 'upper_limit')
 
-    _modulo_context = decimal_Context()
+    _context = decimal_Context()
 
     def _modulo(self, decimal_argument):
         """
@@ -23,14 +23,14 @@ class PercentRange(Base):
         decimal_context.divmod(Decimal('100.1'), 100)
         >>> (Decimal('1'), Decimal('0.1'))
         """
-        _times, remainder = self._modulo_context.divmod(decimal_argument, 100)
+        _times, remainder = self._context.divmod(decimal_argument, 100)
 
         # match the builtin % behavior by adding the N to the result if negative
         return remainder if remainder >= 0 else remainder + 100
 
     def __init__(self, lower_limit, upper_limit):
-        self.upper_limit = Decimal(str(upper_limit))
-        self.lower_limit = Decimal(str(lower_limit))
+        self.upper_limit = self._context.create_decimal(str(upper_limit))
+        self.lower_limit = self._context.create_decimal(str(lower_limit))
 
     def applies_to(self, argument):
         try:

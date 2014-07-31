@@ -14,6 +14,9 @@ test-xunit: ${XUNIT_DIR}
 ${XUNIT_DIR}:
 	mkdir -p ${XUNIT_DIR}
 
+lint:
+	python setup.py flake8
+
 release:
 	git tag $(VERSION)
 	git push origin $(VERSION)
@@ -23,4 +26,4 @@ release:
 watch:
 	bundle exec guard
 
-.PHONY: test test-xunit release watch
+.PHONY: test test-xunit lint release watch
