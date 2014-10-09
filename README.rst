@@ -196,7 +196,7 @@ Switches can be constructed in a certain state or the property can be changed la
 Compounded
 ~~~~~~~~~~
 
-When in the ``SELECTIVE`` state, normally only one condition needs be true for the Switch to be enabled for a particular input. If ``switch.componded`` is set to ``True``, then **all** of the switches conditions need to be true in order to be enabled::
+When in the ``SELECTIVE`` state, normally only one condition needs be true for the Switch to be enabled for a particular input. If ``switch.compounded`` is set to ``True``, then **all** of the switches conditions need to be true in order to be enabled::
 
     switch = Switch('require alll conditions', compounded=True)
 
