@@ -106,7 +106,7 @@ class TestEqualsCaseInsensitiveCondition(TestEqualsCondition):
         EqualsCaseInsensitive()
 
     def test_str_says_is_equal_to_condition(self):
-        eq_(self.str, 'case insensitive equal to "Fred"')
+        eq_(self.str, 'case insensitive equal to "fred"')
 
 
 class TestBetweenCondition(BaseOperator, unittest2.TestCase):

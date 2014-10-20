@@ -15,7 +15,6 @@ class EqualsCaseInsensitive(Base):
         return argument.lower() == self.value.lower()
 
     def __str__(self):
-        return '%s "%s"' % (self.preposition, self.value)
-
+        return '%s "%s"' % (self.preposition, self.value.lower())
 
 operators.register(EqualsCaseInsensitive)
