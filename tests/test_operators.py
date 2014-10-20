@@ -5,6 +5,7 @@ from gutter.client.operators import OperatorInitError
 from gutter.client.operators.comparable import *
 from gutter.client.operators.identity import *
 from gutter.client.operators.misc import *
+from gutter.client.operators.string import *
 
 from exam.decorators import fixture
 
@@ -86,6 +87,26 @@ class TestEqualsCondition(BaseOperator, unittest2.TestCase):
 
     def test_arguments_is_value(self):
         eq_(self.operator.arguments, ('value',))
+
+
+class TestEqualsCaseInsensitiveCondition(TestEqualsCondition):
+
+    def make_operator(self):
+        return EqualsCaseInsensitive(value='Fred')
+
+    def test_applies_to_if_argument_is_equal_to_value(self):
+        ok_(self.operator.applies_to('Fred'))
+        ok_(self.operator.applies_to('fred'))
+        ok_(self.operator.applies_to('Steve') is False)
+        ok_(self.operator.applies_to('') is False)
+        ok_(self.operator.applies_to(True) is False)
+
+    @raises(OperatorInitError)
+    def test_raises_operator_init_error_if_not_provided_value(self):
+        EqualsCaseInsensitive()
+
+    def test_str_says_is_equal_to_condition(self):
+        eq_(self.str, 'case insensitive equal to "Fred"')
 
 
 class TestBetweenCondition(BaseOperator, unittest2.TestCase):
