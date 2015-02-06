@@ -42,7 +42,7 @@ class TestSwitch(unittest2.TestCase):
     possible_properties = [
         ('state', (Switch.states.DISABLED, Switch.states.SELECTIVE)),
         ('compounded', (True, False)),
-        ('concent', (True, False))
+        ('consent', (True, False))
     ]
 
     def test_legacy_unpickle(self):
@@ -143,11 +143,11 @@ class TestSwitch(unittest2.TestCase):
     def test_can_be_constructed_with_parent(self):
         eq_(Switch('foo', parent='dog').parent, 'dog')
 
-    def test_concent_defaults_to_true(self):
-        eq_(Switch('foo').concent, True)
+    def test_consent_defaults_to_true(self):
+        eq_(Switch('foo').consent, True)
 
-    def test_can_be_constructed_with_concent(self):
-        eq_(Switch('foo', concent=False).concent, False)
+    def test_can_be_constructed_with_consent(self):
+        eq_(Switch('foo', consent=False).consent, False)
 
     def test_children_defaults_to_an_empty_list(self):
         eq_(Switch('foo').children, [])
@@ -232,11 +232,11 @@ class TestSwitchChanges(unittest2.TestCase):
             dict(state=self.changes_dict(1, 'new name'))
         )
 
-        self.switch.concent = False
+        self.switch.consent = False
         eq_(self.switch.changes,
             dict(
                 state=self.changes_dict(1, 'new name'),
-                concent=self.changes_dict(True, False)
+                consent=self.changes_dict(True, False)
             )
         )
 
@@ -350,7 +350,7 @@ class SwitchWithConditions(object):
         return mck
 
 
-class ConcentTest(Exam, SwitchWithConditions, unittest2.TestCase):
+class ConsentTest(Exam, SwitchWithConditions, unittest2.TestCase):
 
     @fixture
     def manager(self):
@@ -375,7 +375,7 @@ class ConcentTest(Exam, SwitchWithConditions, unittest2.TestCase):
         for cond in self.switch.conditions:
             cond.call.return_value = val
 
-    def test_with_concent_only_enabled_if_parent_is_too(self):
+    def test_with_consent_only_enabled_if_parent_is_too(self):
         self.manager.register(self.switch)
 
         parent = self.manager.switch(self.switch.parent)
@@ -385,8 +385,8 @@ class ConcentTest(Exam, SwitchWithConditions, unittest2.TestCase):
         parent.state = Switch.states.GLOBAL
         eq_(self.manager.active('parent:with conditions', 'input'), True)
 
-    def test_without_concent_ignores_parents_enabled_status(self):
-        self.switch.concent = False
+    def test_without_consent_ignores_parents_enabled_status(self):
+        self.switch.consent = False
 
         parent = self.manager.switch(self.switch.parent)
         eq_(parent.enabled_for('input'), False)

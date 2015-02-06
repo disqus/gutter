@@ -31,7 +31,7 @@ class Switch(object):
         GLOBAL = 3
 
     def __init__(self, name, state=states.DISABLED, compounded=False,
-                 parent=None, concent=True, manager=None, label=None,
+                 parent=None, consent=True, manager=None, label=None,
                  description=None):
         self._name = str(name)
         self.label = label
@@ -40,7 +40,7 @@ class Switch(object):
         self.conditions = list()
         self.compounded = compounded
         self.parent = parent
-        self.concent = concent
+        self.consent = consent
         self.children = []
         self.manager = manager
         self.reset()
@@ -53,7 +53,7 @@ class Switch(object):
         kwargs = dict(
             state=self.state,
             compounded=self.compounded,
-            concent=self.concent
+            consent=self.consent
         )
         parts = ["%s=%s" % (k, v) for k, v in kwargs.items()]
         return '<Switch("%s") conditions=%s, %s>' % (
@@ -67,7 +67,7 @@ class Switch(object):
                 self.name == other.name and
                 self.state is other.state and
                 self.compounded is other.compounded and
-                self.concent is other.concent
+                self.consent is other.consent
             )
 
     def __getstate__(self):
@@ -414,7 +414,7 @@ class Manager(threading.local):
         # If necessary, the switch first consents with its parent and returns
         # false if the switch is consenting and the parent is not enabled for
         # ``inputs``.
-        if switch.concent and switch.parent and not self.active(switch.parent, *inputs, **kwargs):
+        if switch.consent and switch.parent and not self.active(switch.parent, *inputs, **kwargs):
             return False
 
         return any(map(switch.enabled_for, inputs))

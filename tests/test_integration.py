@@ -129,7 +129,7 @@ class TestIntegration(Exam, unittest2.TestCase):
         self.add_switch('can drink', condition=self.age_21_plus)
         self.add_switch('can drink in europe', condition=self.age_21_plus, state=Switch.states.GLOBAL)
         self.add_switch('can drink:answer to life', condition=self.answer_to_life)
-        self.add_switch('can drink:wine', condition=self.in_sf, concent=True)
+        self.add_switch('can drink:wine', condition=self.in_sf, consent=True)
         self.add_switch('retired', condition=self.age_65_and_up)
         self.add_switch('can vote', condition=self.age_not_under_18)
         self.add_switch('teenager', condition=self.age_between_13_and_18)
@@ -208,7 +208,7 @@ class TestIntegration(Exam, unittest2.TestCase):
             ok_(context.active('10 percent') is False)
             ok_(context.active('Upper 50 percent') is True)
 
-    def test_switches_can_concent_top_parent_switch(self):
+    def test_switches_can_consent_top_parent_switch(self):
         with self.inputs(self.manager, self.jeff) as context:
             ok_(context.active('can drink') is True)
             ok_(context.active('can drink in europe') is True)
@@ -344,7 +344,7 @@ class TestIntegration(Exam, unittest2.TestCase):
             Switch.states.GLOBAL
         )
 
-    def test_concent_with_different_arguments(self):
+    def test_consent_with_different_arguments(self):
         # Test that a parent switch with a different argument type from the
         # child works.
         with self.inputs(self.manager, self.jeff, 42) as context:
