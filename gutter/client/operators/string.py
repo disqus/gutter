@@ -1,3 +1,4 @@
+from gutter.client.arguments.variables import Base as VariableBase
 from gutter.client.operators import Base
 from gutter.client.registry import operators
 
@@ -10,8 +11,11 @@ class EqualsStripIgnoreCase(Base):
     arguments = ('value',)
 
     def applies_to(self, argument):
-        if not isinstance(argument, basestring):
+        if isinstance(argument, VariableBase):
+            argument = str(argument.value)
+        else:
             argument = str(argument)
+
         return argument.lower().strip() == self.value.lower().strip()
 
     def __str__(self):

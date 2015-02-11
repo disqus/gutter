@@ -18,6 +18,7 @@ from exam.cases import Exam
 
 
 class deterministicstring(str):
+
     """
     Since the percentage-based conditions rely on the hash value from their
     arguments, we use this special deterministicstring class to return
@@ -370,7 +371,8 @@ class TestIntegrationWithRedis(TestIntegration):
 
     @fixture
     def manager(self):
-        return Manager(storage=RedisDict('gutter-tests', self.redis))
+        storage = RedisDict(keyspace='gutter-tests', connection=self.redis)
+        return Manager(storage=storage)
 
     def test_parent_switch_pickle_input(self):
         import pickle
