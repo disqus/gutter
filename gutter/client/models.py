@@ -6,8 +6,8 @@ gutter.models
 :license: Apache License 2.0, see LICENSE for more details.
 """
 
-from gutter.client import signals
 from functools import partial
+from gutter.client import signals
 import threading
 
 
@@ -123,7 +123,12 @@ class Switch(object):
         elif self.state is self.states.DISABLED:
             return signal_decorated(False)
 
-        result = self.__enabled_func(cond.call(inpt) for cond in self.conditions)
+        result = self.__enabled_func(
+            cond.call(inpt)
+            for cond
+            in self.conditions
+            if cond.argument(inpt).applies
+        )
         return signal_decorated(result)
 
     def save(self):
@@ -430,7 +435,7 @@ class Manager(threading.local):
         if switch.concent and switch.get_parent() and not self.active(switch.parent, *inputs, **kwargs):
             return False
 
-        return any(map(switch.enabled_for, inputs))
+        return any(switch.enabled_for(inpt) for inpt in inputs)
 
     def update(self, switch):
 
