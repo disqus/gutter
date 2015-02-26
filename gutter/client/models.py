@@ -6,9 +6,47 @@ gutter.models
 :license: Apache License 2.0, see LICENSE for more details.
 """
 
-from functools import partial
-from gutter.client import signals
 import threading
+from collections import defaultdict
+from functools import partial
+from itertools import ifilter
+
+from gutter.client import signals
+
+
+def all_false_if_empty(iterable):
+    if not iterable:
+        return False
+
+    for element in iterable:
+        if not element:
+            return False
+    return True
+
+
+class ConditionsDict(defaultdict):
+
+    @classmethod
+    def from_conditions_list(cls, conditions):
+        conditions_dict = cls(set)
+
+        for cond in conditions:
+            conditions_dict[cond.argument.COMPATIBLE_TYPE].add(cond)
+
+        return conditions_dict
+
+    def get_by_input(self, inpt):
+        return self.get_by_type(type(inpt))
+
+    def get_by_type(self, to_get_key):
+        if to_get_key in self:
+            return self[to_get_key]
+        for key_type in self:
+            if issubclass(to_get_key, key_type):
+                return self[key_type]
+
+        # raise the correct exception
+        return self[to_get_key]
 
 
 class Switch(object):
@@ -38,7 +76,7 @@ class Switch(object):
         self.label = label
         self.description = description
         self.state = state
-        self.conditions = list()
+        self.conditions = []
         self.compounded = compounded
         self.parent = parent
         self.concent = concent
@@ -115,6 +153,7 @@ class Switch(object):
         Keyword Arguments:
         inpt -- An instance of the ``Input`` class.
         """
+
         signals.switch_checked.call(self)
         signal_decorated = partial(self.__signal_and_return, inpt)
 
@@ -123,13 +162,27 @@ class Switch(object):
         elif self.state is self.states.DISABLED:
             return signal_decorated(False)
 
-        result = self.__enabled_func(
-            cond.call(inpt)
-            for cond
-            in self.conditions
-            if cond.argument(inpt).applies
-        )
+        conditions_dict = ConditionsDict.from_conditions_list(self.conditions)
+        conditions = conditions_dict.get_by_input(inpt)
+
+        if conditions:
+            result = self.__enabled_func(
+                cond.call(inpt)
+                for cond
+                in conditions
+                if cond.argument(inpt).applies
+            )
+        else:
+            result = None
+
         return signal_decorated(result)
+
+    def enabled_for_all(self, *inpts):
+        foo = ifilter(
+            lambda x: x is not None,
+            (self.enabled_for(inpt) for inpt in inpts)
+        )
+        return self.__enabled_func(foo)
 
     def save(self):
         """
@@ -186,7 +239,7 @@ class Switch(object):
     @property
     def __enabled_func(self):
         if self.compounded:
-            return all
+            return all_false_if_empty
         else:
             return any
 
@@ -249,9 +302,16 @@ class Condition(object):
         self.operator = operator
         self.negative = negative
 
+    @property
+    def __is_or_is_not(self):
+        return 'is not' if self.negative else 'is'
+
     def __repr__(self):
         argument = ".".join((self.argument.__name__, self.attribute))
-        return '<Condition "%s" %s>' % (argument, self.operator)
+        return '<Condition "%s" %s %s>' % (argument, self.__is_or_is_not, self.operator)
+
+    def __str__(self):
+        return "%s %s %s" % (self.argument_string, self.__is_or_is_not, self.operator)
 
     def __eq__(self, other):
         return (
@@ -296,9 +356,6 @@ class Condition(object):
     def argument_string(self):
         parts = [self.argument.__name__, self.attribute]
         return '.'.join(map(str, parts))
-
-    def __str__(self):
-        return "%s %s" % (self.argument_string, self.operator)
 
     def __apply(self, argument_instance, inpt):
         variable = getattr(argument_instance, self.attribute)
@@ -435,7 +492,7 @@ class Manager(threading.local):
         if switch.concent and switch.get_parent() and not self.active(switch.parent, *inputs, **kwargs):
             return False
 
-        return any(switch.enabled_for(inpt) for inpt in inputs)
+        return switch.enabled_for_all(*inputs)
 
     def update(self, switch):
 

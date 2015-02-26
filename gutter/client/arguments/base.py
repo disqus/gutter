@@ -1,3 +1,6 @@
+from types import NoneType
+
+
 class classproperty(object):
 
     def __init__(self, getter):
@@ -48,7 +51,7 @@ class Container(object):
     the specified input.
     """
 
-    COMPATIBLE_TYPE = None
+    COMPATIBLE_TYPE = NoneType
 
     def __init__(self, inpt):
         self.input = inpt
@@ -62,4 +65,4 @@ class Container(object):
 
     @property
     def applies(self):
-        return type(self.input) is self.COMPATIBLE_TYPE
+        return isinstance(self.input, self.COMPATIBLE_TYPE)

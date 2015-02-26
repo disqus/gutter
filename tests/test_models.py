@@ -9,8 +9,7 @@ from gutter.client.models import Switch, Manager, Condition
 from durabledict import MemoryDict
 from durabledict.base import DurableDict
 from gutter.client import signals
-from gutter.client.operators import comparable
-from gutter.client.arguments import variables
+from gutter.client.operators import comparable, misc
 import mock
 from exam.decorators import fixture, before
 from exam.cases import Exam
@@ -320,7 +319,7 @@ class TestCondition(unittest2.TestCase):
             return 'str of operator'
 
         self.operator.__str__ = local_str
-        eq_(str(self.condition), "MOLArgument.foo str of operator")
+        eq_(str(self.condition), "MOLArgument.foo is str of operator")
 
     def test_equals_if_has_the_same_properties(self):
         a = Condition(Argument, 'bar', bool)
@@ -354,6 +353,7 @@ class SwitchWithConditions(object):
     def pessamistic_condition(self):
         mck = mock.MagicMock()
         mck.call.return_value = False
+        mck.argument.COMPATIBLE_TYPE = str
         return mck
 
 
@@ -718,7 +718,7 @@ class EmptyManagerInstanceTest(ActsLikeManager, unittest2.TestCase):
         switch = self.mock_and_register_switch('foo')
         additional_input = mock.Mock()
         self.manager.active('foo', additional_input)
-        switch.enabled_for.assert_called_once_with(additional_input)
+        switch.enabled_for_all.assert_called_once_with(additional_input)
 
     def test_checks_against_NONE_input_if_no_inputs(self):
         switch = self.mock_and_register_switch('global')
@@ -726,7 +726,7 @@ class EmptyManagerInstanceTest(ActsLikeManager, unittest2.TestCase):
 
         self.manager.active('global')
 
-        switch.enabled_for.assert_called_once_with(Manager.NONE_INPUT)
+        switch.enabled_for_all.assert_called_once_with(Manager.NONE_INPUT)
 
 
 class NamespacedEmptyManagerInstanceTest(EmptyManagerInstanceTest):
@@ -785,57 +785,3 @@ class NamespacedManagerWithInputTest(ManagerWithInputTest):
     @fixture
     def manager(self):
         return Manager(storage=MemoryDict(), namespace=['a', 'b'])
-
-
-class TestArgumentTyping(Exam, unittest2.TestCase):
-
-    class Foo(BaseArgument):
-        COMPATIBLE_TYPE = int
-        value = arguments.Float(lambda self: self.input)
-
-    class Bar(BaseArgument):
-        COMPATIBLE_TYPE = str
-        value = arguments.String(lambda self: self.input)
-
-    @fixture
-    def switch(self):
-        return Switch(
-            'hi',
-            state=Switch.states.SELECTIVE,
-        )
-
-    @fixture
-    def condition_float(self):
-        return Condition(
-            self.Foo,
-            'value',
-            comparable.Equals(value=1)
-        )
-
-    @fixture
-    def condition_str(self):
-        return Condition(
-            self.Bar,
-            'value',
-            comparable.Equals(value='hi')
-        )
-
-    def test_applies(self):
-        eq_(self.condition_float.argument('hi').applies, False)
-        eq_(self.condition_float.argument(1).applies, True)
-
-    def test_enabled_for(self):
-        self.switch.conditions.append(self.condition_float)
-        eq_(self.switch.enabled_for('hi'), False)
-        eq_(self.switch.enabled_for(1), True)
-
-    def test_enabled_for_when_multiple_COMPATIBLE_TYPEs_exist(self):
-        """
-        if two conditions exist that are of different types then 1 != 'hi'
-        should not make the switch fail as they have different COMPATIBLE_TYPEs
-        """
-
-        self.switch.conditions.append(self.condition_str)
-        self.switch.compounded = True
-        eq_(self.switch.enabled_for('hi'), True)
-        eq_(self.switch.enabled_for(1), True)
