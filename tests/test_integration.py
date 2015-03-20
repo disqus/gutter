@@ -18,7 +18,6 @@ from exam.cases import Exam
 
 
 class deterministicstring(str):
-
     """
     Since the percentage-based conditions rely on the hash value from their
     arguments, we use this special deterministicstring class to return
@@ -30,7 +29,6 @@ class deterministicstring(str):
 
 
 class User(object):
-
     def __repr__(self):
         return u'<User "%s" is %d years old>' % (self.name, self.age)
 
@@ -42,7 +40,6 @@ class User(object):
 
 
 class UserArguments(arguments.Container):
-
     COMPATIBLE_TYPE = User
 
     name = arguments.String(lambda self: self.input.name)
@@ -64,7 +61,6 @@ class FloatArguments(arguments.Container):
 
 
 class TestIntegration(Exam, unittest2.TestCase):
-
     class Callback(object):
 
         def __init__(self):
@@ -427,7 +423,6 @@ class TestIntegration(Exam, unittest2.TestCase):
 
 
 class TestIntegrationWithRedis(TestIntegration):
-
     @fixture
     def redis(self):
         return Redis(db=15)

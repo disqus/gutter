@@ -25,7 +25,6 @@ def all_false_if_empty(iterable):
 
 
 class ConditionsDict(defaultdict):
-
     @classmethod
     def from_conditions_list(cls, conditions):
         conditions_dict = cls(set)
@@ -50,7 +49,6 @@ class ConditionsDict(defaultdict):
 
 
 class Switch(object):
-
     """
     A switch encapsulates the concept of an item that is either 'on' or 'off'
     depending on the input.  The switch determines this by checking each of its
@@ -258,7 +256,6 @@ class Switch(object):
 
 
 class Condition(object):
-
     """
     A Condition is the configuration of an argument, its attribute and an
     operator. It tells you if it itself is true or false given an input.
@@ -368,7 +365,6 @@ class Condition(object):
 
 
 class Manager(threading.local):
-
     """
     The Manager holds all state for Gutter.  It knows what Switches have been
     registered, and also what Input objects are currently being applied.  It
@@ -507,9 +503,11 @@ class Manager(threading.local):
         # ``register`` is not used here since we do not need/want to sync
         # parental relationships.
         for child in getattr(switch, 'children', []):
-            child = self.storage[self.__namespaced(child)]
-            child.parent = switch.name
-            self.__persist(child)
+            child = self.storage.get(self.__namespaced(child))
+            if child:
+                child.parent = switch.name
+                self.__persist(child)
+
 
     def namespaced(self, namespace):
         new_namespace = []
