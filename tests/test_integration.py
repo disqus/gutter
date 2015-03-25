@@ -5,6 +5,7 @@ import zlib
 
 from redis import Redis
 from durabledict.redis import RedisDict
+from gutter.client.encoding import JsonPickleEncoding
 
 from gutter.client.operators.comparable import *
 from gutter.client.operators.identity import *
@@ -286,14 +287,12 @@ class TestIntegration(Exam, unittest2.TestCase):
 
     def test_changing_parent_is_reflected_in_child_switch(self):
         with self.inputs(self.manager, self.jeff) as context:
-            assert self.manager['can drink'].children
             ok_(context.active('can drink:wine') is True)
 
             parent = self.manager['can drink']
             parent.state = Switch.states.DISABLED
             parent.save()
 
-            assert self.manager['can drink'].children
             ok_(context.active('can drink:wine') is False)
 
     def test_switches_can_be_deregistered_and_then_autocreated(self):
@@ -433,7 +432,7 @@ class TestIntegrationWithRedis(TestIntegration):
 
     @fixture
     def manager(self):
-        storage = RedisDict(keyspace='gutter-tests', connection=self.redis)
+        storage = RedisDict(keyspace='gutter-tests', connection=self.redis, encoding=JsonPickleEncoding)
         return Manager(storage=storage)
 
     def test_parent_switch_pickle_input(self):

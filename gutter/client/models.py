@@ -6,12 +6,18 @@ gutter.models
 :license: Apache License 2.0, see LICENSE for more details.
 """
 
+from __future__ import absolute_import
+
+# Standard Library
 import threading
 from collections import defaultdict
 from functools import partial
 from itertools import ifilter
 
+# External Libraries
 from gutter.client import signals
+
+DEFAULT_SEPARATOR = ':'
 
 
 def all_false_if_empty(iterable):
@@ -25,6 +31,7 @@ def all_false_if_empty(iterable):
 
 
 class ConditionsDict(defaultdict):
+
     @classmethod
     def from_conditions_list(cls, conditions):
         conditions_dict = cls(set)
@@ -49,6 +56,7 @@ class ConditionsDict(defaultdict):
 
 
 class Switch(object):
+
     """
     A switch encapsulates the concept of an item that is either 'on' or 'off'
     depending on the input.  The switch determines this by checking each of its
@@ -67,18 +75,24 @@ class Switch(object):
         SELECTIVE = 2
         GLOBAL = 3
 
-    def __init__(self, name, state=states.DISABLED, compounded=False,
-                 parent=None, concent=True, manager=None, label=None,
-                 description=None):
+    def __init__(
+            self,
+            name,
+            state=states.DISABLED,
+            compounded=False,
+            concent=True,
+            manager=None,
+            label=None,
+            description=None,
+            **kwargs
+    ):
         self._name = str(name)
         self.label = label
         self.description = description
         self.state = state
         self.conditions = []
         self.compounded = compounded
-        self.parent = parent
         self.concent = concent
-        self.children = []
         self.manager = manager
         self.reset()
 
@@ -86,11 +100,14 @@ class Switch(object):
     def name(self):
         return self._name
 
+    @property
+    def parent(self):
+        separator = getattr(self.manager, 'key_separator', DEFAULT_SEPARATOR)
+        parent = self.name.rsplit(separator, 1)[0]
+        return parent if parent != self.name else None
+
     def get_parent(self):
         return self.manager.switch(self.parent) if self.parent else None
-
-    def get_children(self):
-        return map(self.manager.switch, self.children)
 
     def __repr__(self):
         kwargs = dict(
@@ -119,18 +136,12 @@ class Switch(object):
         return inner_dict
 
     def __setstate__(self, state):
-        ### legacy conversion for 0.2 -> 0.3 ###
-        parent_or_parentname = state.pop('parent', '')
-        parent = getattr(parent_or_parentname, 'name', parent_or_parentname)
-        state['parent'] = parent
-
-        children = state.pop('children', [])
-        children = [getattr(child, 'name', child) for child in children]
-        state['children'] = children
-
-        if 'name' in state:
-            state['_name'] = state.pop('name')
-        ### /legacy conversion for 0.2 -> 0.3 ###
+        # remove parent from the state, this is now a calculated field
+        for attr in (
+            'parent',
+            'children',
+        ):
+            state.pop(attr, '')
 
         self.__dict__ = state
         if not hasattr(self, 'manager'):
@@ -256,6 +267,7 @@ class Switch(object):
 
 
 class Condition(object):
+
     """
     A Condition is the configuration of an argument, its attribute and an
     operator. It tells you if it itself is true or false given an input.
@@ -365,6 +377,7 @@ class Condition(object):
 
 
 class Manager(threading.local):
+
     """
     The Manager holds all state for Gutter.  It knows what Switches have been
     registered, and also what Input objects are currently being applied.  It
@@ -372,7 +385,7 @@ class Manager(threading.local):
     active, given its conditions and current inputs.
     """
 
-    key_separator = ':'
+    key_separator = DEFAULT_SEPARATOR
     namespace_separator = '.'
     default_namespace = ['default']
 
@@ -380,8 +393,14 @@ class Manager(threading.local):
     #: for and ignore
     NONE_INPUT = object()
 
-    def __init__(self, storage, autocreate=False, switch_class=Switch,
-                 inputs=None, namespace=None):
+    def __init__(
+        self,
+        storage,
+        autocreate=False,
+        switch_class=Switch,
+        inputs=None,
+        namespace=None
+    ):
 
         if inputs is None:
             inputs = []
@@ -408,6 +427,9 @@ class Manager(threading.local):
 
     def __contains__(self, key):
         return self.__namespaced(key) in self.storage
+
+    def __del__(self, key):
+        del self.storage[self.__namespaced(key)]
 
     @property
     def switches(self):
@@ -442,6 +464,15 @@ class Manager(threading.local):
         switch.manager = self
         return switch
 
+    def get_children(self, parent):
+        namespaced_parent = self.__namespaced(parent) + ':'
+        return [
+            self.__denamespaced(child)
+            for child
+            in self.storage.keys()
+            if child.startswith(namespaced_parent)
+        ]
+
     def register(self, switch, signal=signals.switch_registered):
         '''
         Register a switch and persist it to the storage.
@@ -449,21 +480,19 @@ class Manager(threading.local):
         if not switch.name:
             raise ValueError('Switch name cannot be blank')
 
-        self.__persist(switch)
-        self.__sync_parental_relationships(switch)
-
         switch.manager = self
+        self.__persist(switch)
+
         signal.call(switch)
 
     def unregister(self, switch_or_name):
-        name = getattr(switch_or_name, 'name', switch_or_name)
-        if name in self:
-            switch = self.switch(name)
+        switch = getattr(switch_or_name, 'name', switch_or_name)
 
-            [self.unregister(child) for child in switch.children]
+        map(self.unregister, self.get_children(switch))
 
-            del self.storage[self.__namespaced(name)]
-            signals.switch_unregistered.call(switch)
+        if switch in self:
+            signals.switch_unregistered.call(self.switch(switch))
+            del self.storage[self.__namespaced(switch)]
 
     def input(self, *inputs):
         self.inputs = list(inputs)
@@ -485,7 +514,12 @@ class Manager(threading.local):
         # If necessary, the switch first consents with its parent and returns
         # false if the switch is consenting and the parent is not enabled for
         # ``inputs``.
-        if switch.concent and switch.get_parent() and not self.active(switch.parent, *inputs, **kwargs):
+
+        if (
+            switch.concent
+            and switch.get_parent()
+            and not self.active(switch.parent, *inputs, **kwargs)
+        ):
             return False
 
         return switch.enabled_for_all(*inputs)
@@ -494,20 +528,6 @@ class Manager(threading.local):
 
         self.register(switch, signal=signals.switch_updated)
         switch.reset()
-
-        # If this switch has any children, it's likely their instance of this
-        # switch (their ``parent``) is now "stale" since this switch has
-        # been updated. In order for them to pick up their new parent, we need
-        # to re-save them.
-        #
-        # ``register`` is not used here since we do not need/want to sync
-        # parental relationships.
-        for child in getattr(switch, 'children', []):
-            child = self.storage.get(self.__namespaced(child))
-            if child:
-                child.parent = switch.name
-                self.__persist(child)
-
 
     def namespaced(self, namespace):
         new_namespace = []
@@ -537,22 +557,11 @@ class Manager(threading.local):
         self.register(switch)
         return switch
 
-    def __sync_parental_relationships(self, switch):
-        new_parent = None
-
-        try:
-            new_parent = self.switch(self.__parent_key_for(switch))
-            switch.parent = new_parent.name
-            new_parent.children.append(switch.name)
-            new_parent.save()
-        except ValueError:
-            # no parent found or created, so we just pass
-            pass
-
     def __parent_key_for(self, switch):
         # TODO: Make this a method on the switch object
-        parent_parts = switch.name.split(self.key_separator)[:-1]
-        return self.key_separator.join(parent_parts)
+        return self.name.rsplit(self.key_separator, 1)[:-1]
+        # parent_parts = switch.name.split(self.key_separator)[:-1]
+        # return self.key_separator.join(parent_parts)
 
     def __namespaced(self, name=''):
         if not self.__joined_namespace:
@@ -561,6 +570,12 @@ class Manager(threading.local):
             return self.namespace_separator.join(
                 (self.__joined_namespace, name)
             )
+
+    def __denamespaced(self, name=''):
+        prefix = self.__joined_namespace + self.namespace_separator
+        if prefix and name.startswith(prefix):
+            return name.replace(prefix, '', 1)
+        return name
 
     @property
     def __joined_namespace(self):
