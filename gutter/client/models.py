@@ -428,7 +428,7 @@ class Manager(threading.local):
     def __contains__(self, key):
         return self.__namespaced(key) in self.storage
 
-    def __del__(self, key):
+    def __delitem__(self, key):
         del self.storage[self.__namespaced(key)]
 
     @property
