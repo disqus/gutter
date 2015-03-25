@@ -5,6 +5,7 @@ import zlib
 
 from redis import Redis
 from durabledict.redis import RedisDict
+from gutter.client.encoding import JsonPickleEncoding
 
 from gutter.client.operators.comparable import *
 from gutter.client.operators.identity import *
@@ -18,7 +19,6 @@ from exam.cases import Exam
 
 
 class deterministicstring(str):
-
     """
     Since the percentage-based conditions rely on the hash value from their
     arguments, we use this special deterministicstring class to return
@@ -30,6 +30,8 @@ class deterministicstring(str):
 
 
 class User(object):
+    def __repr__(self):
+        return u'<User "%s" is %d years old>' % (self.name, self.age)
 
     def __init__(self, name, age, location='San Francisco', married=False):
         self.name = name
@@ -39,7 +41,6 @@ class User(object):
 
 
 class UserArguments(arguments.Container):
-
     COMPATIBLE_TYPE = User
 
     name = arguments.String(lambda self: self.input.name)
@@ -54,8 +55,13 @@ class IntegerArguments(arguments.Container):
     value = arguments.Integer(lambda self: self.input)
 
 
-class TestIntegration(Exam, unittest2.TestCase):
+class FloatArguments(arguments.Container):
+    COMPATIBLE_TYPE = float
 
+    value = arguments.Integer(lambda self: self.input)
+
+
+class TestIntegration(Exam, unittest2.TestCase):
     class Callback(object):
 
         def __init__(self):
@@ -108,7 +114,7 @@ class TestIntegration(Exam, unittest2.TestCase):
     def setup_inputs(self):
         self.jeff = User(deterministicstring('jeff'), 21)
         self.frank = User(deterministicstring('frank'), 10, location="Seattle")
-        self.larry = User(deterministicstring('bill'), 70, location="Yakima", married=True)
+        self.bill = User(deterministicstring('bill'), 70, location="Yakima", married=True)
         self.timmy = User(deterministicstring('timmy'), 12)
         self.steve = User(deterministicstring('timmy'), 19)
 
@@ -124,7 +130,11 @@ class TestIntegration(Exam, unittest2.TestCase):
 
         self.ten_percent = Condition(UserArguments, 'name', Percent(percentage=10))
         self.upper_50_percent = Condition(UserArguments, 'name', PercentRange(lower_limit=50, upper_limit=100))
+        self.float_50_percent = Condition(FloatArguments, 'value', PercentRange(lower_limit=50, upper_limit=100))
         self.answer_to_life = Condition(IntegerArguments, 'value', Equals(value=42))
+
+        self.is_not_jeff = Condition(UserArguments, 'name', Equals(value='jeff'), negative=True)
+        self.is_not_frank = Condition(UserArguments, 'name', Equals(value='frank'), negative=True)
 
     def setup_switches(self):
         self.add_switch('can drink', condition=self.age_21_plus)
@@ -140,6 +150,28 @@ class TestIntegration(Exam, unittest2.TestCase):
                         self.has_location, compounded=True)
         self.add_switch('10 percent', self.ten_percent)
         self.add_switch('Upper 50 percent', self.upper_50_percent)
+        self.add_switch(
+            'is over 21 and knows the meaning of life',
+            self.answer_to_life,
+            self.age_21_plus,
+            state=Switch.states.SELECTIVE,
+            compounded=True
+        )
+        self.add_switch(
+            'is not jeff or frank',
+            self.is_not_jeff,
+            self.is_not_frank,
+            state=Switch.states.SELECTIVE,
+            compounded=True
+        )
+        self.add_switch(
+            'is not jeff or frank and float is >50th percentile',
+            self.is_not_jeff,
+            self.is_not_frank,
+            self.float_50_percent,
+            state=Switch.states.SELECTIVE,
+            compounded=True
+        )
 
     def add_switch(self, name, condition=None, *conditions, **kwargs):
         switch = Switch(name, compounded=kwargs.get('compounded', False))
@@ -154,7 +186,7 @@ class TestIntegration(Exam, unittest2.TestCase):
         return switch
 
     def test_basic_switches_work_with_conditions(self):
-        with self.inputs(self.manager, self.larry) as context:
+        with self.inputs(self.manager, self.bill) as context:
             ok_(context.active('can drink') is True)
             ok_(context.active('can drink in europe') is True)
             ok_(context.active('can vote') is True)
@@ -185,15 +217,15 @@ class TestIntegration(Exam, unittest2.TestCase):
     def test_can_use_extra_inputs_to_active(self):
         with self.inputs(self.manager, self.frank) as context:
             ok_(context.active('can drink') is False)
-            ok_(context.active('can drink', self.larry) is True)
+            ok_(context.active('can drink', self.bill) is True)
 
-        with self.inputs(self.manager, self.larry) as context:
+        with self.inputs(self.manager, self.bill) as context:
             ok_(context.active('can drink') is True)
             ok_(context.active('can drink', self.frank, exclusive=True) is False)
 
     def test_switches_with_multiple_inputs(self):
 
-        with self.inputs(self.manager, self.larry, self.jeff) as context:
+        with self.inputs(self.manager, self.bill, self.jeff) as context:
             ok_(context.active('can drink') is True)
             ok_(context.active('can drink in europe') is True)
             ok_(context.active('SF resident') is True)
@@ -209,6 +241,38 @@ class TestIntegration(Exam, unittest2.TestCase):
             ok_(context.active('10 percent') is False)
             ok_(context.active('Upper 50 percent') is True)
 
+    def test_switches_with_multiple_inputs_of_multiple_types(self):
+
+        with self.inputs(self.manager, self.bill, 4242, 0.2) as context:
+            ok_(context.active('is not jeff or frank and float is >50th percentile') is False,
+                'should fail because bill is not jeff or frank but 0.2 is < 50%')
+
+        with self.inputs(self.manager, self.bill, 4242, 0.8) as context:
+            ok_(context.active('is not jeff or frank and float is >50th percentile') is True,
+                'should pass because bill is not jeff or frank and 0.8 is > 50%')
+
+        with self.inputs(self.manager, self.jeff, 4242, 0.8) as context:
+            ok_(context.active('is not jeff or frank and float is >50th percentile') is False,
+                'should fail because jeff is jeff or frank even though 0.8 is > 50%')
+
+        with self.inputs(self.manager, self.bill, 4242) as context:
+            # the integer input should not cause this to pass
+            # this test covers the negative use case
+            ok_(context.active('is not jeff or frank') is True,
+                'should work because bill is not jeff or frank')
+
+        with self.inputs(self.manager, self.frank, self.jeff, 4242) as context:
+            # the integer input should not cause this to pass
+            # this test covers the negative use case
+            ok_(context.active('is not jeff or frank') is False,
+                'should fail because jeff and frank are inputs')
+
+        with self.inputs(self.manager, self.bill, self.jeff, 42, 0.3) as context:
+            # this should require every user input to be over 21
+            # and have an integer input of 42
+            ok_(context.active('is over 21 and knows the meaning of life') is True,
+                'should pass because jeff and frank are over 21 and 42 is an input')
+
     def test_switches_can_concent_top_parent_switch(self):
         with self.inputs(self.manager, self.jeff) as context:
             ok_(context.active('can drink') is True)
@@ -223,14 +287,12 @@ class TestIntegration(Exam, unittest2.TestCase):
 
     def test_changing_parent_is_reflected_in_child_switch(self):
         with self.inputs(self.manager, self.jeff) as context:
-            assert self.manager['can drink'].children
             ok_(context.active('can drink:wine') is True)
 
             parent = self.manager['can drink']
             parent.state = Switch.states.DISABLED
             parent.save()
 
-            assert self.manager['can drink'].children
             ok_(context.active('can drink:wine') is False)
 
     def test_switches_can_be_deregistered_and_then_autocreated(self):
@@ -360,7 +422,6 @@ class TestIntegration(Exam, unittest2.TestCase):
 
 
 class TestIntegrationWithRedis(TestIntegration):
-
     @fixture
     def redis(self):
         return Redis(db=15)
@@ -371,7 +432,7 @@ class TestIntegrationWithRedis(TestIntegration):
 
     @fixture
     def manager(self):
-        storage = RedisDict(keyspace='gutter-tests', connection=self.redis)
+        storage = RedisDict(keyspace='gutter-tests', connection=self.redis, encoding=JsonPickleEncoding)
         return Manager(storage=storage)
 
     def test_parent_switch_pickle_input(self):

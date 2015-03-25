@@ -1,25 +1,38 @@
 {
- "folders": [
-  {
-   "folder_exclude_patterns": [
-    "*.egg",
-    "build",
-    "dist",
-    "*.egg-info",
-    "doc/_*",
-    ".ropeproject"
-   ],
-   "file_exclude_patterns": [
-    "*.egg",
-    "*.sublime-workspace",
-    "*_pb2.py"
-   ],
-   "path": "."
-  }
- ],
- "settings": {
-  "tab_size": 4,
-  "translate_tabs_to_spaces": true,
-  "trim_trailing_white_space_on_save": true
-  }
+	"build_systems":
+	[
+		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"name": "Anaconda Python Builder",
+			"selector": "source.python",
+			"shell_cmd": "python -u \"$file\""
+		}
+	],
+	"folders":
+	[
+		{
+			"file_exclude_patterns":
+			[
+				"*.egg",
+				"*.sublime-workspace",
+				"*_pb2.py"
+			],
+			"folder_exclude_patterns":
+			[
+				"*.egg",
+				"build",
+				"dist",
+				"*.egg-info",
+				"doc/_*",
+				".ropeproject"
+			],
+			"path": "."
+		}
+	],
+	"settings":
+	{
+		"tab_size": 4,
+		"translate_tabs_to_spaces": true,
+		"trim_trailing_white_space_on_save": true
+	}
 }

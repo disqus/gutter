@@ -1,6 +1,6 @@
-import unittest2
-import threading
 import itertools
+import threading
+import unittest2
 
 from nose.tools import *
 from gutter.client.arguments import Container as BaseArgument
@@ -9,14 +9,13 @@ from gutter.client.models import Switch, Manager, Condition
 from durabledict import MemoryDict
 from durabledict.base import DurableDict
 from gutter.client import signals
+from gutter.client.operators import comparable, misc
 import mock
-
 from exam.decorators import fixture, before
 from exam.cases import Exam
 
 
 class ManagerMixin(Exam):
-
     @fixture
     def manager(self):
         return Manager(MemoryDict())
@@ -34,7 +33,6 @@ def unbound_method():
 
 
 class Argument(object):
-
     def bar(self):
         pass
 
@@ -45,33 +43,11 @@ class MOLArgument(BaseArgument):
 
 
 class TestSwitch(ManagerMixin, unittest2.TestCase):
-
     possible_properties = [
         ('state', (Switch.states.DISABLED, Switch.states.SELECTIVE)),
         ('compounded', (True, False)),
         ('concent', (True, False))
     ]
-
-    def test_legacy_unpickle(self):
-        d = EncodingDict()
-
-        parent = Switch('a')
-        switch = Switch('a:b')
-
-        children = [
-            Switch('a:b:c'),
-            Switch('a:b:d'),
-        ]
-
-        [setattr(child, 'parent', switch) for child in children]
-
-        switch.children = children
-        switch.parent = parent
-
-        decoded_switch = d.encoding.decode(d.encoding.encode(switch))
-        self.assertEquals(decoded_switch.name, switch.name)
-        self.assertEquals(decoded_switch.parent, switch.parent.name)
-        self.assertListEqual([child.name for child in children], decoded_switch.children)
 
     def test_switch_name_is_immutable(self):
         switch = Switch('foo')
@@ -147,16 +123,13 @@ class TestSwitch(ManagerMixin, unittest2.TestCase):
         eq_(Switch('foo').parent, None)
 
     def test_can_be_constructed_with_parent(self):
-        eq_(Switch('foo', parent='dog').parent, 'dog')
+        eq_(Switch('dog:foo').parent, 'dog')
 
     def test_concent_defaults_to_true(self):
         eq_(Switch('foo').concent, True)
 
     def test_can_be_constructed_with_concent(self):
         eq_(Switch('foo', concent=False).concent, False)
-
-    def test_children_defaults_to_an_empty_list(self):
-        eq_(Switch('foo').children, [])
 
     def test_switch_manager_defaults_to_none(self):
         eq_(Switch('foo').manager, None)
@@ -207,7 +180,6 @@ class TestSwitch(ManagerMixin, unittest2.TestCase):
 
 
 class TestSwitchChanges(ManagerMixin, unittest2.TestCase):
-
     @fixture
     def switch(self):
         return Switch('foo')
@@ -244,11 +216,10 @@ class TestSwitchChanges(ManagerMixin, unittest2.TestCase):
                 state=self.changes_dict(1, 'new name'),
                 concent=self.changes_dict(True, False)
             )
-            )
+        )
 
 
 class TestCondition(unittest2.TestCase):
-
     def argument_dict(name):
         return dict(
             module='module%s' % name,
@@ -319,7 +290,7 @@ class TestCondition(unittest2.TestCase):
             return 'str of operator'
 
         self.operator.__str__ = local_str
-        eq_(str(self.condition), "MOLArgument.foo str of operator")
+        eq_(str(self.condition), "MOLArgument.foo is str of operator")
 
     def test_equals_if_has_the_same_properties(self):
         a = Condition(Argument, 'bar', bool)
@@ -336,7 +307,6 @@ class TestCondition(unittest2.TestCase):
 
 
 class SwitchWithConditions(object):
-
     @fixture
     def switch(self):
         switch = Switch('parent:with conditions', state=Switch.states.SELECTIVE)
@@ -353,11 +323,11 @@ class SwitchWithConditions(object):
     def pessamistic_condition(self):
         mck = mock.MagicMock()
         mck.call.return_value = False
+        mck.argument.COMPATIBLE_TYPE = str
         return mck
 
 
 class ConcentTest(Exam, SwitchWithConditions, unittest2.TestCase):
-
     @fixture
     def manager(self):
         return Manager(storage=MemoryDict())
@@ -403,7 +373,6 @@ class ConcentTest(Exam, SwitchWithConditions, unittest2.TestCase):
 
 
 class DefaultConditionsTest(SwitchWithConditions, unittest2.TestCase):
-
     def test_enabled_for_is_true_if_any_conditions_are_true(self):
         ok_(self.switch.enabled_for('input') is False)
         self.switch.conditions[0].call.return_value = True
@@ -422,7 +391,6 @@ class DefaultConditionsTest(SwitchWithConditions, unittest2.TestCase):
 
 
 class CompoundedConditionsTest(Exam, SwitchWithConditions, unittest2.TestCase):
-
     @before
     def make_switch_compounded(self):
         self.switch.compounded = True
@@ -436,7 +404,6 @@ class CompoundedConditionsTest(Exam, SwitchWithConditions, unittest2.TestCase):
 
 
 class ManagerTest(unittest2.TestCase):
-
     storage_with_existing_switches = {
         'default.existing': 'switch',
         'default.another': 'valuable switch'
@@ -456,7 +423,7 @@ class ManagerTest(unittest2.TestCase):
     def switch(self):
         switch = mock.Mock(spec=Switch)
         switch.changes = {}
-        switch.parent = None
+        # switch.parent = None
         switch.name = 'foo'
         switch.manager = None
         return switch
@@ -563,7 +530,6 @@ class ManagerTest(unittest2.TestCase):
 
 
 class NamespacedManagertest(ManagerTest):
-
     storage_with_existing_switches = {
         'a.b.brother': 'brother switch',
         'a.b.sister': 'sister switch',
@@ -583,7 +549,6 @@ class NamespacedManagertest(ManagerTest):
 
 
 class ActsLikeManager(object):
-
     def namespaced(self, *names):
         parts = itertools.chain(self.manager.namespace, names)
         return self.manager.key_separator.join(parts)
@@ -607,7 +572,7 @@ class ActsLikeManager(object):
     def mock_and_register_switch(self, name):
         switch = mock.Mock(name=name)
         switch.name = name
-        switch.parent = None
+        # switch.parent = None
         switch.get_parent.return_value = None
         switch.children = []
 
@@ -649,11 +614,11 @@ class ActsLikeManager(object):
         parent = self.make_and_register_switch('movies')
         child = self.make_and_register_switch('movies:jaws')
 
-        eq_(parent.children, [child.name])
+        eq_(self.manager.get_children(parent.name), [child.name])
 
-        sibling = self.make_and_register_switch('movies:jaws')
+        sibling = self.make_and_register_switch('movies:jaws2')
 
-        eq_(parent.children, [child.name, sibling.name])
+        eq_(set(self.manager.get_children(parent.name)), set([child.name, sibling.name]))
 
     def test_register_raises_value_error_for_blank_name(self):
         with self.assertRaises(ValueError):
@@ -701,7 +666,6 @@ class ActsLikeManager(object):
 
 
 class EmptyManagerInstanceTest(ActsLikeManager, unittest2.TestCase):
-
     def test_input_accepts_variable_input_args(self):
         eq_(self.manager.inputs, [])
         self.manager.input('input1', 'input2')
@@ -717,7 +681,7 @@ class EmptyManagerInstanceTest(ActsLikeManager, unittest2.TestCase):
         switch = self.mock_and_register_switch('foo')
         additional_input = mock.Mock()
         self.manager.active('foo', additional_input)
-        switch.enabled_for.assert_called_once_with(additional_input)
+        switch.enabled_for_all.assert_called_once_with(additional_input)
 
     def test_checks_against_NONE_input_if_no_inputs(self):
         switch = self.mock_and_register_switch('global')
@@ -725,18 +689,16 @@ class EmptyManagerInstanceTest(ActsLikeManager, unittest2.TestCase):
 
         self.manager.active('global')
 
-        switch.enabled_for.assert_called_once_with(Manager.NONE_INPUT)
+        switch.enabled_for_all.assert_called_once_with(Manager.NONE_INPUT)
 
 
 class NamespacedEmptyManagerInstanceTest(EmptyManagerInstanceTest):
-
     @fixture
     def manager(self):
         return Manager(storage=MemoryDict(), namespace=['a', 'b'])
 
 
 class ManagerWithInputTest(Exam, ActsLikeManager, unittest2.TestCase):
-
     def build_and_register_switch(self, name, enabled_for=False):
         switch = Switch(name)
         switch.enabled_for = mock.Mock(return_value=enabled_for)
@@ -780,7 +742,6 @@ class ManagerWithInputTest(Exam, ActsLikeManager, unittest2.TestCase):
 
 
 class NamespacedManagerWithInputTest(ManagerWithInputTest):
-
     @fixture
     def manager(self):
         return Manager(storage=MemoryDict(), namespace=['a', 'b'])

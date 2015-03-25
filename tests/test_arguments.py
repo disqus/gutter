@@ -22,7 +22,7 @@ class TestBase(unittest2.TestCase):
     subclass_str_arg = fixture(MyArguments, Mock(prop=45))
 
     def test_applies_is_false_if_compatible_type_is_none(self):
-        eq_(self.container.COMPATIBLE_TYPE, None)
+        eq_(self.container.COMPATIBLE_TYPE, type(None))
         eq_(self.container.applies, False)
 
     def applies_is_true_if_input_type_is_compatible_type(self):
