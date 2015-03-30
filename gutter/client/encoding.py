@@ -2,14 +2,12 @@
 
 from __future__ import absolute_import
 
-# Standard Library
-import pickle as old_pickle
-
 # External Libraries
+from durabledict.encoding import PickleEncoding
 import jsonpickle as pickle
 
 
-class JsonPickleEncoding(object):
+class JsonPickleEncoding(PickleEncoding):
     @staticmethod
     def encode(data):
         return pickle.dumps(data)
@@ -19,4 +17,4 @@ class JsonPickleEncoding(object):
         try:
             return pickle.loads(data)
         except Exception:
-            return old_pickle.loads(data)
+            return PickleEncoding.decode(data)
