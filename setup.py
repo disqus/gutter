@@ -28,7 +28,7 @@ if 'flake8' in sys.argv[1:]:
 
 setup(
     name='gutter',
-    version='0.4.0',
+    version='0.5.0',
     author='DISQUS',
     author_email='opensource@disqus.com',
     url='http://github.com/disqus/gutter',
