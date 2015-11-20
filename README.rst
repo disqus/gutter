@@ -117,7 +117,7 @@ There are a few things going on here, so let's break down what they all mean.
 1. The ``UserArgument`` class is subclassed from ``Container``.  The subclassing is required since ``Container`` implements some of the required API.
 2. The class has a bunch of class variables that are calls to ``arguments.TYPE``, where ``TYPE`` is the type of variable this argument is. At present there are 3 types: ``Value`` for general values, ``Boolean`` for boolean values and ``String`` for string values.
 3. ``arguments.TYPE()`` is called with a callable that returns the value.  In the above example, we'll want to make some switches active based on a user's ``name``, ``is_admin`` status and ``age``.
-4. Those ``argument``s return the actual value, which is derefenced from ``self.input``, which is the input object (in this case a ``User`` instance).
+4. Those callables return the actual value, which is derefenced from ``self.input``, which is the input object (in this case a ``User`` instance).
 5. ``Variable`` objects understand ``Switch`` conditions and operators, and implement the correct API to allow themselves to be appropriately compared.
 6. ``COMPATIBLE_TYPE`` declares that this argument only works with ``User`` instances.  This works with the default implementation of ``applies`` in the base argument that checks if the ``type`` of the input is the same as ``COMPATIBLE_TYPE``.
 
