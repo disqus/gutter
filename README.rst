@@ -134,8 +134,8 @@ Since constructing arguments that simply reference an attribute on ``self.input`
         COMPATIBLE_TYPE = User
 
         name = arguments.String('name')
-        is_admin = arguments.Boolean('name')
-        age = arguments.Value('name')
+        is_admin = arguments.Boolean('is_admin')
+        age = arguments.Value('age')
 
 
 Rationale for Arguments
