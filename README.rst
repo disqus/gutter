@@ -21,7 +21,6 @@ Table of Contents
 * `Checking Switches as Active`_
 * Signals_
 * Namespaces_
-* Templates_
 * Decorators_
 * `Testing Utilities`_
 
