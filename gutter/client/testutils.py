@@ -7,7 +7,7 @@ gutter.testutils
 """
 
 from functools import wraps
-from gutter.client.singleton import gutter
+from gutter.client import get_gutter_client
 
 
 class SwitchContextManager(object):
@@ -31,10 +31,18 @@ class SwitchContextManager(object):
     >>>     with switches(gutter, my_switch_name=True):
     >>>         print gutter.active('my_switch_name')
     """
-    def __init__(self, gutter=gutter, **keys):
-        self.previous_active_func = gutter.active
-        self.gutter = gutter
+    def __init__(self, gutter=None, **keys):
+        self._gutter = gutter
         self.keys = keys
+
+    @property
+    def gutter(self):
+        if self._gutter is None:
+            self._gutter = get_gutter_client()
+        elif isinstance(self._gutter, basestring):
+            self._gutter = get_gutter_client(alias=self._gutter)
+        return self._gutter
+
 
     def __call__(self, func):
         @wraps(func)
@@ -45,6 +53,8 @@ class SwitchContextManager(object):
         return inner
 
     def __enter__(self):
+
+        self.previous_active_func = self.gutter.active
 
         def patched_active(gutter):
             real_active = gutter.active

@@ -9,7 +9,6 @@ from gutter.client.models import Switch, Manager, Condition
 from durabledict import MemoryDict
 from durabledict.base import DurableDict
 from gutter.client import signals
-from gutter.client.operators import comparable, misc
 import mock
 from exam.decorators import fixture, before
 from exam.cases import Exam

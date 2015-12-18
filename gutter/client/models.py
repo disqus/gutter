@@ -395,12 +395,15 @@ class Manager(threading.local):
 
     def __init__(
         self,
-        storage,
+        storage=None,
         autocreate=False,
         switch_class=Switch,
         inputs=None,
         namespace=None
     ):
+        if storage is None:
+            # todo: make a better check
+            raise TypeError('storage must be a dict like value')
 
         if inputs is None:
             inputs = []
