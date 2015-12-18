@@ -471,7 +471,7 @@ class ManagerTest(unittest2.TestCase):
     @mock.patch('gutter.client.signals.switch_updated')
     def test_update_calls_the_switch_updateed_signal(self, signal):
         self.manager.update(self.switch)
-        signal.call.assert_call_once()
+        signal.call.assert_called_once_with(self.switch)
 
     def test_manager_resets_switch_dirty_tracking(self):
         self.manager.update(self.switch)
