@@ -6,4 +6,4 @@ services:
 python:
   - "2.7"
 
-script:  ./setup.py test
+script:  python setup.py test
