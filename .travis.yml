@@ -6,6 +6,4 @@ services:
 python:
   - "2.7"
 
-install: python setup.py develop
-
-script:  make test
+script:  ./setup.py test
