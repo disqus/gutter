@@ -11,8 +11,13 @@ except ImportError:
     from setuptools import setup
 
 tests_require = [
-    'nose', 'exam', 'mock', 'nose-performance', 'django', 'redis', 'unittest2'
+    'nose', 'exam', 'mock', 'django', 'redis'
 ]
+
+if sys.version_info < (3, 3):
+    tests_require.append('unittest2')
+    tests_require.append('nose-performance')
+
 
 setup_requires = []
 if 'nosetests' in sys.argv[1:]:
@@ -39,6 +44,7 @@ setup(
         'durabledict>=0.9.0',
         'jsonpickle',
         'werkzeug',
+        'six',
     ],
     setup_requires=setup_requires,
     namespace_packages=['gutter'],
