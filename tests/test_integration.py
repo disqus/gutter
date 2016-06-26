@@ -446,5 +446,5 @@ class TestIntegrationWithRedis(TestIntegration):
 
         try:
             self.manager.active('new:switch')
-        except pickle.PicklingError, e:
+        except pickle.PicklingError as e:
             self.fail('Encountered pickling error: "%s"' % e)
