@@ -5,6 +5,7 @@ gutter.testutils
 :copyright: (c) 2010-2012 DISQUS.
 :license: Apache License 2.0, see LICENSE for more details.
 """
+import six
 
 from functools import wraps
 from gutter.client import get_gutter_client
@@ -39,7 +40,7 @@ class SwitchContextManager(object):
     def gutter(self):
         if self._gutter is None:
             self._gutter = get_gutter_client()
-        elif isinstance(self._gutter, basestring):
+        elif isinstance(self._gutter, six.string_types):
             self._gutter = get_gutter_client(alias=self._gutter)
         return self._gutter
 

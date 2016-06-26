@@ -12,10 +12,11 @@ from __future__ import absolute_import
 import threading
 from collections import defaultdict
 from functools import partial
-from itertools import ifilter
 
 # External Libraries
+import six
 from gutter.client import signals
+from gutter.client.compat import ifilter
 
 DEFAULT_SEPARATOR = ':'
 
@@ -410,7 +411,7 @@ class Manager(threading.local):
 
         if namespace is None:
             namespace = self.default_namespace
-        elif isinstance(namespace, basestring):
+        elif isinstance(namespace, six.string_types):
             namespace = [namespace]
 
         self.storage = storage
@@ -440,7 +441,7 @@ class Manager(threading.local):
         List of all switches currently registered.
         """
         results = [
-            switch for name, switch in self.storage.iteritems()
+            switch for name, switch in six.iteritems(self.storage)
             if name.startswith(self.__joined_namespace)
         ]
 
@@ -491,7 +492,8 @@ class Manager(threading.local):
     def unregister(self, switch_or_name):
         switch = getattr(switch_or_name, 'name', switch_or_name)
 
-        map(self.unregister, self.get_children(switch))
+        for child in self.get_children(switch):
+            self.unregister(child)
 
         if switch in self:
             signals.switch_unregistered.call(self.switch(switch))
