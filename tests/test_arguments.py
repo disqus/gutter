@@ -1,10 +1,11 @@
-import unittest2
 from mock import MagicMock, Mock
 from nose.tools import *
+import six
 
 from gutter.client.arguments.variables import *
 from gutter.client import arguments
 from gutter.client.arguments import Container
+from gutter.client.compat import unittest
 
 from exam.decorators import fixture
 
@@ -15,7 +16,7 @@ class MyArguments(Container):
     str_variable = arguments.String('prop')
 
 
-class TestBase(unittest2.TestCase):
+class TestBase(unittest.TestCase):
 
     container = fixture(Container, True)
     subclass_arguments = fixture(MyArguments, True)
@@ -65,7 +66,10 @@ class TestBase(unittest2.TestCase):
 
 class BaseVariableTest(object):
 
-    interface_functions = ['__cmp__', '__hash__', '__nonzero__']
+    if six.PY2:
+        interface_functions = ['__cmp__', '__hash__', '__nonzero__']
+    else:
+        interface_functions = ['__cmp__', '__hash__', '__bool__']
 
     @fixture
     def argument(self):
@@ -100,7 +104,7 @@ class DelegateToValue(object):
             values_function.assert_called_once_with(self.valid_comparison_value)
 
 
-class ValueTest(BaseVariableTest, DelegateToValue, unittest2.TestCase):
+class ValueTest(BaseVariableTest, DelegateToValue, unittest.TestCase):
 
     klass = Value
     valid_comparison_value = 'marv'
@@ -110,11 +114,14 @@ class ValueTest(BaseVariableTest, DelegateToValue, unittest2.TestCase):
         eq_(Value.to_python(variable), variable)
 
 
-class BooleanTest(BaseVariableTest, DelegateToValue, unittest2.TestCase):
+class BooleanTest(BaseVariableTest, DelegateToValue, unittest.TestCase):
 
     klass = Boolean
     valid_comparison_value = True
-    interface_functions = ['__cmp__', '__nonzero__']
+    if six.PY2:
+        interface_functions = ['__cmp__', '__nonzero__']
+    else:
+        interface_functions = ['__lt__', '__gt__', '__eq__', '__bool__']
 
     def test_hashes_its_hash_value_instead_of_value(self):
         boolean = Boolean(True, hash_value='another value')
@@ -138,21 +145,33 @@ class BooleanTest(BaseVariableTest, DelegateToValue, unittest2.TestCase):
         eq_(Boolean.to_python('0'), True)
 
 
-class StringTest(BaseVariableTest, DelegateToValue, unittest2.TestCase):
+class StringTest(BaseVariableTest, DelegateToValue, unittest.TestCase):
 
     klass = String
     valid_comparison_value = 'foobazzle'
-    interface_functions = ['__hash__']
+    interface_functions = []
 
-    def test_cmp_compares_with_other_value(self):
-        eq_(self.argument.__cmp__('zebra'), -1)
-        eq_(self.argument.__cmp__('aardvark'), 1)
-        eq_(self.argument.__cmp__('foobazzle'), 0)
+    def test_compare_with_other_value(self):
+        ok_(self.argument < 'zebra')
+        ok_(self.argument > 'aardvark')
+        ok_(self.argument == 'foobazzle')
 
-    def test_nonzero_returns_if_truthy(self):
-        ok_(String('hello').__nonzero__() is True)
-        ok_(String('').__nonzero__() is False)
-        ok_(String('0').__nonzero__() is True)
+    if six.PY2:
+        def test_cmp_compares_with_other_value(self):
+            eq_(self.argument.__cmp__('zebra'), -1)
+            eq_(self.argument.__cmp__('aardvark'), 1)
+            eq_(self.argument.__cmp__('foobazzle'), 0)
+
+    if six.PY2:
+        def test_nonzero_returns_if_truthy(self):
+            ok_(String('hello').__nonzero__() is True)
+            ok_(String('').__nonzero__() is False)
+            ok_(String('0').__nonzero__() is True)
+    else:
+        def test_bool_returns_if_truthy(self):
+            ok_(String('hello').__bool__() is True)
+            ok_(String('').__bool__() is False)
+            ok_(String('0').__bool__() is True)
 
     def test_to_python_strs_the_value(self):
         eq_(String.to_python(True), 'True')
@@ -160,7 +179,7 @@ class StringTest(BaseVariableTest, DelegateToValue, unittest2.TestCase):
         eq_(String.to_python(1), '1')
 
 
-class IntegerTest(BaseVariableTest, DelegateToValue, unittest2.TestCase):
+class IntegerTest(BaseVariableTest, DelegateToValue, unittest.TestCase):
 
     klass = Integer
     valid_comparison_value = 1
