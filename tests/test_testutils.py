@@ -1,8 +1,8 @@
-import unittest2
 from durabledict import MemoryDict
 from nose.tools import *
 
 from gutter.client import get_gutter_client
+from gutter.client.compat import unittest
 from gutter.client.encoding import JsonPickleEncoding
 from gutter.client.testutils import switches
 from gutter.client.models import Switch
@@ -11,7 +11,7 @@ from exam.decorators import around, fixture
 from exam.cases import Exam
 
 
-class TestDecorator(Exam, unittest2.TestCase):
+class TestDecorator(Exam, unittest.TestCase):
 
     @fixture
     def gutter(self):

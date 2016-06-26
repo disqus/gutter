@@ -1,5 +1,4 @@
 import itertools
-import unittest2
 from copy import copy
 
 from exam.cases import Exam
@@ -13,9 +12,11 @@ from gutter.client.operators import (
 )
 from gutter.client.arguments.base import Container
 from gutter.client import registry
+from gutter.client.compat import unittest
+
 
 def all_operators_in(module):
-    for _, obj in vars(module).iteritems():
+    for _, obj in vars(module).items():
         try:
             if issubclass(obj, Base) and obj is not Base:
                 yield obj
@@ -36,7 +37,7 @@ class TestArgument(Container):
     pass
 
 
-class TestOperatorRegistry(Exam, unittest2.TestCase):
+class TestOperatorRegistry(Exam, unittest.TestCase):
 
     @around
     def preserve_registry(self):
@@ -66,7 +67,7 @@ class TestOperatorRegistry(Exam, unittest2.TestCase):
         )
 
 
-class TestArgumentRegistry(Exam, unittest2.TestCase):
+class TestArgumentRegistry(Exam, unittest.TestCase):
 
     @around
     def preserve_registry(self):
