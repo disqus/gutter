@@ -1,6 +1,5 @@
 import itertools
 import threading
-import unittest2
 
 from nose.tools import *
 from gutter.client.arguments import Container as BaseArgument
@@ -9,6 +8,7 @@ from gutter.client.models import Switch, Manager, Condition
 from durabledict import MemoryDict
 from durabledict.base import DurableDict
 from gutter.client import signals
+from gutter.client.compat import unittest, TestCaseMixin
 import mock
 from exam.decorators import fixture, before
 from exam.cases import Exam
@@ -41,7 +41,7 @@ class MOLArgument(BaseArgument):
     foo = arguments.Value(lambda self: 42)
 
 
-class TestSwitch(ManagerMixin, unittest2.TestCase):
+class TestSwitch(ManagerMixin, unittest.TestCase):
     possible_properties = [
         ('state', (Switch.states.DISABLED, Switch.states.SELECTIVE)),
         ('compounded', (True, False)),
@@ -178,7 +178,7 @@ class TestSwitch(ManagerMixin, unittest2.TestCase):
         eq_(a, b)
 
 
-class TestSwitchChanges(ManagerMixin, unittest2.TestCase):
+class TestSwitchChanges(ManagerMixin, unittest.TestCase):
     @fixture
     def switch(self):
         return Switch('foo')
@@ -218,7 +218,7 @@ class TestSwitchChanges(ManagerMixin, unittest2.TestCase):
         )
 
 
-class TestCondition(unittest2.TestCase):
+class TestCondition(unittest.TestCase):
     def argument_dict(name):
         return dict(
             module='module%s' % name,
@@ -227,7 +227,7 @@ class TestCondition(unittest2.TestCase):
         )
 
     possible_properties = [
-        ('argument_dict', (argument_dict('1'), argument_dict('2'))),
+        ('argument', (argument_dict('1'), argument_dict('2'))),
         ('operator', ('o1', 'o2')),
         ('negative', (False, True))
     ]
@@ -296,6 +296,7 @@ class TestCondition(unittest2.TestCase):
         b = Condition(Argument, 'bar', bool)
 
         for prop, (a_val, b_val) in self.possible_properties:
+            print('PROP', prop, a_val, b_val)
             setattr(a, prop, a_val)
             setattr(b, prop, b_val)
 
@@ -326,7 +327,7 @@ class SwitchWithConditions(object):
         return mck
 
 
-class ConcentTest(Exam, SwitchWithConditions, unittest2.TestCase):
+class ConcentTest(Exam, SwitchWithConditions, unittest.TestCase):
     @fixture
     def manager(self):
         return Manager(storage=MemoryDict())
@@ -371,7 +372,7 @@ class ConcentTest(Exam, SwitchWithConditions, unittest2.TestCase):
         eq_(self.switch.enabled_for('input'), False)
 
 
-class DefaultConditionsTest(SwitchWithConditions, unittest2.TestCase):
+class DefaultConditionsTest(SwitchWithConditions, unittest.TestCase):
     def test_enabled_for_is_true_if_any_conditions_are_true(self):
         ok_(self.switch.enabled_for('input') is False)
         self.switch.conditions[0].call.return_value = True
@@ -389,7 +390,7 @@ class DefaultConditionsTest(SwitchWithConditions, unittest2.TestCase):
         eq_(self.switch.enabled_for('input'), False)
 
 
-class CompoundedConditionsTest(Exam, SwitchWithConditions, unittest2.TestCase):
+class CompoundedConditionsTest(Exam, SwitchWithConditions, unittest.TestCase):
     @before
     def make_switch_compounded(self):
         self.switch.compounded = True
@@ -402,7 +403,7 @@ class CompoundedConditionsTest(Exam, SwitchWithConditions, unittest2.TestCase):
         ok_(self.switch.enabled_for('input') is True)
 
 
-class ManagerTest(unittest2.TestCase):
+class ManagerTest(unittest.TestCase, TestCaseMixin):
     storage_with_existing_switches = {
         'default.existing': 'switch',
         'default.another': 'valuable switch'
@@ -664,7 +665,7 @@ class ActsLikeManager(object):
         signal.call.assert_called_once_with(switch)
 
 
-class EmptyManagerInstanceTest(ActsLikeManager, unittest2.TestCase):
+class EmptyManagerInstanceTest(ActsLikeManager, unittest.TestCase):
     def test_input_accepts_variable_input_args(self):
         eq_(self.manager.inputs, [])
         self.manager.input('input1', 'input2')
@@ -697,7 +698,7 @@ class NamespacedEmptyManagerInstanceTest(EmptyManagerInstanceTest):
         return Manager(storage=MemoryDict(), namespace=['a', 'b'])
 
 
-class ManagerWithInputTest(Exam, ActsLikeManager, unittest2.TestCase):
+class ManagerWithInputTest(Exam, ActsLikeManager, unittest.TestCase):
     def build_and_register_switch(self, name, enabled_for=False):
         switch = Switch(name)
         switch.enabled_for = mock.Mock(return_value=enabled_for)

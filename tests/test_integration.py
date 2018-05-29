@@ -1,18 +1,18 @@
-import unittest2
 from nose.tools import *
 
 import zlib
 
 from redis import Redis
 from durabledict.redis import RedisDict
-from gutter.client.encoding import JsonPickleEncoding
 
+from gutter.client.encoding import KeyEncoderProxy, JsonPickleEncoding
 from gutter.client.operators.comparable import *
 from gutter.client.operators.identity import *
 from gutter.client.operators.misc import *
 from gutter.client.models import Switch, Condition, Manager
 from gutter.client import arguments
 from gutter.client import signals
+from gutter.client.compat import unittest
 
 from exam.decorators import fixture, before, after, around
 from exam.cases import Exam
@@ -26,7 +26,7 @@ class deterministicstring(str):
     """
 
     def __hash__(self):
-        return zlib.crc32(self)
+        return zlib.crc32(self.encode('utf-8'))
 
 
 class User(object):
@@ -61,7 +61,7 @@ class FloatArguments(arguments.Container):
     value = arguments.Integer(lambda self: self.input)
 
 
-class TestIntegration(Exam, unittest2.TestCase):
+class TestIntegration(Exam, unittest.TestCase):
     class Callback(object):
 
         def __init__(self):
@@ -432,8 +432,23 @@ class TestIntegrationWithRedis(TestIntegration):
 
     @fixture
     def manager(self):
-        storage = RedisDict(keyspace='gutter-tests', connection=self.redis, encoding=JsonPickleEncoding)
+        storage = KeyEncoderProxy(
+            RedisDict(
+                keyspace='gutter-tests',
+                connection=self.redis,
+                encoding=JsonPickleEncoding))
         return Manager(storage=storage)
+
+    def test_redis_dict_key_decoded(self):
+        storage = KeyEncoderProxy(
+            storage=RedisDict(
+                keyspace='test-encoding',
+                connection=self.redis,
+                encoding=JsonPickleEncoding))
+        value = "Example string"
+        key = "Example key"
+        storage[key] = value
+        ok_(list(storage.keys()) == [key])
 
     def test_parent_switch_pickle_input(self):
         import pickle
@@ -446,5 +461,5 @@ class TestIntegrationWithRedis(TestIntegration):
 
         try:
             self.manager.active('new:switch')
-        except pickle.PicklingError, e:
+        except pickle.PicklingError as e:
             self.fail('Encountered pickling error: "%s"' % e)
