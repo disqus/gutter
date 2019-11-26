@@ -11,7 +11,7 @@ except ImportError:
     from setuptools import setup
 
 tests_require = [
-    'nose', 'exam', 'mock', 'nose-performance', 'django', 'redis', 'unittest2'
+    'nose', 'exam', 'mock', 'nose-performance', 'django==1.7', 'redis', 'unittest2'
 ]
 
 setup_requires = []
