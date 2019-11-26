@@ -1,0 +1,20 @@
+name: CI
+
+on: push
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Build
+      run: docker-compose build
+
+    - name: Run
+      run: docker-compose up -d
+
+    - name: Test
+      run: docker-compose exec python make
