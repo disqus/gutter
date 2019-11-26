@@ -1,11 +1,8 @@
-language: python
+language: minimal
 
-services:
-  - redis-server
+install:
+  - docker-compose build
 
-python:
-  - "2.7"
-
-install: python setup.py develop
-
-script:  make test
+script:
+  - docker-compose up -d
+  - docker-compose exec python make
