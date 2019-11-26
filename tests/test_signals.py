@@ -25,7 +25,7 @@ class ActsLikeSignal(object):
 
     def tests_callback_called_when_signal_is_called(self):
         self.signal_with_callback.call()
-        self.callback.assert_called_once()
+        self.callback.assert_called_once_with()
 
     def test_signal_passes_args_along_to_callback(self):
         self.signal_with_callback.call(1, 2.0, kw='args')

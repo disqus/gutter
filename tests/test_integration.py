@@ -424,7 +424,7 @@ class TestIntegration(Exam, unittest2.TestCase):
 class TestIntegrationWithRedis(TestIntegration):
     @fixture
     def redis(self):
-        return Redis(db=15)
+        return Redis(host='redis', db=15)
 
     @after
     def flush_redis(self):

@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+
+  python:
+    image: python:2.7
+    command: sleep infinity
+    working_dir: /src
+    volumes:
+    - .:/src
+
+  redis:
+    image: redis
