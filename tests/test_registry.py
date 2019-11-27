@@ -15,7 +15,7 @@ from gutter.client.arguments.base import Container
 from gutter.client import registry
 
 def all_operators_in(module):
-    for _, obj in vars(module).iteritems():
+    for _, obj in vars(module).items():
         try:
             if issubclass(obj, Base) and obj is not Base:
                 yield obj

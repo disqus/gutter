@@ -12,7 +12,6 @@ from __future__ import absolute_import
 import threading
 from collections import defaultdict
 from functools import partial
-from itertools import ifilter
 
 # External Libraries
 from gutter.client import signals
@@ -187,7 +186,7 @@ class Switch(object):
         return signal_decorated(result)
 
     def enabled_for_all(self, *inpts):
-        foo = ifilter(
+        foo = filter(
             lambda x: x is not None,
             (self.enabled_for(inpt) for inpt in inpts)
         )
@@ -407,7 +406,7 @@ class Manager(threading.local):
 
         if namespace is None:
             namespace = self.default_namespace
-        elif isinstance(namespace, basestring):
+        elif isinstance(namespace, str):
             namespace = [namespace]
 
         self.storage = storage
@@ -437,7 +436,7 @@ class Manager(threading.local):
         List of all switches currently registered.
         """
         results = [
-            switch for name, switch in self.storage.iteritems()
+            switch for name, switch in self.storage.items()
             if name.startswith(self.__joined_namespace)
         ]
 

@@ -1,5 +1,3 @@
-from types import NoneType
-
 
 class classproperty(object):
 
@@ -13,7 +11,7 @@ class classproperty(object):
 class argument(object):
 
     def __init__(self, variable, getter):
-        if issubclass(type(getter), basestring):
+        if issubclass(type(getter), str):
             self.getter = lambda self: getattr(self.input, getter)
         else:
             self.getter = getter
@@ -51,7 +49,7 @@ class Container(object):
     the specified input.
     """
 
-    COMPATIBLE_TYPE = NoneType
+    COMPATIBLE_TYPE = type(None)
 
     def __init__(self, inpt):
         self.input = inpt

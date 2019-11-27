@@ -269,7 +269,7 @@ class PercentTest(BaseOperator):
 
     def successful_runs(self, number):
         runs = map(self.operator.applies_to, range(1000))
-        return len(filter(bool, runs))
+        return len(list(filter(bool, runs)))
 
 
 class PercentageTest(PercentTest, unittest2.TestCase):
