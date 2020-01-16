@@ -24,7 +24,10 @@ class Between(Base):
     arguments = ('lower_limit', 'upper_limit')
 
     def applies_to(self, argument):
-        return argument > self.lower_limit and argument < self.upper_limit
+        try:
+            return argument > self.lower_limit and argument < self.upper_limit
+        except TypeError:
+            return False
 
     def __str__(self):
         return 'between "%s" and "%s"' % (self.lower_limit, self.upper_limit)

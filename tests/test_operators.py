@@ -120,6 +120,8 @@ class TestBetweenCondition(BaseOperator, unittest2.TestCase):
         ok_(self.operator.applies_to(2))
         ok_(self.operator.applies_to(99))
         ok_(self.operator.applies_to(100) is False)
+
+    def test_applies_to_if_wrong_type(self):
         ok_(self.operator.applies_to('steve') is False)
 
     def test_applies_to_works_with_any_comparable(self):
