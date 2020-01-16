@@ -1,0 +1,7 @@
+#!/bin/bash
+if [[ "$@" ]]
+then
+    exec docker-compose exec python python setup.py nosetests --where "$@"
+else
+    exec docker-compose exec python python setup.py nosetests
+fi
