@@ -1,6 +1,7 @@
-import unittest2
-from nose.tools import *
 import mock
+import unittest2
+from importlib import reload
+from nose.tools import *
 
 from gutter.client.settings import manager
 import gutter.client.models

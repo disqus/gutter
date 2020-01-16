@@ -36,7 +36,7 @@ setup(
     packages=find_packages(exclude=["tests"]),
     zip_safe=False,
     install_requires=[
-        'durabledict==0.9.3',
+        'durabledict==0.9.4',
         'jsonpickle',
         'werkzeug',
     ],
