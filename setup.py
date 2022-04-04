@@ -24,6 +24,7 @@ if 'nosetests' in sys.argv[1:]:
     setup_requires.append('nose')
 
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', __name__)
+    os.environ.setdefault('REDIS_HOST', 'localhost')
     INSTALLED_APPS = ('gutter.client',)
     SECRET_KEY = 'secret!'
 
