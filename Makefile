@@ -23,7 +23,4 @@ release:
 	git push origin master
 	python setup.py sdist upload
 
-watch:
-	bundle exec guard
-
-.PHONY: test test-xunit lint release watch
+.PHONY: test test-xunit lint release
