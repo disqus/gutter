@@ -11,7 +11,7 @@ except ImportError:
     from setuptools import setup
 
 tests_require = [
-    'nose', 'exam', 'mock', 'django', 'redis'
+    'nose', 'exam', 'mock', 'redis'
 ]
 
 if sys.version_info < (3, 3):
@@ -34,7 +34,7 @@ if 'flake8' in sys.argv[1:]:
 
 setup(
     name='gutter',
-    version='0.6.0',
+    version='1.0.0',
     author='DISQUS',
     author_email='opensource@disqus.com',
     url='http://github.com/disqus/gutter',
