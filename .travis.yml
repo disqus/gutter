@@ -4,6 +4,7 @@ services:
   - redis-server
 
 python:
+  - "3.8"
   - "2.7"
 
 script:  python setup.py test

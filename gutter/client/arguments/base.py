@@ -1,4 +1,6 @@
-from types import NoneType
+import six
+
+from gutter.client.compat import NoneType
 
 
 class classproperty(object):
@@ -13,7 +15,7 @@ class classproperty(object):
 class argument(object):
 
     def __init__(self, variable, getter):
-        if issubclass(type(getter), basestring):
+        if issubclass(type(getter), six.string_types):
             self.getter = lambda self: getattr(self.input, getter)
         else:
             self.getter = getter

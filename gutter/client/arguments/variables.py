@@ -20,6 +20,15 @@ class Base(object):
     __hash__ = __proxy_to_value_method('__hash__')
     __nonzero__ = __proxy_to_value_method('__nonzero__')
 
+    # PY3
+    __lt__ = __proxy_to_value_method('__lt__')
+    __le__ = __proxy_to_value_method('__le__')
+    __gt__ = __proxy_to_value_method('__gt__')
+    __ge__ = __proxy_to_value_method('__ge__')
+    __eq__ = __proxy_to_value_method('__eq__')
+    __ne__ = __proxy_to_value_method('__ne__')
+    __bool__ = __proxy_to_value_method('__bool__')
+
     @staticmethod
     def to_python(value):
         return value
@@ -62,8 +71,22 @@ class String(Base):
     def __cmp__(self, other):
         return cmp(self.value, other)
 
+    def __lt__(self, other):
+        return self.value < other
+
+    def __gt__(self, other):
+        return self.value > other
+
+    def __eq__(self, other):
+        return self.value == other
+
+    def __hash__(self):
+        return hash(self.value)
+
     def __nonzero__(self, *args, **kwargs):
         return bool(self.value)
+
+    __bool__ = __nonzero__
 
     @staticmethod
     def to_python(value):

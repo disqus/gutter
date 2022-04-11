@@ -11,14 +11,20 @@ except ImportError:
     from setuptools import setup
 
 tests_require = [
-    'nose', 'exam', 'mock', 'nose-performance', 'django', 'redis', 'unittest2'
+    'nose', 'exam', 'mock', 'redis'
 ]
+
+if sys.version_info < (3, 3):
+    tests_require.append('unittest2')
+    tests_require.append('nose-performance')
+
 
 setup_requires = []
 if 'nosetests' in sys.argv[1:]:
     setup_requires.append('nose')
 
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', __name__)
+    os.environ.setdefault('REDIS_HOST', 'localhost')
     INSTALLED_APPS = ('gutter.client',)
     SECRET_KEY = 'secret!'
 
@@ -28,7 +34,7 @@ if 'flake8' in sys.argv[1:]:
 
 setup(
     name='gutter',
-    version='0.6.0',
+    version='1.0.0',
     author='DISQUS',
     author_email='opensource@disqus.com',
     url='http://github.com/disqus/gutter',
@@ -39,6 +45,7 @@ setup(
         'durabledict>=0.9.0',
         'jsonpickle',
         'werkzeug',
+        'six',
     ],
     setup_requires=setup_requires,
     namespace_packages=['gutter'],

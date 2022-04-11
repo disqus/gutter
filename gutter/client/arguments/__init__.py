@@ -1,7 +1,7 @@
 from functools import partial
 
-from base import Container, argument  # noqa
-import variables
+from . import variables
+from .base import Container, argument  # noqa
 
 Value = partial(argument, variables.Value)
 Boolean = partial(argument, variables.Boolean)
