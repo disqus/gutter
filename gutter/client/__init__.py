@@ -16,7 +16,7 @@ CLIENT_CACHE = {}
 
 def get_gutter_client(
         alias='default',
-        cache=CLIENT_CACHE,
+        cache=None,
         **kwargs
 ):
     """
@@ -33,6 +33,9 @@ def get_gutter_client(
 
     """
     from gutter.client.models import Manager
+
+    if cache is None:
+        cache = CLIENT_CACHE
 
     if not alias:
         return Manager(**kwargs)
