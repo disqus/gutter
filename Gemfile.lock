@@ -9,7 +9,7 @@ GEM
     listen (0.5.3)
     rb-fsevent (0.9.2)
     rb-readline (0.4.2)
-    thor (0.16.0)
+    thor (1.4.0)
 
 PLATFORMS
   ruby
